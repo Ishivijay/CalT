@@ -97,14 +97,15 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
         _show('No photo selected.');
         return;
       }
-      final reader = html.FileReader()..readAsArrayBuffer(file);
+      final reader = html.FileReader()..readAsDataUrl(file);
       await reader.onLoadEnd.first;
-      if (reader.result is! ByteBuffer || !mounted) {
+      final dataUrl = reader.result;
+      if (dataUrl is! String || !dataUrl.contains(',') || !mounted) {
         _show('Could not read that image. Try a JPG or PNG file.');
         return;
       }
       setState(() {
-        _image = Uint8List.view(reader.result as ByteBuffer);
+        _image = base64Decode(dataUrl.substring(dataUrl.indexOf(',') + 1));
         _photoItems = [];
       });
       _show('Photo selected. Click Analyze to estimate nutrition.');
