@@ -33,7 +33,7 @@ class SaveAiPhotoMealsUsecase {
   }
 
   IntakeEntity _intakeFor(AiPhotoMealItem item, IntakeTypeEntity type, DateTime day) {
-    final grams = item.grams <= 0 ? 100 : item.grams;
+    final double grams = item.grams <= 0 ? 100.0 : item.grams;
     final meal = item.referenceMeal ?? MealEntity(
       code: IdGenerator.getUniqueID(), name: item.name, url: null, mealQuantity: '100', mealUnit: 'g', servingQuantity: null, servingUnit: 'g', servingSize: '',
       nutriments: MealNutrimentsEntity(energyKcal100: item.kcal * 100 / grams, carbohydrates100: item.carbsG * 100 / grams, fat100: item.fatG * 100 / grams, proteins100: item.proteinG * 100 / grams, sugars100: null, saturatedFat100: null, fiber100: null),

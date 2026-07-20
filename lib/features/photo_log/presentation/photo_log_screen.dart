@@ -124,6 +124,6 @@ class _PhotoLogScreenState extends State<PhotoLogScreen> {
 
   Widget _reviewCard(int index) {
     final item = _items[index];
-    return Card(child: ListTile(onTap: () => _edit(index), title: Text(item.name), subtitle: Text('${item.grams.toStringAsFixed(0)} g · ${item.kcal.toStringAsFixed(0)} kcal\nP ${item.proteinG.toStringAsFixed(1)}g · C ${item.carbsG.toStringAsFixed(1)}g · F ${item.fatG.toStringAsFixed(1)}g'), isThreeLine: true, leading: Icon(item.verified ? Icons.verified_rounded : Icons.auto_awesome_outlined, color: item.verified ? Colors.green : null), trailing: IconButton(tooltip: 'Remove', icon: const Icon(Icons.delete_outline), onPressed: () => setState(() => _items = [..._items]..removeAt(index))));
+    return Card(child: ListTile(onTap: () => _edit(index), title: Text(item.name), subtitle: Text('${item.grams.toStringAsFixed(0)} g · ${item.kcal.toStringAsFixed(0)} kcal\nP ${item.proteinG.toStringAsFixed(1)}g · C ${item.carbsG.toStringAsFixed(1)}g · F ${item.fatG.toStringAsFixed(1)}g'), isThreeLine: true, leading: Icon(item.verified ? Icons.verified_rounded : Icons.auto_awesome_outlined, color: item.verified ? Colors.green : null), trailing: IconButton(tooltip: 'Remove', icon: const Icon(Icons.delete_outline), onPressed: () => setState(() => _items = [..._items]..removeAt(index)))));
   }
 }
