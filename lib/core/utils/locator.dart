@@ -88,6 +88,9 @@ import 'package:opennutritracker/features/add_meal/presentation/bloc/recent_meal
 import 'package:opennutritracker/features/ai_provider/data/ai_provider_config_store.dart';
 import 'package:opennutritracker/features/ai_provider/data/http_llm_providers.dart';
 import 'package:opennutritracker/features/ai_provider/presentation/ai_provider_settings_bloc.dart';
+import 'package:opennutritracker/features/photo_log/data/photo_food_matcher.dart';
+import 'package:opennutritracker/features/photo_log/data/photo_meal_analyzer.dart';
+import 'package:opennutritracker/features/photo_log/domain/save_ai_photo_meals_usecase.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/calendar_day_bloc.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/diary_bloc.dart';
 import 'package:opennutritracker/features/edit_meal/presentation/bloc/edit_meal_bloc.dart';
@@ -144,6 +147,12 @@ Future<void> initLocator() async {
   );
   locator.registerLazySingleton<LlmProviderFactory>(
     () => LlmProviderFactory(http.Client()),
+  );
+  locator.registerLazySingleton<PhotoMealAnalyzer>(
+    () => PhotoMealAnalyzer(locator(), locator()),
+  );
+  locator.registerLazySingleton<PhotoFoodMatcher>(
+    () => PhotoFoodMatcher(locator()),
   );
   locator.registerLazySingleton<HiveDBProvider>(() => hiveDBProvider);
   locator.registerLazySingleton<DeleteAllUserDataUsecase>(
@@ -366,6 +375,9 @@ Future<void> initLocator() async {
   );
   locator.registerLazySingleton<AddIntakeUsecase>(
     () => AddIntakeUsecase(locator()),
+  );
+  locator.registerLazySingleton<SaveAiPhotoMealsUsecase>(
+    () => SaveAiPhotoMealsUsecase(locator(), locator(), locator(), locator()),
   );
   locator.registerLazySingleton<DeleteIntakeUsecase>(
     () => DeleteIntakeUsecase(locator()),

@@ -9,6 +9,7 @@ import 'package:opennutritracker/features/add_activity/presentation/add_activity
 import 'package:opennutritracker/features/add_meal/presentation/add_meal_screen.dart';
 import 'package:opennutritracker/features/add_meal/presentation/add_meal_type.dart';
 import 'package:opennutritracker/features/add_meal/presentation/widgets/meal_item_card.dart';
+import 'package:opennutritracker/features/photo_log/presentation/photo_log_screen.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
 class AddItemBottomSheet extends StatelessWidget {
@@ -185,6 +186,29 @@ class AddItemBottomSheet extends StatelessWidget {
           ),
           const Divider(indent: 16, endIndent: 16),
           Semantics(
+            identifier: 'add-item-photo-log',
+            child: ListTile(
+              title: Text(
+                'Log with photo',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+              subtitle: Text(
+                'Get an AI estimate, then review it before saving',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+              ),
+              leading: Container(
+                height: double.infinity,
+                child: const Icon(Icons.auto_awesome_outlined),
+              ),
+              onTap: () => _showPhotoLogScreen(context),
+            ),
+          ),
+          const Divider(indent: 16, endIndent: 16),
+          Semantics(
             identifier: 'add-item-recipes',
             child: ListTile(
               title: Text(
@@ -263,6 +287,14 @@ class AddItemBottomSheet extends StatelessWidget {
     Navigator.of(context).pushNamed(
       NavigationOptions.addActivityRoute,
       arguments: AddActivityScreenArguments(day: day),
+    );
+  }
+
+  void _showPhotoLogScreen(BuildContext context) {
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamed(
+      NavigationOptions.photoLogRoute,
+      arguments: PhotoLogScreenArguments(day: day),
     );
   }
 }
