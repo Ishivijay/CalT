@@ -9,8 +9,9 @@ class PhotoFoodMatcher {
   final SearchProductsUseCase _search;
 
   Future<AiPhotoMealItem> verify(AiPhotoMealItem item) async {
-    final result = await _search.searchFDCFoodByString(item.name);
     final normalized = _normalize(item.name);
+    if (normalized.isEmpty) return item;
+    final result = await _search.searchFDCFoodByString(item.name);
     for (final meal in result.meals) {
       final candidate = _normalize(meal.name ?? '');
       if (candidate.isNotEmpty && (candidate.contains(normalized) || normalized.contains(candidate))) {
