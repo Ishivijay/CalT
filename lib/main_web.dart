@@ -84,15 +84,35 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
   void _saveConfig() => html.window.sessionStorage[_configKey] = jsonEncode(_config.toJson());
 
   Future<void> _selectPhoto() async {
-    final input = html.FileUploadInputElement()..accept = 'image/*';
-    input.click();
-    await input.onChange.first;
-    final file = input.files?.firstOrNull;
-    if (file == null) return;
-    final reader = html.FileReader()..readAsArrayBuffer(file);
-    await reader.onLoadEnd.first;
-    if (reader.result is! ByteBuffer || !mounted) return;
-    setState(() { _image = Uint8List.view(reader.result as ByteBuffer); _photoItems = []; });
+    final input = html.FileUploadInputElement()
+      ..accept = 'image/*'
+      ..style.display = 'none';
+    // Firefox reliably opens a picker only for an input attached to the DOM.
+    html.document.body?.append(input);
+    try {
+      input.click();
+      await input.onChange.first;
+      final file = input.files?.firstOrNull;
+      if (file == null) {
+        _show('No photo selected.');
+        return;
+      }
+      final reader = html.FileReader()..readAsArrayBuffer(file);
+      await reader.onLoadEnd.first;
+      if (reader.result is! ByteBuffer || !mounted) {
+        _show('Could not read that image. Try a JPG or PNG file.');
+        return;
+      }
+      setState(() {
+        _image = Uint8List.view(reader.result as ByteBuffer);
+        _photoItems = [];
+      });
+      _show('Photo selected. Click Analyze to estimate nutrition.');
+    } catch (_) {
+      _show('Could not open or read the photo. Try a JPG or PNG file.');
+    } finally {
+      input.remove();
+    }
   }
 
   Future<void> _analyzePhoto() async {
