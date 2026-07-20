@@ -45,6 +45,8 @@ OpenNutriTracker is an open-source mobile application designed to simplify nutri
 - **🍽️ Custom meals + recipes:** Build a one-off custom meal or save a reusable recipe with photo, brand, and barcode. The recipe builder has its own ingredient picker with barcode scanning so you can compose meals from real products without leaving the screen.
 - **⚡ Quick add:** When you already know roughly how much you ate, skip the search flow entirely — Quick add takes a title plus kcal (and optional macros) and logs it straight to the meal section.
 - **📷 Barcode scanner:** Scan packaged items for instant lookup, paste a barcode manually when the camera struggles, or attach a barcode to a custom meal so future scans recognise your own foods.
+- **✨ Optional AI photo logging (BYOK):** Connect OpenAI, Anthropic, Gemini, or an OpenAI-compatible service with your own API key. Take or choose a meal photo, optionally add context, then edit every AI estimate before it enters your diary. When a safe database match is found it is marked verified; otherwise it remains visibly an AI estimate.
+- **💡 Optional AI insights (BYOK):** Generate a cached daily summary of your recent aggregate food patterns, practical non-judgmental suggestions, and a positive observation. The card always states that it is AI-generated and not medical advice.
 - **🏃 Activities:** Log workouts from a categorised activity catalogue or define your own custom activities with direct kcal entry and reusable templates.
 - **💧 Water tracker:** A water chip on the home screen with quick-add increments, an editable goal, and undo for the last entry.
 - **⏱️ Fasting timer:** Optional intermittent-fasting timer with content-warning gate, a home chip showing time remaining, and a completion notification when you reach your window.
@@ -60,6 +62,10 @@ See [Data Protection](https://www.iubenda.com/privacy-policy/53501884)
 - **Data Encryption**: All collected user data is encrypted and stored locally on your device
 - **Minimal Data Collection**: OpenNutriTracker only collects the necessary information required for tracking nutrition and providing personalized insights. Your data will not be shared with third parties without your consent.
 - **Open-Source**: OpenNutriTracker is an open-source application
+
+### Optional AI features
+
+AI features are off until you configure a provider in **Settings → AI Provider (BYOK)**. Your API key is stored only in encrypted platform storage and is never logged or included in crash reports. When you use photo logging or generate insights, the selected photo or a compact aggregate of your diary is sent to the provider you configured, under that provider's terms. Review AI estimates before saving: they can be inaccurate and are not medical advice.
 
 ## Verifying APK signatures
 

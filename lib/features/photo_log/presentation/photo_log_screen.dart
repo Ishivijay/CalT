@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:opennutritracker/core/domain/entity/intake_type_entity.dart';
-import 'package:opennutritracker/core/presentation/main_screen.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
 import 'package:opennutritracker/core/utils/navigation_options.dart';
 import 'package:opennutritracker/features/ai_provider/data/ai_provider_config_store.dart';
@@ -97,8 +96,8 @@ class _PhotoLogScreenState extends State<PhotoLogScreen> {
       await locator<SaveAiPhotoMealsUsecase>().save(_items, _type, _day);
       locator<HomeBloc>().add(const LoadItemsEvent()); locator<DiaryBloc>().add(const LoadDiaryYearEvent()); locator<CalendarDayBloc>().add(RefreshCalendarDayEvent());
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const MainScreen()), (route) => false);
-      _message('AI meal estimate saved to your diary.');
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('AI meal estimate saved to your diary.')));
+      Navigator.of(context).pushNamedAndRemoveUntil(NavigationOptions.mainRoute, (route) => false);
     } catch (_) { _message('Could not save the meal. Please try again.'); }
     finally { if (mounted) setState(() => _saving = false); }
   }

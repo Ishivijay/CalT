@@ -91,6 +91,9 @@ import 'package:opennutritracker/features/ai_provider/presentation/ai_provider_s
 import 'package:opennutritracker/features/photo_log/data/photo_food_matcher.dart';
 import 'package:opennutritracker/features/photo_log/data/photo_meal_analyzer.dart';
 import 'package:opennutritracker/features/photo_log/domain/save_ai_photo_meals_usecase.dart';
+import 'package:opennutritracker/features/ai_insights/data/ai_insights_cache_store.dart';
+import 'package:opennutritracker/features/ai_insights/data/ai_insights_service.dart';
+import 'package:opennutritracker/features/ai_insights/domain/insights_aggregation.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/calendar_day_bloc.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/diary_bloc.dart';
 import 'package:opennutritracker/features/edit_meal/presentation/bloc/edit_meal_bloc.dart';
@@ -154,6 +157,10 @@ Future<void> initLocator() async {
   locator.registerLazySingleton<PhotoFoodMatcher>(
     () => PhotoFoodMatcher(locator()),
   );
+  locator.registerLazySingleton<AiInsightsCacheStore>(
+    () => AiInsightsCacheStore(const FlutterSecureStorage()),
+  );
+  locator.registerLazySingleton<InsightsAggregator>(InsightsAggregator.new);
   locator.registerLazySingleton<HiveDBProvider>(() => hiveDBProvider);
   locator.registerLazySingleton<DeleteAllUserDataUsecase>(
     () => DeleteAllUserDataUsecase(locator()),
@@ -378,6 +385,9 @@ Future<void> initLocator() async {
   );
   locator.registerLazySingleton<SaveAiPhotoMealsUsecase>(
     () => SaveAiPhotoMealsUsecase(locator(), locator(), locator(), locator()),
+  );
+  locator.registerLazySingleton<AiInsightsService>(
+    () => AiInsightsService(locator(), locator(), locator(), locator(), locator(), locator(), locator()),
   );
   locator.registerLazySingleton<DeleteIntakeUsecase>(
     () => DeleteIntakeUsecase(locator()),
