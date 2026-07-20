@@ -77,6 +77,18 @@ flutter run --flavor full \
   --dart-define=SUPABASE_PROJECT_ANON_KEY=your-anon-key
 ```
 
+### Web app
+
+The browser-focused application lives at `lib/main_web.dart`. It keeps diary data in the browser's local storage, and only retains a BYOK API key for the current browser session. Build it without Chrome or an Android emulator:
+
+```sh
+flutter config --enable-web
+flutter build web -t lib/main_web.dart
+python3 -m http.server 8000 --directory build/web
+```
+
+Open `http://localhost:8000` in Firefox. Cloud AI providers must allow browser-originated requests; for a production deployment, use a server-side BYOK proxy rather than exposing a provider key to a browser.
+
 ## Verifying APK signatures
 
 If you are side-loading an OpenNutriTracker APK from GitHub Releases — or from F-Droid, once the app is published there — you may reasonably want to confirm that the file you downloaded was signed by the same key the maintainer uses for every release, rather than by someone who intercepted the download or repackaged the app. The check below is for anyone who would like that extra reassurance before installing.

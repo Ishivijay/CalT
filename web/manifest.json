@@ -1,0 +1,9 @@
+{
+  "name": "OpenNutriTracker Web",
+  "short_name": "NutriTracker",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f7f9f6",
+  "theme_color": "#236b45",
+  "description": "A private, local-first nutrition tracker."
+}
