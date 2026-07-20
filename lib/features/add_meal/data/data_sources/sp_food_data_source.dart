@@ -16,6 +16,10 @@ class SpFoodDataSource {
   final log = Logger('SpFoodDataSource');
 
   Future<List<SpFoodDTO>> fetchSearchWordResults(String searchString) async {
+    if (!locator.isRegistered<SupabaseClient>()) {
+      log.fine('Supabase backend is not configured; skipping backend search');
+      return const <SpFoodDTO>[];
+    }
     try {
       return await withRetry(() async {
         log.fine('Fetching Supabase food results');

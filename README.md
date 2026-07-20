@@ -67,6 +67,16 @@ See [Data Protection](https://www.iubenda.com/privacy-policy/53501884)
 
 AI features are off until you configure a provider in **Settings → AI Provider (BYOK)**. Your API key is stored only in encrypted platform storage and is never logged or included in crash reports. When you use photo logging or generate insights, the selected photo or a compact aggregate of your diary is sent to the provider you configured, under that provider's terms. Review AI estimates before saving: they can be inaccurate and are not medical advice.
 
+### Running a local build
+
+A fresh checkout can run without a `.env` file. Local data and Open Food Facts remain available; the optional self-hosted Supabase food database is skipped until configured. Supply its credentials at build time only when needed:
+
+```sh
+flutter run --flavor full \
+  --dart-define=SUPABASE_PROJECT_URL=https://your-project.supabase.co \
+  --dart-define=SUPABASE_PROJECT_ANON_KEY=your-anon-key
+```
+
 ## Verifying APK signatures
 
 If you are side-loading an OpenNutriTracker APK from GitHub Releases — or from F-Droid, once the app is published there — you may reasonably want to confirm that the file you downloaded was signed by the same key the maintainer uses for every release, rather than by someone who intercepted the download or repackaged the app. The check below is for anyone who would like that extra reassurance before installing.

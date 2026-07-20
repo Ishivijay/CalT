@@ -166,17 +166,23 @@ Future<void> initLocator() async {
     () => DeleteAllUserDataUsecase(locator()),
   );
 
-  // Backend
-  await Supabase.initialize(
-    url: Env.supabaseProjectUrl,
-    anonKey: Env.supabaseProjectAnonKey,
-    // In debug builds supabase_flutter attaches its own printer to the
-    // shared root log stream (hierarchical logging is off), duplicating
-    // every app log line in a second format. LoggerConfig already prints
-    // everything — including supabase records — once.
-    debug: false,
-  );
-  locator.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
+  // The app remains usable with local storage and Open Food Facts when a
+  // developer has not supplied a private Supabase backend. This makes a fresh
+  // checkout runnable without generating a secrets file.
+  if (Env.hasSupabaseConfig) {
+    await Supabase.initialize(
+      url: Env.supabaseProjectUrl,
+      anonKey: Env.supabaseProjectAnonKey,
+      // In debug builds supabase_flutter attaches its own printer to the
+      // shared root log stream (hierarchical logging is off), duplicating
+      // every app log line in a second format. LoggerConfig already prints
+      // everything — including supabase records — once.
+      debug: false,
+    );
+    locator.registerLazySingleton<SupabaseClient>(
+      () => Supabase.instance.client,
+    );
+  }
 
   // Notification service (#312)
   locator.registerLazySingleton<NotificationService>(

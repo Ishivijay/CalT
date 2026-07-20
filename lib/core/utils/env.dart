@@ -1,15 +1,15 @@
-import 'package:envied/envied.dart';
+/// Optional build configuration. Keeping these as Dart defines means a fresh
+/// checkout can run offline without a generated, secret-bearing source file.
+/// Pass real values only for features that need them, e.g.
+/// `--dart-define=SUPABASE_PROJECT_URL=https://...`.
+abstract final class Env {
+  static const String fdcApiKey = String.fromEnvironment('FDC_API_KEY');
+  static const String sentryDns = String.fromEnvironment('SENTRY_DNS');
+  static const String supabaseProjectUrl =
+      String.fromEnvironment('SUPABASE_PROJECT_URL');
+  static const String supabaseProjectAnonKey =
+      String.fromEnvironment('SUPABASE_PROJECT_ANON_KEY');
 
-part 'env.g.dart';
-
-@Envied(path: '.env')
-abstract class Env {
-  @EnviedField(varName: 'FDC_API_KEY', obfuscate: true)
-  static final String fdcApiKey = _Env.fdcApiKey;
-  @EnviedField(varName: 'SENTRY_DNS', obfuscate: true)
-  static final String sentryDns = _Env.sentryDns;
-  @EnviedField(varName: 'SUPABASE_PROJECT_URL', obfuscate: true)
-  static final String supabaseProjectUrl = _Env.supabaseProjectUrl;
-  @EnviedField(varName: 'SUPABASE_PROJECT_ANON_KEY', obfuscate: true)
-  static final String supabaseProjectAnonKey = _Env.supabaseProjectAnonKey;
+  static bool get hasSupabaseConfig =>
+      supabaseProjectUrl.isNotEmpty && supabaseProjectAnonKey.isNotEmpty;
 }
