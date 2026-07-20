@@ -39,6 +39,7 @@ import 'package:opennutritracker/features/scanner/scanner_screen.dart';
 import 'package:opennutritracker/features/meal_detail/meal_detail_screen.dart';
 import 'package:opennutritracker/features/settings/presentation/widgets/accent_colour_screen.dart';
 import 'package:opennutritracker/features/settings/settings_screen.dart';
+import 'package:opennutritracker/features/ai_provider/presentation/ai_provider_settings_page.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -212,6 +213,8 @@ class OpenNutriTrackerApp extends StatelessWidget {
         NavigationOptions.onboardingRoute: (context) =>
             const OnboardingScreen(),
         NavigationOptions.settingsRoute: (context) => const SettingsScreen(),
+        NavigationOptions.aiProviderSettingsRoute: (context) =>
+            const AiProviderSettingsPage(),
         NavigationOptions.accentColourRoute: (context) =>
             const AccentColourScreen(),
         NavigationOptions.addMealRoute: (context) => const AddMealScreen(),

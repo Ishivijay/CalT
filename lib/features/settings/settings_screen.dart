@@ -342,6 +342,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: Dimens.spacing20),
+                _categoryHeader(context, palette, 'AI features'),
+                _SettingsGroup(
+                  palette: palette,
+                  tiles: [
+                    _SettingsTile(
+                      identifier: 'settings-ai-provider',
+                      palette: palette,
+                      icon: Icons.auto_awesome_rounded,
+                      title: 'AI Provider (BYOK)',
+                      subtitle: 'Configure your private AI connection',
+                      showChevron: true,
+                      onTap: () => Navigator.of(context).pushNamed(
+                        NavigationOptions.aiProviderSettingsRoute,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Dimens.spacing20),
                 _categoryHeader(
                     context, palette, S.of(context).settingsCategoryData),
                 _SettingsGroup(

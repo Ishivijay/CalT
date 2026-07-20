@@ -1,5 +1,7 @@
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
 import 'package:opennutritracker/core/data/data_source/config_data_source.dart';
 import 'package:opennutritracker/core/data/data_source/custom_activity_template_data_source.dart';
 import 'package:opennutritracker/core/data/data_source/remote_search_cache_data_source.dart';
@@ -83,6 +85,9 @@ import 'package:opennutritracker/features/add_meal/presentation/bloc/add_meal_bl
 import 'package:opennutritracker/features/add_meal/presentation/bloc/food_bloc.dart';
 import 'package:opennutritracker/features/add_meal/presentation/bloc/products_bloc.dart';
 import 'package:opennutritracker/features/add_meal/presentation/bloc/recent_meal_bloc.dart';
+import 'package:opennutritracker/features/ai_provider/data/ai_provider_config_store.dart';
+import 'package:opennutritracker/features/ai_provider/data/http_llm_providers.dart';
+import 'package:opennutritracker/features/ai_provider/presentation/ai_provider_settings_bloc.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/calendar_day_bloc.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/diary_bloc.dart';
 import 'package:opennutritracker/features/edit_meal/presentation/bloc/edit_meal_bloc.dart';
@@ -131,6 +136,14 @@ Future<void> initLocator() async {
   await bootstrapActiveProfile(hiveDBProvider, secureAppStorageProvider);
   locator.registerLazySingleton<SecureAppStorageProvider>(
     () => secureAppStorageProvider,
+  );
+  // BYOK credentials deliberately live outside Hive and are never passed to
+  // logging or crash-reporting services.
+  locator.registerLazySingleton<AiProviderConfigStore>(
+    () => AiProviderConfigStore(const FlutterSecureStorage()),
+  );
+  locator.registerLazySingleton<LlmProviderFactory>(
+    () => LlmProviderFactory(http.Client()),
   );
   locator.registerLazySingleton<HiveDBProvider>(() => hiveDBProvider);
   locator.registerLazySingleton<DeleteAllUserDataUsecase>(
@@ -294,6 +307,9 @@ Future<void> initLocator() async {
       locator(),
       locator(),
     ),
+  );
+  locator.registerFactory<AiProviderSettingsBloc>(
+    () => AiProviderSettingsBloc(locator(), locator()),
   );
 
   // UseCases
