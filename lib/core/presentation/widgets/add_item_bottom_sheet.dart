@@ -10,6 +10,10 @@ import 'package:opennutritracker/features/add_meal/presentation/add_meal_screen.
 import 'package:opennutritracker/features/add_meal/presentation/add_meal_type.dart';
 import 'package:opennutritracker/features/add_meal/presentation/widgets/meal_item_card.dart';
 import 'package:opennutritracker/features/photo_log/presentation/photo_log_screen.dart';
+import 'package:opennutritracker/features/home/domain/usecase/coach_demo_diary_seeder.dart';
+import 'package:opennutritracker/features/home/presentation/bloc/home_bloc.dart';
+import 'package:opennutritracker/features/diary/presentation/bloc/calendar_day_bloc.dart';
+import 'package:opennutritracker/features/diary/presentation/bloc/diary_bloc.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
 class AddItemBottomSheet extends StatelessWidget {
@@ -37,199 +41,225 @@ class AddItemBottomSheet extends StatelessWidget {
               child: Text(
                 S.of(context).addItemLabel,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
             _buildRecentSection(context),
-          if (showActivityTracking) ...[
+            if (showActivityTracking) ...[
+              Semantics(
+                identifier: 'add-item-activity',
+                child: ListTile(
+                  title: Text(
+                    S.of(context).activityLabel,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  subtitle: Text(
+                    S.of(context).activityExample,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  // ignore: sized_box_for_whitespace
+                  leading: Container(
+                    height: double.infinity,
+                    child: Icon(
+                      UserActivityEntity.getIconData(),
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  onTap: () {
+                    _showAddActivityScreen(context);
+                  },
+                ),
+              ),
+              const Divider(indent: 16, endIndent: 16),
+            ],
             Semantics(
-              identifier: 'add-item-activity',
+              identifier: 'add-item-breakfast',
               child: ListTile(
                 title: Text(
-                  S.of(context).activityLabel,
+                  S.of(context).breakfastLabel,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 subtitle: Text(
-                  S.of(context).activityExample,
+                  S.of(context).breakfastExample,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+                // ignore: sized_box_for_whitespace
+                leading: SizedBox(
+                  height: double.infinity,
+                  child: Icon(IntakeTypeEntity.breakfast.getIconData()),
+                ),
+                onTap: () {
+                  _showAddItemScreen(context, AddMealType.breakfastType);
+                },
+              ),
+            ),
+            Semantics(
+              identifier: 'add-item-lunch',
+              child: ListTile(
+                title: Text(
+                  S.of(context).lunchLabel,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                subtitle: Text(
+                  S.of(context).lunchExample,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
                 ),
                 // ignore: sized_box_for_whitespace
                 leading: Container(
                   height: double.infinity,
-                  child: Icon(
-                    UserActivityEntity.getIconData(),
+                  child: Icon(IntakeTypeEntity.lunch.getIconData()),
+                ),
+                onTap: () {
+                  _showAddItemScreen(context, AddMealType.lunchType);
+                },
+              ),
+            ),
+            Semantics(
+              identifier: 'add-item-dinner',
+              child: ListTile(
+                title: Text(
+                  S.of(context).dinnerLabel,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
+                subtitle: Text(
+                  S.of(context).dinnerExample,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+                // ignore: sized_box_for_whitespace
+                leading: Container(
+                  height: double.infinity,
+                  child: Icon(IntakeTypeEntity.dinner.getIconData()),
+                ),
                 onTap: () {
-                  _showAddActivityScreen(context);
+                  _showAddItemScreen(context, AddMealType.dinnerType);
+                },
+              ),
+            ),
+            Semantics(
+              identifier: 'add-item-snack',
+              child: ListTile(
+                title: Text(
+                  S.of(context).snackLabel,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                subtitle: Text(
+                  S.of(context).snackExample,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+                // ignore: sized_box_for_whitespace
+                leading: Container(
+                  height: double.infinity,
+                  child: Icon(IntakeTypeEntity.snack.getIconData()),
+                ),
+                onTap: () {
+                  _showAddItemScreen(context, AddMealType.snackType);
                 },
               ),
             ),
             const Divider(indent: 16, endIndent: 16),
+            Semantics(
+              identifier: 'add-item-photo-log',
+              child: ListTile(
+                title: Text(
+                  'Log with photo',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                subtitle: Text(
+                  'Get an AI estimate, then review it before saving',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+                leading: Container(
+                  height: double.infinity,
+                  child: const Icon(Icons.auto_awesome_outlined),
+                ),
+                onTap: () => _showPhotoLogScreen(context),
+              ),
+            ),
+            const Divider(indent: 16, endIndent: 16),
+            ListTile(
+              title: Text(
+                'Load two-day coach demo',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              subtitle: Text(
+                'Add sample meals to test personalized CalT insights',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+              leading: SizedBox(
+                height: double.infinity,
+                child: const Icon(Icons.auto_graph_rounded),
+              ),
+              onTap: () => _loadCoachDemo(context),
+            ),
+            const Divider(indent: 16, endIndent: 16),
+            Semantics(
+              identifier: 'add-item-recipes',
+              child: ListTile(
+                title: Text(
+                  S.of(context).recipesLabel,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                // ignore: sized_box_for_whitespace
+                leading: Container(
+                  height: double.infinity,
+                  child: const Icon(Icons.menu_book_outlined),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(
+                    context,
+                  ).pushNamed(NavigationOptions.recipesRoute);
+                },
+              ),
+            ),
           ],
-          Semantics(
-            identifier: 'add-item-breakfast',
-            child: ListTile(
-              title: Text(
-                S.of(context).breakfastLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-              ),
-              subtitle: Text(
-                S.of(context).breakfastExample,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-              ),
-              // ignore: sized_box_for_whitespace
-              leading: Container(
-                height: double.infinity,
-                child: Icon(IntakeTypeEntity.breakfast.getIconData()),
-              ),
-              onTap: () {
-                _showAddItemScreen(context, AddMealType.breakfastType);
-              },
-            ),
-          ),
-          Semantics(
-            identifier: 'add-item-lunch',
-            child: ListTile(
-              title: Text(
-                S.of(context).lunchLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-              ),
-              subtitle: Text(
-                S.of(context).lunchExample,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-              ),
-              // ignore: sized_box_for_whitespace
-              leading: Container(
-                height: double.infinity,
-                child: Icon(IntakeTypeEntity.lunch.getIconData()),
-              ),
-              onTap: () {
-                _showAddItemScreen(context, AddMealType.lunchType);
-              },
-            ),
-          ),
-          Semantics(
-            identifier: 'add-item-dinner',
-            child: ListTile(
-              title: Text(
-                S.of(context).dinnerLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-              ),
-              subtitle: Text(
-                S.of(context).dinnerExample,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-              ),
-              // ignore: sized_box_for_whitespace
-              leading: Container(
-                height: double.infinity,
-                child: Icon(IntakeTypeEntity.dinner.getIconData()),
-              ),
-              onTap: () {
-                _showAddItemScreen(context, AddMealType.dinnerType);
-              },
-            ),
-          ),
-          Semantics(
-            identifier: 'add-item-snack',
-            child: ListTile(
-              title: Text(
-                S.of(context).snackLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-              ),
-              subtitle: Text(
-                S.of(context).snackExample,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-              ),
-              // ignore: sized_box_for_whitespace
-              leading: Container(
-                height: double.infinity,
-                child: Icon(IntakeTypeEntity.snack.getIconData()),
-              ),
-              onTap: () {
-                _showAddItemScreen(context, AddMealType.snackType);
-              },
-            ),
-          ),
-          const Divider(indent: 16, endIndent: 16),
-          Semantics(
-            identifier: 'add-item-photo-log',
-            child: ListTile(
-              title: Text(
-                'Log with photo',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-              ),
-              subtitle: Text(
-                'Get an AI estimate, then review it before saving',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-              ),
-              leading: Container(
-                height: double.infinity,
-                child: const Icon(Icons.auto_awesome_outlined),
-              ),
-              onTap: () => _showPhotoLogScreen(context),
-            ),
-          ),
-          const Divider(indent: 16, endIndent: 16),
-          Semantics(
-            identifier: 'add-item-recipes',
-            child: ListTile(
-              title: Text(
-                S.of(context).recipesLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-              ),
-              // ignore: sized_box_for_whitespace
-              leading: Container(
-                height: double.infinity,
-                child: const Icon(Icons.menu_book_outlined),
-              ),
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed(NavigationOptions.recipesRoute);
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
       ),
     );
   }
@@ -256,8 +286,8 @@ class AddItemBottomSheet extends StatelessWidget {
               child: Text(
                 S.of(context).recentlyAddedLabel,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
             for (final intake in recent)
@@ -279,6 +309,22 @@ class AddItemBottomSheet extends StatelessWidget {
     Navigator.of(context).pushNamed(
       NavigationOptions.addMealRoute,
       arguments: AddMealScreenArguments(itemType, day),
+    );
+  }
+
+  Future<void> _loadCoachDemo(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).pop();
+    await locator<CoachDemoDiarySeeder>().seed();
+    locator<HomeBloc>().add(const LoadItemsEvent());
+    locator<DiaryBloc>().add(const LoadDiaryYearEvent());
+    locator<CalendarDayBloc>().add(RefreshCalendarDayEvent());
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Two days of sample meals added. Generate CalT coach insights now.',
+        ),
+      ),
     );
   }
 
