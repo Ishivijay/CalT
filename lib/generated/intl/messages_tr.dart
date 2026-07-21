@@ -159,7 +159,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allItemsLabel": MessageLookupByLibrary.simpleMessage("Tümü"),
     "alphaVersionName": MessageLookupByLibrary.simpleMessage("[Alpha]"),
     "appDescription": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker, gizliliğinize saygı duyan ücretsiz ve açık kaynaklı bir kalori ve besin takipçisidir.",
+      "CalT, gizliliğinize saygı duyan ücretsiz ve açık kaynaklı bir kalori ve besin takipçisidir.",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("GPL-3.0 lisansı"),
     "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
@@ -423,7 +423,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Değişiklikler iptal edilsin mi?",
     ),
     "disclaimerText": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker bir tıbbi uygulama değildir. Sağlanan tüm veriler doğrulanmamıştır ve dikkatle kullanılmalıdır. Lütfen sağlıklı bir yaşam tarzı sürdürün ve herhangi bir sorununuz varsa bir profesyonele danışın. Hastalık, hamilelik veya emzirme döneminde kullanımı önerilmez.\n\n\nUygulama hala geliştirme aşamasındadır. Hatalar, aksaklıklar ve çökmeler meydana gelebilir.\n\nHer hesaplamanın hakemli kaynaklarına Ana Sayfa veya Profil ekranındaki bilgi simgesine dokunarak ulaşabilirsin.",
+      "CalT bir tıbbi uygulama değildir. Sağlanan tüm veriler doğrulanmamıştır ve dikkatle kullanılmalıdır. Lütfen sağlıklı bir yaşam tarzı sürdürün ve herhangi bir sorununuz varsa bir profesyonele danışın. Hastalık, hamilelik veya emzirme döneminde kullanımı önerilmez.\n\n\nUygulama hala geliştirme aşamasındadır. Hatalar, aksaklıklar ve çökmeler meydana gelebilir.\n\nHer hesaplamanın hakemli kaynaklarına Ana Sayfa veya Profil ekranındaki bilgi simgesine dokunarak ulaşabilirsin.",
     ),
     "downloadSampleCsvAction": MessageLookupByLibrary.simpleMessage(
       "Örnek yemekler (csv)",
@@ -774,7 +774,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationsDailyReminderChannelName":
         MessageLookupByLibrary.simpleMessage("Günlük hatırlatıcılar"),
     "notificationsDailyReminderTitle": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker",
+      "CalT",
     ),
     "notificationsPermissionDeniedSnack": MessageLookupByLibrary.simpleMessage(
       "Bildirim izni reddedildi.",
@@ -1867,7 +1867,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Makro besin dağılımı",
     ),
     "sourcesNonBinaryDescription": MessageLookupByLibrary.simpleMessage(
-      "Enerji harcaması üzerine yapılan araştırmalar tarihsel olarak yalnızca ikili cinsiyet kategorilerini kullanmıştır; bu nedenle non-binary kişiler için doğrulanmış tek bir TDEE formülü yoktur. Bu yüzden OpenNutriTracker, Ayarlar → Hesaplamalar bölümünde ortalanmış bir referans, östrojen-tipik bir referans ve testosteron-tipik bir referans arasında seçim yapmanı sağlar. Bakımın için kesin bir değer gerçekten önemliyse lütfen hormon durumunu bilen bir klinisyenle görüş.",
+      "Enerji harcaması üzerine yapılan araştırmalar tarihsel olarak yalnızca ikili cinsiyet kategorilerini kullanmıştır; bu nedenle non-binary kişiler için doğrulanmış tek bir TDEE formülü yoktur. Bu yüzden CalT, Ayarlar → Hesaplamalar bölümünde ortalanmış bir referans, östrojen-tipik bir referans ve testosteron-tipik bir referans arasında seçim yapmanı sağlar. Bakımın için kesin bir değer gerçekten önemliyse lütfen hormon durumunu bilen bir klinisyenle görüş.",
     ),
     "sourcesNonBinaryTitle": MessageLookupByLibrary.simpleMessage(
       "Non-binary kişiler için kalori tahmini",
@@ -1882,7 +1882,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Kaynağı aç",
     ),
     "sourcesScreenIntro": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker, gösterdiği her hesaplama için yerleşik ve hakemli yöntemler kullanır. Aşağıdaki kaynaklar orijinal yayınlara bağlanır, böylece her değeri kendin doğrulayabilirsin.",
+      "CalT, gösterdiği her hesaplama için yerleşik ve hakemli yöntemler kullanır. Aşağıdaki kaynaklar orijinal yayınlara bağlanır, böylece her değeri kendin doğrulayabilirsin.",
     ),
     "stLabel": MessageLookupByLibrary.simpleMessage("st"),
     "sugarLabel": MessageLookupByLibrary.simpleMessage("şeker"),

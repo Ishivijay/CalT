@@ -439,7 +439,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Discard changes?",
     ),
     "disclaimerText": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker is not a medical application. All data provided is not validated and should be used with caution. Please maintain a healthy lifestyle and consult a professional if you have any problems. Use during illness, pregnancy or lactation is not recommended. For the peer-reviewed sources behind each calculation, tap the info icon on the Home or Profile screen.",
+      "CalT is not a medical application. All data provided is not validated and should be used with caution. Please maintain a healthy lifestyle and consult a professional if you have any problems. Use during illness, pregnancy or lactation is not recommended. For the peer-reviewed sources behind each calculation, tap the info icon on the Home or Profile screen.",
     ),
     "downloadSampleCsvAction": MessageLookupByLibrary.simpleMessage(
       "Sample meals (csv)",
@@ -1851,7 +1851,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Macronutrient distribution",
     ),
     "sourcesNonBinaryDescription": MessageLookupByLibrary.simpleMessage(
-      "Energy-expenditure research has historically used binary sex categories, so there is no single validated TDEE formula for non-binary people. OpenNutriTracker therefore lets you choose between an averaged reference, an estrogen-typical reference, or a testosterone-typical reference under Settings → Calculations. If an accurate number genuinely matters for your care, please speak to a clinician familiar with your hormone status.",
+      "Energy-expenditure research has historically used binary sex categories, so there is no single validated TDEE formula for non-binary people. CalT therefore lets you choose between an averaged reference, an estrogen-typical reference, or a testosterone-typical reference under Settings → Calculations. If an accurate number genuinely matters for your care, please speak to a clinician familiar with your hormone status.",
     ),
     "sourcesNonBinaryTitle": MessageLookupByLibrary.simpleMessage(
       "Non-binary calorie estimation",
@@ -1866,7 +1866,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "View source",
     ),
     "sourcesScreenIntro": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker uses well-established, peer-reviewed methodologies for every calculation it shows. The citations below link to the original sources so you can verify any number yourself.",
+      "CalT uses well-established, peer-reviewed methodologies for every calculation it shows. The citations below link to the original sources so you can verify any number yourself.",
     ),
     "stLabel": MessageLookupByLibrary.simpleMessage("st"),
     "sugarLabel": MessageLookupByLibrary.simpleMessage("sugar"),

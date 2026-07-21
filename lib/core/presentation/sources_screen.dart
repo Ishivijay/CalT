@@ -6,7 +6,7 @@ import 'package:opennutritracker/generated/l10n.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Surfaces the peer-reviewed sources behind every health/medical
-/// calculation OpenNutriTracker shows. Reachable from the Home dashboard,
+/// calculation CalT shows. Reachable from the Home dashboard,
 /// the BMI overview on the Profile tab, both gender-selection screens,
 /// and the disclaimer dialog — so anyone scanning the app for citations
 /// (Apple's reviewers included) can find them within one tap.

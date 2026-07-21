@@ -171,7 +171,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allItemsLabel": MessageLookupByLibrary.simpleMessage("Vše"),
     "alphaVersionName": MessageLookupByLibrary.simpleMessage("[Alfa]"),
     "appDescription": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker je volně šiřitelný open-source tracker kalorického příjmu a nutričních hodnot, který respektuje Vaše soukromí.",
+      "CalT je volně šiřitelný open-source tracker kalorického příjmu a nutričních hodnot, který respektuje Vaše soukromí.",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("Licence GPL-3.0"),
     "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
@@ -445,7 +445,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Zahodit změny?",
     ),
     "disclaimerText": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker není aplikace pro lékařské účely. Doporučené hodnoty nejsou validovány a měly by být použity opatrně za použití selského rozumu. Dodržujte prosím obecné zásady zdravého životního stylu a kontaktujte lékaře v případě zdravotních problémů. Používání aplikace se nedoporučuje během nemoci, těhotenství či kojení. Recenzované zdroje ke každému výpočtu najdete přes ikonu informací na obrazovce Domů nebo Profil.",
+      "CalT není aplikace pro lékařské účely. Doporučené hodnoty nejsou validovány a měly by být použity opatrně za použití selského rozumu. Dodržujte prosím obecné zásady zdravého životního stylu a kontaktujte lékaře v případě zdravotních problémů. Používání aplikace se nedoporučuje během nemoci, těhotenství či kojení. Recenzované zdroje ke každému výpočtu najdete přes ikonu informací na obrazovce Domů nebo Profil.",
     ),
     "downloadSampleCsvAction": MessageLookupByLibrary.simpleMessage(
       "Vzorová jídla (csv)",
@@ -792,7 +792,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationsDailyReminderChannelName":
         MessageLookupByLibrary.simpleMessage("Denní připomenutí"),
     "notificationsDailyReminderTitle": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker",
+      "CalT",
     ),
     "notificationsPermissionDeniedSnack": MessageLookupByLibrary.simpleMessage(
       "Oprávnění k upozorněním bylo odepřeno.",
@@ -1909,7 +1909,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Rozložení makroživin",
     ),
     "sourcesNonBinaryDescription": MessageLookupByLibrary.simpleMessage(
-      "Výzkum energetického výdeje historicky používal pouze binární pohlavní kategorie, takže pro non-binární osoby neexistuje jediný validovaný vzorec TDEE. OpenNutriTracker proto v Nastavení → Výpočty nabízí volbu mezi zprůměrovanou referencí, estrogen-typickou referencí a testosteron-typickou referencí. Pokud na přesné hodnotě skutečně záleží, prosím poraď se s lékařem, který zná tvůj hormonální stav.",
+      "Výzkum energetického výdeje historicky používal pouze binární pohlavní kategorie, takže pro non-binární osoby neexistuje jediný validovaný vzorec TDEE. CalT proto v Nastavení → Výpočty nabízí volbu mezi zprůměrovanou referencí, estrogen-typickou referencí a testosteron-typickou referencí. Pokud na přesné hodnotě skutečně záleží, prosím poraď se s lékařem, který zná tvůj hormonální stav.",
     ),
     "sourcesNonBinaryTitle": MessageLookupByLibrary.simpleMessage(
       "Výpočet kalorií pro non-binární osoby",
@@ -1924,7 +1924,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Otevřít zdroj",
     ),
     "sourcesScreenIntro": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker používá pro každý zobrazený výpočet zavedené, recenzované metody. Následující odkazy vedou na původní zdroje, takže si můžeš každé číslo sám ověřit.",
+      "CalT používá pro každý zobrazený výpočet zavedené, recenzované metody. Následující odkazy vedou na původní zdroje, takže si můžeš každé číslo sám ověřit.",
     ),
     "stLabel": MessageLookupByLibrary.simpleMessage("st"),
     "sugarLabel": MessageLookupByLibrary.simpleMessage("cukry"),

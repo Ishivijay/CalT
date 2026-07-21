@@ -16,6 +16,8 @@ import 'package:opennutritracker/core/presentation/widgets/edit_activity_dialog.
 import 'package:opennutritracker/core/presentation/widgets/edit_dialog.dart';
 import 'package:opennutritracker/core/presentation/widgets/delete_dialog.dart';
 import 'package:opennutritracker/core/presentation/widgets/disclaimer_dialog.dart';
+import 'package:opennutritracker/core/presentation/widgets/add_item_bottom_sheet.dart';
+import 'package:opennutritracker/core/domain/usecase/get_config_usecase.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
 import 'package:opennutritracker/features/add_meal/presentation/add_meal_type.dart';
 import 'package:opennutritracker/features/home/presentation/bloc/home_bloc.dart';
@@ -24,6 +26,7 @@ import 'package:opennutritracker/features/home/presentation/widgets/intake_verti
 import 'package:opennutritracker/features/home/presentation/widgets/quick_water_widget.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/quick_weight_widget.dart';
+import 'package:opennutritracker/features/home/domain/usecase/coach_demo_diary_seeder.dart';
 import 'package:opennutritracker/features/ai_insights/presentation/ai_insights_card.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
@@ -211,7 +214,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 userActivities.isEmpty)
               EmptyHint(
                 icon: Icons.add_circle_outline_rounded,
-                title: S.of(context).homeFirstMealHint,
+                title: 'Your diary is ready',
+                subtitle:
+                    'Log food or activity, or add a two-day demo to try CalT coach.',
+                actionLabel: 'Log food or activity',
+                onAction: () => _openAddSheet(context),
+                secondaryActionLabel: 'Load two-day coach demo',
+                onSecondaryAction: () => _loadCoachDemo(context),
               ),
             if (CalorieGoalCalc.isBelowRecommendedDailyKcalFloor(
               goalKcal: totalKcalDaily,
@@ -354,6 +363,33 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> _openAddSheet(BuildContext context) async {
+    final config = await locator<GetConfigUsecase>().getConfig();
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => AddItemBottomSheet(
+        day: DateTime.now(),
+        showActivityTracking: config.showActivityTracking,
+        usesImperialUnits: config.usesImperialFoodUnits,
+      ),
+    );
+  }
+
+  Future<void> _loadCoachDemo(BuildContext context) async {
+    await locator<CoachDemoDiarySeeder>().seed();
+    _homeBloc.add(const LoadItemsEvent());
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Two days of sample meals added. Tap CalT coach to generate insights.',
+        ),
+      ),
     );
   }
 

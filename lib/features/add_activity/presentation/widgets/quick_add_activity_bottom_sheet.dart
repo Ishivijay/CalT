@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:opennutritracker/core/presentation/widgets/voice_input_button.dart';
 import 'package:opennutritracker/core/domain/entity/physical_activity_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_activity_entity.dart';
 import 'package:opennutritracker/core/domain/usecase/add_tracked_day_usecase.dart';
@@ -112,10 +113,10 @@ class _QuickAddActivityBottomSheetState
       // Resolve the message before navigating: the push below tears down
       // this sheet, so reading from context afterwards is unsafe.
       final addedMessage = S.of(context).quickAddActivityAddedSnack;
-      Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
-        NavigationOptions.mainRoute,
-        (route) => false,
-      );
+      Navigator.of(
+        context,
+        rootNavigator: true,
+      ).pushNamedAndRemoveUntil(NavigationOptions.mainRoute, (route) => false);
       scaffoldMessenger.showSnackBar(SnackBar(content: Text(addedMessage)));
     } catch (e, st) {
       _log.severe('Quick Add activity save failed', e, st);
@@ -158,7 +159,9 @@ class _QuickAddActivityBottomSheetState
     final s = S.of(context);
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           Dimens.spacing24,
@@ -174,9 +177,9 @@ class _QuickAddActivityBottomSheetState
               padding: const EdgeInsets.only(bottom: Dimens.spacing16),
               child: Text(
                 s.quickAddActivityTitleLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -208,7 +211,9 @@ class _QuickAddActivityBottomSheetState
               child: FilledButton(
                 style: FilledButton.styleFrom(
                   shape: Dimens.shapeM,
-                  padding: const EdgeInsets.symmetric(vertical: Dimens.spacing16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: Dimens.spacing16,
+                  ),
                 ),
                 onPressed: _canSubmit ? _onSubmit : null,
                 child: _saving
@@ -244,8 +249,9 @@ class _QuickAddActivityBottomSheetState
         child: TextField(
           controller: controller,
           autofocus: autofocus,
-          textCapitalization:
-              numeric ? TextCapitalization.none : TextCapitalization.sentences,
+          textCapitalization: numeric
+              ? TextCapitalization.none
+              : TextCapitalization.sentences,
           keyboardType: numeric
               ? const TextInputType.numberWithOptions(decimal: true)
               : TextInputType.text,
@@ -254,15 +260,24 @@ class _QuickAddActivityBottomSheetState
               : null,
           decoration: InputDecoration(
             labelText: isRequired ? '$label *' : label,
+            suffixIcon: numeric
+                ? null
+                : VoiceInputButton(controller: controller),
             filled: true,
             fillColor: palette.surfaceMuted,
             border: OutlineInputBorder(
               borderRadius: Dimens.borderRadiusM,
-              borderSide: BorderSide(color: palette.border, width: Dimens.hairline),
+              borderSide: BorderSide(
+                color: palette.border,
+                width: Dimens.hairline,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: Dimens.borderRadiusM,
-              borderSide: BorderSide(color: palette.border, width: Dimens.hairline),
+              borderSide: BorderSide(
+                color: palette.border,
+                width: Dimens.hairline,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: Dimens.borderRadiusM,

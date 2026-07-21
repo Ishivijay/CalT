@@ -152,7 +152,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allItemsLabel": MessageLookupByLibrary.simpleMessage("全部"),
     "alphaVersionName": MessageLookupByLibrary.simpleMessage("[Alpha]"),
     "appDescription": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker是一款免费开源的卡路里和营养追踪应用，尊重您的隐私。",
+      "CalT是一款免费开源的卡路里和营养追踪应用，尊重您的隐私。",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("GPL-3.0 许可证"),
     "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
@@ -370,7 +370,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "discardChangesTitle": MessageLookupByLibrary.simpleMessage("放弃更改？"),
     "disclaimerText": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker不是医疗应用程序。提供的所有数据均未经验证，应谨慎使用。请保持健康的生活方式，如有任何问题请咨询专业人士。不建议在患病、怀孕或哺乳期使用。每一项计算所依据的同行评审来源，请点击「首页」或「个人资料」页面的信息图标查看。",
+      "CalT不是医疗应用程序。提供的所有数据均未经验证，应谨慎使用。请保持健康的生活方式，如有任何问题请咨询专业人士。不建议在患病、怀孕或哺乳期使用。每一项计算所依据的同行评审来源，请点击「首页」或「个人资料」页面的信息图标查看。",
     ),
     "downloadSampleCsvAction": MessageLookupByLibrary.simpleMessage(
       "示例餐食 (csv)",
@@ -635,7 +635,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationsDailyReminderChannelName":
         MessageLookupByLibrary.simpleMessage("每日提醒"),
     "notificationsDailyReminderTitle": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker",
+      "CalT",
     ),
     "notificationsPermissionDeniedSnack": MessageLookupByLibrary.simpleMessage(
       "通知权限被拒绝。",
@@ -1430,7 +1430,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "sourcesMacrosTitle": MessageLookupByLibrary.simpleMessage("宏量营养素分配"),
     "sourcesNonBinaryDescription": MessageLookupByLibrary.simpleMessage(
-      "能量消耗的研究历史上一直只采用二元性别分类，因此目前并不存在一条经过验证的、适用于非二元性别人士的 TDEE 公式。OpenNutriTracker 因此在 设置 → 计算 中提供平均参考、雌激素型参考、睾酮型参考三种选项供你选择。如果精确数值对你确实重要，请咨询了解你激素状况的临床医师。",
+      "能量消耗的研究历史上一直只采用二元性别分类，因此目前并不存在一条经过验证的、适用于非二元性别人士的 TDEE 公式。CalT 因此在 设置 → 计算 中提供平均参考、雌激素型参考、睾酮型参考三种选项供你选择。如果精确数值对你确实重要，请咨询了解你激素状况的临床医师。",
     ),
     "sourcesNonBinaryTitle": MessageLookupByLibrary.simpleMessage(
       "非二元性别人士的卡路里估算",
@@ -1443,7 +1443,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "sourcesOpenSourceLabel": MessageLookupByLibrary.simpleMessage("打开来源"),
     "sourcesScreenIntro": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker 的每一项计算都采用成熟的、经同行评审的方法。以下引用直接链接到原始文献，你可以自行核对其中的每一个数值。",
+      "CalT 的每一项计算都采用成熟的、经同行评审的方法。以下引用直接链接到原始文献，你可以自行核对其中的每一个数值。",
     ),
     "stLabel": MessageLookupByLibrary.simpleMessage("英石"),
     "sugarLabel": MessageLookupByLibrary.simpleMessage("糖"),

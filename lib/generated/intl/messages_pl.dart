@@ -171,7 +171,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allItemsLabel": MessageLookupByLibrary.simpleMessage("Wszystkie"),
     "alphaVersionName": MessageLookupByLibrary.simpleMessage("[Alpha]"),
     "appDescription": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker to darmowy tracker kalorii i składników odżywczych o otwartym kodzie źródłowym, który szanuje Twoją prywatność.",
+      "CalT to darmowy tracker kalorii i składników odżywczych o otwartym kodzie źródłowym, który szanuje Twoją prywatność.",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("Licencja GPL-3.0"),
     "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
@@ -445,7 +445,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Odrzucić zmiany?",
     ),
     "disclaimerText": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker nie jest aplikacją medyczną. Wszystkie dostarczone dane nie są zweryfikowane i należy ich używać z ostrożnością. Prosimy o prowadzenie zdrowego stylu życia i skonsultowanie się z profesjonalistą w przypadku jakichkolwiek problemów. Używanie podczas choroby, ciąży lub karmienia piersią nie jest zalecane. Recenzowane źródła dla każdego obliczenia znajdziesz po dotknięciu ikony informacji na ekranie głównym lub w Profilu.",
+      "CalT nie jest aplikacją medyczną. Wszystkie dostarczone dane nie są zweryfikowane i należy ich używać z ostrożnością. Prosimy o prowadzenie zdrowego stylu życia i skonsultowanie się z profesjonalistą w przypadku jakichkolwiek problemów. Używanie podczas choroby, ciąży lub karmienia piersią nie jest zalecane. Recenzowane źródła dla każdego obliczenia znajdziesz po dotknięciu ikony informacji na ekranie głównym lub w Profilu.",
     ),
     "downloadSampleCsvAction": MessageLookupByLibrary.simpleMessage(
       "Przykładowe posiłki (csv)",
@@ -792,7 +792,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationsDailyReminderChannelName":
         MessageLookupByLibrary.simpleMessage("Codzienne przypomnienia"),
     "notificationsDailyReminderTitle": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker",
+      "CalT",
     ),
     "notificationsPermissionDeniedSnack": MessageLookupByLibrary.simpleMessage(
       "Odmówiono dostępu do powiadomień.",
@@ -1905,7 +1905,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Rozkład makroskładników",
     ),
     "sourcesNonBinaryDescription": MessageLookupByLibrary.simpleMessage(
-      "Badania nad wydatkiem energetycznym historycznie korzystały wyłącznie z binarnych kategorii płci, dlatego nie istnieje jeden zwalidowany wzór TDEE dla osób niebinarnych. OpenNutriTracker oferuje więc w Ustawienia → Obliczenia wybór między uśrednioną referencją, referencją typową dla estrogenu oraz referencją typową dla testosteronu. Jeśli dokładna wartość jest dla ciebie naprawdę istotna, skonsultuj się z lekarzem znającym twój profil hormonalny.",
+      "Badania nad wydatkiem energetycznym historycznie korzystały wyłącznie z binarnych kategorii płci, dlatego nie istnieje jeden zwalidowany wzór TDEE dla osób niebinarnych. CalT oferuje więc w Ustawienia → Obliczenia wybór między uśrednioną referencją, referencją typową dla estrogenu oraz referencją typową dla testosteronu. Jeśli dokładna wartość jest dla ciebie naprawdę istotna, skonsultuj się z lekarzem znającym twój profil hormonalny.",
     ),
     "sourcesNonBinaryTitle": MessageLookupByLibrary.simpleMessage(
       "Obliczanie kalorii dla osób niebinarnych",
@@ -1920,7 +1920,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Otwórz źródło",
     ),
     "sourcesScreenIntro": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker stosuje dla każdego obliczenia uznane, recenzowane metody. Poniższe odnośniki prowadzą do oryginalnych źródeł, dzięki czemu możesz samodzielnie zweryfikować dowolną wartość.",
+      "CalT stosuje dla każdego obliczenia uznane, recenzowane metody. Poniższe odnośniki prowadzą do oryginalnych źródeł, dzięki czemu możesz samodzielnie zweryfikować dowolną wartość.",
     ),
     "stLabel": MessageLookupByLibrary.simpleMessage("st"),
     "sugarLabel": MessageLookupByLibrary.simpleMessage("cukier"),

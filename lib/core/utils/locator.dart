@@ -106,6 +106,7 @@ import 'package:opennutritracker/features/fasting/domain/usecase/get_active_fast
 import 'package:opennutritracker/features/fasting/domain/usecase/start_fasting_usecase.dart';
 import 'package:opennutritracker/features/fasting/presentation/bloc/fasting_bloc.dart';
 import 'package:opennutritracker/features/home/presentation/bloc/home_bloc.dart';
+import 'package:opennutritracker/features/home/domain/usecase/coach_demo_diary_seeder.dart';
 import 'package:opennutritracker/features/meal_detail/presentation/bloc/meal_detail_bloc.dart';
 import 'package:opennutritracker/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'package:opennutritracker/features/profile/presentation/bloc/profile_bloc.dart';
@@ -210,6 +211,15 @@ Future<void> initLocator() async {
       locator(),
       locator(),
       locator(),
+      locator(),
+      locator(),
+      locator(),
+      locator(),
+      locator(),
+    ),
+  );
+  locator.registerLazySingleton(
+    () => CoachDemoDiarySeeder(
       locator(),
       locator(),
       locator(),

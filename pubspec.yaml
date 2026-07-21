@@ -1,5 +1,5 @@
 name: opennutritracker
-description: Open-Source Calories & Activity Tracker
+description: CalT — a frictionless calorie and activity tracker.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -71,6 +71,7 @@ dependencies:
   share_plus: ^10.0.0
   image_picker: ^1.1.2
   flutter_image_compress: ^2.4.0
+  speech_to_text: ^7.0.0
 
   hive_ce: ^2.19.3
   hive_ce_flutter: ^2.3.4

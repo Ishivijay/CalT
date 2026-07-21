@@ -9,12 +9,20 @@ class EmptyHint extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
 
   const EmptyHint({
     super.key,
     required this.icon,
     required this.title,
     this.subtitle,
+    this.actionLabel,
+    this.onAction,
+    this.secondaryActionLabel,
+    this.onSecondaryAction,
   });
 
   @override
@@ -47,6 +55,19 @@ class EmptyHint extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: Dimens.spacing16),
+            FilledButton.icon(
+              onPressed: onAction,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(actionLabel!),
+            ),
+          ],
+          if (secondaryActionLabel != null && onSecondaryAction != null)
+            TextButton(
+              onPressed: onSecondaryAction,
+              child: Text(secondaryActionLabel!),
+            ),
         ],
       ),
     );
