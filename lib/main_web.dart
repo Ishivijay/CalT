@@ -144,20 +144,60 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
 
   Future<void> _generateInsights() async {
     if (!_config.isConfigured) { _show('Configure an AI provider first.'); return; }
+    if (_meals.isEmpty) { _show('Add at least one meal before generating diary insights.'); return; }
     setState(() => _working = true);
-    final since = DateTime.now().subtract(const Duration(days: 7));
-    final recent = _meals.where((meal) => meal.createdAt.isAfter(since)).toList();
-    final kcal = recent.fold<double>(0, (sum, meal) => sum + meal.kcal);
-    final protein = recent.fold<double>(0, (sum, meal) => sum + meal.protein);
-    final carbs = recent.fold<double>(0, (sum, meal) => sum + meal.carbs);
-    final fat = recent.fold<double>(0, (sum, meal) => sum + meal.fat);
     try {
-      final result = await _factory.create(_config).sendTextPrompt('Write a short, non-judgmental nutrition diary summary with 2 practical suggestions and one positive observation. Use only these 7-day aggregates: ${recent.length} entries, ${kcal.toStringAsFixed(0)} kcal, ${protein.toStringAsFixed(0)}g protein, ${carbs.toStringAsFixed(0)}g carbs, ${fat.toStringAsFixed(0)}g fat. This is not medical advice.');
-      if (mounted) setState(() => _insight = result.rawText);
+      final result = await _factory.create(_config).sendTextPrompt(_insightPrompt());
+      if (mounted) setState(() => _insight = _cleanInsight(result.rawText));
     } on LlmException catch (error) { _show(error.message); }
     catch (_) { _show('Could not generate insights.'); }
     finally { if (mounted) setState(() => _working = false); }
   }
+
+  String _insightPrompt() {
+    // Keep a large diary useful without silently sending an unbounded amount
+    // of browser-local data to the selected provider.
+    final entries = [..._meals]..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    final scoped = entries.length <= 100 ? entries : entries.sublist(entries.length - 100);
+    final byDay = <String, List<_WebMeal>>{};
+    for (final meal in scoped) {
+      final day = '${meal.createdAt.year}-${meal.createdAt.month.toString().padLeft(2, '0')}-${meal.createdAt.day.toString().padLeft(2, '0')}';
+      (byDay[day] ??= []).add(meal);
+    }
+    final dayLines = byDay.entries.map((entry) {
+      final meals = entry.value;
+      final kcal = meals.fold<double>(0, (sum, meal) => sum + meal.kcal);
+      final protein = meals.fold<double>(0, (sum, meal) => sum + meal.protein);
+      final carbs = meals.fold<double>(0, (sum, meal) => sum + meal.carbs);
+      final fat = meals.fold<double>(0, (sum, meal) => sum + meal.fat);
+      return '${entry.key}: ${meals.length} entries; ${kcal.toStringAsFixed(0)} kcal; protein ${protein.toStringAsFixed(1)}g; carbs ${carbs.toStringAsFixed(1)}g; fat ${fat.toStringAsFixed(1)}g.';
+    }).join('\n');
+    final entryLines = scoped.map((meal) => '${meal.createdAt.toIso8601String().substring(0, 10)} | ${meal.name} | ${meal.grams.toStringAsFixed(0)}g | ${meal.kcal.toStringAsFixed(0)} kcal | protein ${meal.protein.toStringAsFixed(1)}g | carbs ${meal.carbs.toStringAsFixed(1)}g | fat ${meal.fat.toStringAsFixed(1)}g').join('\n');
+    return '''You are reviewing a nutrition diary. Give specific, useful observations based on the ACTUAL logged foods and numbers below; do not give generic advice about "logging more" unless the data is genuinely too sparse. Do not use Markdown, asterisks, bullet symbols, or a preamble.
+
+Adapt to the amount of data: if it is one meal or one day, analyze that entry and say clearly that it is not a daily pattern. If it spans several days, compare the real day-by-day patterns. Discuss energy and the available macronutrients, and identify food-choice patterns using the food names. Do not claim vitamin/mineral deficiencies or diagnose health conditions, because micronutrients are not logged. Be non-judgmental and practical.
+
+Use exactly these concise plain-text sections:
+DIARY SNAPSHOT:
+NUTRIENT PATTERN:
+FOOD-CHOICE INSIGHTS:
+ONE USEFUL NEXT STEP:
+DATA LIMIT:
+
+Diary coverage: ${scoped.length} entries across ${byDay.length} logged day(s). ${entries.length > scoped.length ? 'Only the latest 100 entries are included.' : ''}
+
+DAY TOTALS:
+$dayLines
+
+MEAL ENTRIES:
+$entryLines''';
+  }
+
+  String _cleanInsight(String text) => text
+      .replaceAll('**', '')
+      .replaceAll('###', '')
+      .replaceAll(RegExp(r'^\s*[-*]\s+', multiLine: true), '')
+      .trim();
 
   void _show(String text) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text))); }
 
@@ -192,7 +232,7 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
     final protein = today.fold<double>(0, (sum, meal) => sum + meal.protein);
     final carbs = today.fold<double>(0, (sum, meal) => sum + meal.carbs);
     final fat = today.fold<double>(0, (sum, meal) => sum + meal.fat);
-    return Scaffold(appBar: AppBar(title: const Text('OpenNutriTracker Web'), actions: [IconButton(onPressed: _settings, icon: const Icon(Icons.settings_outlined), tooltip: 'AI settings')]), floatingActionButton: FloatingActionButton.extended(onPressed: _addManualMeal, icon: const Icon(Icons.add), label: const Text('Add meal')), body: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 980), child: ListView(padding: const EdgeInsets.all(20), children: [Text('Today', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 12), Wrap(spacing: 12, runSpacing: 12, children: [_stat('Calories', '${kcal.toStringAsFixed(0)} kcal'), _stat('Protein', '${protein.toStringAsFixed(0)} g'), _stat('Carbs', '${carbs.toStringAsFixed(0)} g'), _stat('Fat', '${fat.toStringAsFixed(0)} g')]), const SizedBox(height: 24), _section('Log with photo', Column(crossAxisAlignment: CrossAxisAlignment.start, children: [if (_image != null) ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(_image!, height: 220, width: double.infinity, fit: BoxFit.cover)), Row(children: [OutlinedButton.icon(onPressed: _working ? null : _selectPhoto, icon: const Icon(Icons.upload_file), label: const Text('Choose photo')), const SizedBox(width: 12), FilledButton.icon(onPressed: _image == null || _working ? null : _analyzePhoto, icon: _working ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.auto_awesome), label: const Text('Analyze'))]), if (_photoItems.isNotEmpty) ...[const SizedBox(height: 12), const Text('Review estimates before saving'), for (var i = 0; i < _photoItems.length; i++) ListTile(onTap: () => _editPhotoItem(i), title: Text(_photoItems[i].name), subtitle: Text('${_photoItems[i].grams.toStringAsFixed(0)}g · ${_photoItems[i].kcal.toStringAsFixed(0)} kcal'), trailing: IconButton(onPressed: () => setState(() => _photoItems = [..._photoItems]..removeAt(i)), icon: const Icon(Icons.delete_outline))), FilledButton(onPressed: _savePhotoItems, child: const Text('Confirm and save'))]])), const SizedBox(height: 16), _section('AI insights', Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('AI-generated, not medical advice.'), const SizedBox(height: 8), FilledButton.icon(onPressed: _working ? null : _generateInsights, icon: const Icon(Icons.insights_outlined), label: const Text('Generate insights')), if (_insight != null) Padding(padding: const EdgeInsets.only(top: 12), child: Text(_insight!))])), const SizedBox(height: 16), Text('Diary', style: Theme.of(context).textTheme.titleLarge), if (today.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Text('No meals logged today. Add one manually or use a photo.')), for (final meal in today.reversed) Card(child: ListTile(title: Text(meal.name), subtitle: Text('${meal.grams.toStringAsFixed(0)} g · P ${meal.protein.toStringAsFixed(1)}g · C ${meal.carbs.toStringAsFixed(1)}g · F ${meal.fat.toStringAsFixed(1)}g'), trailing: Text('${meal.kcal.toStringAsFixed(0)} kcal'))), const SizedBox(height: 90)]))));
+    return Scaffold(appBar: AppBar(title: const Text('OpenNutriTracker Web'), actions: [IconButton(onPressed: _settings, icon: const Icon(Icons.settings_outlined), tooltip: 'AI settings')]), floatingActionButton: FloatingActionButton.extended(onPressed: _addManualMeal, icon: const Icon(Icons.add), label: const Text('Add meal')), body: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 980), child: ListView(padding: const EdgeInsets.all(20), children: [Text('Today', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 12), Wrap(spacing: 12, runSpacing: 12, children: [_stat('Calories', '${kcal.toStringAsFixed(0)} kcal'), _stat('Protein', '${protein.toStringAsFixed(0)} g'), _stat('Carbs', '${carbs.toStringAsFixed(0)} g'), _stat('Fat', '${fat.toStringAsFixed(0)} g')]), const SizedBox(height: 24), _section('Log with photo', Column(crossAxisAlignment: CrossAxisAlignment.start, children: [if (_image != null) ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(_image!, height: 220, width: double.infinity, fit: BoxFit.cover)), Row(children: [OutlinedButton.icon(onPressed: _working ? null : _selectPhoto, icon: const Icon(Icons.upload_file), label: const Text('Choose photo')), const SizedBox(width: 12), FilledButton.icon(onPressed: _image == null || _working ? null : _analyzePhoto, icon: _working ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.auto_awesome), label: const Text('Analyze'))]), if (_photoItems.isNotEmpty) ...[const SizedBox(height: 12), const Text('Review estimates before saving'), for (var i = 0; i < _photoItems.length; i++) ListTile(onTap: () => _editPhotoItem(i), title: Text(_photoItems[i].name), subtitle: Text('${_photoItems[i].grams.toStringAsFixed(0)}g · ${_photoItems[i].kcal.toStringAsFixed(0)} kcal'), trailing: IconButton(onPressed: () => setState(() => _photoItems = [..._photoItems]..removeAt(i)), icon: const Icon(Icons.delete_outline))), FilledButton(onPressed: _savePhotoItems, child: const Text('Confirm and save'))]])), const SizedBox(height: 16), _section('AI insights', Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Specific to the food and macro data in your diary. AI-generated, not medical advice.'), const SizedBox(height: 8), FilledButton.icon(onPressed: _working ? null : _generateInsights, icon: const Icon(Icons.insights_outlined), label: const Text('Analyze diary')), if (_insight != null) Padding(padding: const EdgeInsets.only(top: 12), child: Text(_insight!))])), const SizedBox(height: 16), Text('Diary', style: Theme.of(context).textTheme.titleLarge), if (today.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Text('No meals logged today. Add one manually or use a photo.')), for (final meal in today.reversed) Card(child: ListTile(title: Text(meal.name), subtitle: Text('${meal.grams.toStringAsFixed(0)} g · P ${meal.protein.toStringAsFixed(1)}g · C ${meal.carbs.toStringAsFixed(1)}g · F ${meal.fat.toStringAsFixed(1)}g'), trailing: Text('${meal.kcal.toStringAsFixed(0)} kcal'))), const SizedBox(height: 90)]))));
   }
 
   Widget _stat(String label, String value) => SizedBox(width: 180, child: Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label), const SizedBox(height: 4), Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold))]))));
