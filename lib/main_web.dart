@@ -17,7 +17,7 @@ class NutritionWebApp extends StatelessWidget {
   const NutritionWebApp({super.key});
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'OpenNutriTracker Web',
+    title: 'CalT: a frictionless calory tracker',
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(
@@ -1140,7 +1140,7 @@ $entryLines''';
           children: [
             Icon(Icons.bolt_rounded, color: Color(0xff1d5d50)),
             SizedBox(width: 8),
-            Text('NUTRITRACK'),
+            Text('CalT'),
           ],
         ),
         actions: [
@@ -1679,7 +1679,7 @@ $entryLines''';
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'NUTRITRACK',
+                  'CalT',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
@@ -2500,7 +2500,7 @@ class _ProfileAndDataScreenState extends State<_ProfileAndDataScreen> {
     final blob = html.Blob([jsonEncode(snapshot)], 'application/json');
     final url = html.Url.createObjectUrlFromBlob(blob);
     final link = html.AnchorElement(href: url)
-      ..download = 'nutritrack-backup.json'
+      ..download = 'calt-backup.json'
       ..style.display = 'none';
     html.document.body?.append(link);
     link.click();

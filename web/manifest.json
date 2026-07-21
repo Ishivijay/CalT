@@ -1,11 +1,11 @@
 {
-  "name": "NutriTrack Fitness",
-  "short_name": "NutriTracker",
+  "name": "CalT: a frictionless calory tracker",
+  "short_name": "CalT",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#f1f5f2",
   "theme_color": "#1d5d50",
-  "description": "A private, local-first nutrition and fitness tracker.",
+  "description": "CalT is a private, frictionless calory tracker.",
   "icons": [
     {
       "src": "assets/assets/icon/ont_logo_square_color_back_1024x1024.png",
