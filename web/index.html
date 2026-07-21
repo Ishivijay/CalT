@@ -8,8 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OpenNutriTracker Web</title>
   <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1d5d50">
+  <link rel="apple-touch-icon" href="assets/assets/icon/ont_logo_square_color_back_1024x1024.png">
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+    }
+  </script>
 </body>
 </html>

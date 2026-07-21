@@ -5,9 +5,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:opennutritracker/features/ai_provider/data/http_llm_providers.dart';
 import 'package:opennutritracker/features/ai_provider/domain/ai_provider_config.dart';
 import 'package:opennutritracker/features/ai_provider/domain/llm_provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() => runApp(const NutritionWebApp());
 
@@ -121,6 +123,10 @@ class _PersonProfile {
     this.weightKg = '',
     this.activityLevel = '',
     this.goal = '',
+    this.targetKcal = '',
+    this.targetProtein = '',
+    this.targetCarbs = '',
+    this.targetFat = '',
     this.dietaryPreferences = '',
     this.healthContext = '',
   });
@@ -134,6 +140,10 @@ class _PersonProfile {
   final String weightKg;
   final String activityLevel;
   final String goal;
+  final String targetKcal;
+  final String targetProtein;
+  final String targetCarbs;
+  final String targetFat;
   final String dietaryPreferences;
   final String healthContext;
 
@@ -144,6 +154,10 @@ class _PersonProfile {
     weightKg,
     activityLevel,
     goal,
+    targetKcal,
+    targetProtein,
+    targetCarbs,
+    targetFat,
     dietaryPreferences,
     healthContext,
   ].any((value) => value.trim().isNotEmpty);
@@ -156,6 +170,10 @@ class _PersonProfile {
     'weightKg': weightKg,
     'activityLevel': activityLevel,
     'goal': goal,
+    'targetKcal': targetKcal,
+    'targetProtein': targetProtein,
+    'targetCarbs': targetCarbs,
+    'targetFat': targetFat,
     'dietaryPreferences': dietaryPreferences,
     'healthContext': healthContext,
   };
@@ -168,6 +186,10 @@ class _PersonProfile {
     weightKg: json['weightKg']?.toString() ?? '',
     activityLevel: json['activityLevel']?.toString() ?? '',
     goal: json['goal']?.toString() ?? '',
+    targetKcal: json['targetKcal']?.toString() ?? '',
+    targetProtein: json['targetProtein']?.toString() ?? '',
+    targetCarbs: json['targetCarbs']?.toString() ?? '',
+    targetFat: json['targetFat']?.toString() ?? '',
     dietaryPreferences: json['dietaryPreferences']?.toString() ?? '',
     healthContext: json['healthContext']?.toString() ?? '',
   );
@@ -208,6 +230,7 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
   bool _working = false;
   bool _isDraggingFile = false;
   String? _insight;
+  String? _weeklyCoach;
   final List<void Function()> _webEventCleanups = [];
 
   @override
@@ -347,6 +370,112 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
     }
   }
 
+  Future<void> _scanBarcode() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (context) => const _BarcodeScannerScreen()),
+    );
+    if (code == null || code.trim().isEmpty || !mounted) return;
+    await _lookupBarcode(code.trim());
+  }
+
+  Future<void> _lookupBarcode(String code) async {
+    _show('Looking up barcode $code…');
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://world.openfoodfacts.org/api/v2/product/$code.json?fields=product_name,product_name_en,serving_quantity,nutriments',
+        ),
+      );
+      final payload = jsonDecode(response.body);
+      if (response.statusCode != 200 ||
+          payload is! Map ||
+          payload['status'] != 1) {
+        throw const FormatException();
+      }
+      final product = Map<String, dynamic>.from(payload['product'] as Map);
+      final nutriments = product['nutriments'] is Map
+          ? Map<String, dynamic>.from(product['nutriments'] as Map)
+          : <String, dynamic>{};
+      final name = (product['product_name'] ?? product['product_name_en'] ?? '')
+          .toString()
+          .trim();
+      if (name.isEmpty) throw const FormatException();
+      await _reviewBarcodeProduct(
+        name: name,
+        grams: _number(product['serving_quantity']) > 0
+            ? _number(product['serving_quantity'])
+            : 100,
+        kcalPer100: _number(nutriments['energy-kcal_100g']),
+        proteinPer100: _number(nutriments['proteins_100g']),
+        carbsPer100: _number(nutriments['carbohydrates_100g']),
+        fatPer100: _number(nutriments['fat_100g']),
+      );
+    } catch (_) {
+      _show('Food not found. Try another barcode or add the meal manually.');
+    }
+  }
+
+  Future<void> _reviewBarcodeProduct({
+    required String name,
+    required double grams,
+    required double kcalPer100,
+    required double proteinPer100,
+    required double carbsPer100,
+    required double fatPer100,
+  }) async {
+    final amount = TextEditingController(text: grams.toStringAsFixed(0));
+    final meal = await showDialog<_WebMeal>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Barcode match'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 6),
+            const Text(
+              'Nutrition values come from Open Food Facts. Check the serving before saving.',
+            ),
+            const SizedBox(height: 16),
+            _input(amount, 'Serving amount (g)'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final factor = _number(amount.text) / 100;
+              Navigator.pop(
+                context,
+                _WebMeal(
+                  name: name,
+                  grams: _number(amount.text),
+                  kcal: kcalPer100 * factor,
+                  protein: proteinPer100 * factor,
+                  carbs: carbsPer100 * factor,
+                  fat: fatPer100 * factor,
+                  createdAt: DateTime.now(),
+                ),
+              );
+            },
+            child: const Text('Add to diary'),
+          ),
+        ],
+      ),
+    );
+    amount.dispose();
+    if (meal == null || !mounted) return;
+    setState(() {
+      _meals = [..._meals, meal];
+      _saveMeals();
+    });
+    _show('$name added to your diary.');
+  }
+
   Future<void> _analyzePhoto() async {
     if (_image == null) return;
     if (!_config.isConfigured) {
@@ -438,6 +567,67 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
       _show(error.message);
     } catch (_) {
       _show('Could not generate insights.');
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
+  }
+
+  Future<void> _generateWeeklyCoach() async {
+    if (!_config.isConfigured) {
+      _show('Configure an AI provider first.');
+      return;
+    }
+    final end = DateTime.now();
+    final start = DateTime(
+      end.year,
+      end.month,
+      end.day,
+    ).subtract(const Duration(days: 6));
+    final weekMeals = _meals
+        .where((meal) => !meal.createdAt.isBefore(start))
+        .toList();
+    if (weekMeals.isEmpty) {
+      _show('Log at least one meal this week before asking your coach.');
+      return;
+    }
+    final days = <String, List<_WebMeal>>{};
+    for (final meal in weekMeals) {
+      final key = meal.createdAt.toIso8601String().substring(0, 10);
+      (days[key] ??= []).add(meal);
+    }
+    final dayLines = days.entries
+        .map((entry) {
+          final meals = entry.value;
+          final kcal = meals.fold<double>(0, (sum, meal) => sum + meal.kcal);
+          final protein = meals.fold<double>(
+            0,
+            (sum, meal) => sum + meal.protein,
+          );
+          return '${entry.key}: ${meals.length} meals, ${kcal.toStringAsFixed(0)} kcal, ${protein.toStringAsFixed(0)}g protein. Foods: ${meals.map((meal) => meal.name).join(', ')}';
+        })
+        .join('\n');
+    setState(() => _working = true);
+    try {
+      final result = await _factory.create(_config).sendTextPrompt(
+        '''You are a supportive fitness nutrition coach. Review this person's last seven calendar days of logged meals. Base every observation on the diary, not generic advice. ${_profile.promptContext}
+
+Give concise plain text sections only (no Markdown):
+WEEKLY CONSISTENCY:
+PROTEIN DISTRIBUTION:
+FUEL AND RECOVERY:
+NEXT WEEK FOCUS:
+DATA LIMIT:
+
+Do not diagnose, prescribe, estimate unlogged nutrients, or assume workouts occurred. If few days are logged, say so clearly and tailor the feedback to the logged days.
+
+WEEKLY DIARY:
+$dayLines''',
+      );
+      if (mounted) setState(() => _weeklyCoach = _cleanInsight(result.rawText));
+    } on LlmException catch (error) {
+      _show(error.message);
+    } catch (_) {
+      _show('Could not generate the weekly coach summary.');
     } finally {
       if (mounted) setState(() => _working = false);
     }
@@ -728,6 +918,20 @@ $entryLines''';
     _show('Profile saved locally. Future AI insights will use it.');
   }
 
+  Future<void> _openDiaryCalendar() async {
+    final meals = await Navigator.of(context).push<List<_WebMeal>>(
+      MaterialPageRoute(
+        builder: (context) => _DiaryCalendarScreen(meals: _meals),
+      ),
+    );
+    if (meals == null || !mounted) return;
+    setState(() {
+      _meals = meals;
+      _saveMeals();
+    });
+    _show('Diary changes saved.');
+  }
+
   @override
   Widget build(BuildContext context) {
     final today = _meals
@@ -925,6 +1129,8 @@ $entryLines''';
                               ),
                             ],
                           ),
+                          const SizedBox(height: 16),
+                          _targetRings(kcal, protein, carbs, fat),
                           const SizedBox(height: 28),
                           _section(
                             title: 'Photo log',
@@ -964,6 +1170,13 @@ $entryLines''';
                                             ? 'Choose photo'
                                             : 'Replace photo',
                                       ),
+                                    ),
+                                    OutlinedButton.icon(
+                                      onPressed: _working ? null : _scanBarcode,
+                                      icon: const Icon(
+                                        Icons.qr_code_scanner_rounded,
+                                      ),
+                                      label: const Text('Scan barcode'),
                                     ),
                                     FilledButton.icon(
                                       onPressed: _image == null || _working
@@ -1073,6 +1286,40 @@ $entryLines''';
                               ],
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          _section(
+                            title: 'Weekly AI coach',
+                            subtitle:
+                                'Consistency, protein distribution, and practical fuelling or recovery suggestions from your last 7 days.',
+                            icon: Icons.psychology_alt_outlined,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                FilledButton.icon(
+                                  onPressed: _working
+                                      ? null
+                                      : _generateWeeklyCoach,
+                                  icon: const Icon(Icons.auto_awesome_rounded),
+                                  label: const Text('Review my week'),
+                                ),
+                                if (_weeklyCoach != null) ...[
+                                  const SizedBox(height: 14),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xffeef6ee),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Text(
+                                      _weeklyCoach!,
+                                      style: const TextStyle(height: 1.45),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 28),
                           Row(
                             children: [
@@ -1083,6 +1330,11 @@ $entryLines''';
                                 ),
                               ),
                               const Spacer(),
+                              TextButton.icon(
+                                onPressed: _openDiaryCalendar,
+                                icon: const Icon(Icons.calendar_month_rounded),
+                                label: const Text('Calendar'),
+                              ),
                               Text(
                                 '${today.length} ${today.length == 1 ? 'item' : 'items'}',
                                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -1390,6 +1642,131 @@ $entryLines''';
         ),
       );
 
+  Widget _targetRings(double kcal, double protein, double carbs, double fat) {
+    final targets = [
+      ('CALORIES', kcal, _number(_profile.targetKcal), const Color(0xffe06d3d)),
+      (
+        'PROTEIN',
+        protein,
+        _number(_profile.targetProtein),
+        const Color(0xff635fc7),
+      ),
+      ('CARBS', carbs, _number(_profile.targetCarbs), const Color(0xffd09530)),
+      ('FAT', fat, _number(_profile.targetFat), const Color(0xff1d8b70)),
+    ];
+    final hasTarget = targets.any((target) => target.$3 > 0);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.track_changes_rounded,
+                  color: Color(0xff1d5d50),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'DAILY TARGETS',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: _openProfileAndData,
+                  child: Text(hasTarget ? 'Edit targets' : 'Set targets'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              alignment: WrapAlignment.spaceAround,
+              spacing: 22,
+              runSpacing: 18,
+              children: [
+                for (final target in targets)
+                  _targetRing(target.$1, target.$2, target.$3, target.$4),
+              ],
+            ),
+            if (!hasTarget) ...[
+              const SizedBox(height: 12),
+              const Text(
+                'Set personal calorie and macro targets to see your progress here.',
+                style: TextStyle(color: Color(0xff527060)),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _targetRing(String label, double current, double target, Color color) {
+    final progress = target <= 0 ? 0.0 : (current / target).clamp(0.0, 1.0);
+    final currentText = current.toStringAsFixed(0);
+    return SizedBox(
+      width: 126,
+      child: Column(
+        children: [
+          SizedBox(
+            width: 90,
+            height: 90,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 90,
+                  height: 90,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 9,
+                    backgroundColor: color.withValues(alpha: 0.13),
+                    color: color,
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      currentText,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      target <= 0
+                          ? 'set goal'
+                          : '/ ${target.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xff527060),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 11,
+              letterSpacing: 0.7,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _section({
     required String title,
     required String subtitle,
@@ -1429,6 +1806,342 @@ $entryLines''';
   );
 }
 
+class _BarcodeScannerScreen extends StatefulWidget {
+  const _BarcodeScannerScreen();
+
+  @override
+  State<_BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
+}
+
+class _BarcodeScannerScreenState extends State<_BarcodeScannerScreen> {
+  bool _handled = false;
+
+  void _onDetect(BarcodeCapture capture) {
+    if (_handled) return;
+    final code = capture.barcodes
+        .map((barcode) => barcode.rawValue)
+        .firstWhere(
+          (value) => value != null && value.isNotEmpty,
+          orElse: () => null,
+        );
+    if (code == null) return;
+    _handled = true;
+    Navigator.pop(context, code);
+  }
+
+  Future<void> _enterManually() async {
+    final controller = TextEditingController();
+    final code = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Enter barcode'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Barcode number',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Look up'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (code != null && code.isNotEmpty && mounted)
+      Navigator.pop(context, code);
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.black,
+    appBar: AppBar(
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+      title: const Text('Scan a food barcode'),
+      actions: [
+        TextButton.icon(
+          onPressed: _enterManually,
+          icon: const Icon(Icons.keyboard_rounded),
+          label: const Text('Enter code'),
+          style: TextButton.styleFrom(foregroundColor: Colors.white),
+        ),
+      ],
+    ),
+    body: Stack(
+      fit: StackFit.expand,
+      children: [
+        MobileScanner(onDetect: _onDetect),
+        Center(
+          child: Container(
+            width: 270,
+            height: 170,
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xffb9ff64), width: 3),
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+        const Positioned(
+          bottom: 38,
+          left: 24,
+          right: 24,
+          child: Text(
+            'Hold the barcode inside the frame. Camera access requires HTTPS or localhost.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _DiaryCalendarScreen extends StatefulWidget {
+  const _DiaryCalendarScreen({required this.meals});
+
+  final List<_WebMeal> meals;
+
+  @override
+  State<_DiaryCalendarScreen> createState() => _DiaryCalendarScreenState();
+}
+
+class _DiaryCalendarScreenState extends State<_DiaryCalendarScreen> {
+  late List<_WebMeal> _meals;
+  late DateTime _focusedDay;
+  late DateTime _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _meals = [...widget.meals];
+    _focusedDay = DateTime.now();
+    _selectedDay = DateTime.now();
+  }
+
+  List<_WebMeal> _eventsFor(DateTime day) =>
+      _meals.where((meal) => DateUtils.isSameDay(meal.createdAt, day)).toList()
+        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+  Future<void> _editMeal(_WebMeal original) async {
+    final name = TextEditingController(text: original.name);
+    final grams = TextEditingController(
+      text: original.grams.toStringAsFixed(0),
+    );
+    final kcal = TextEditingController(text: original.kcal.toStringAsFixed(0));
+    final protein = TextEditingController(
+      text: original.protein.toStringAsFixed(1),
+    );
+    final carbs = TextEditingController(
+      text: original.carbs.toStringAsFixed(1),
+    );
+    final fat = TextEditingController(text: original.fat.toStringAsFixed(1));
+    final edited = await showDialog<_WebMeal>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit diary entry'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _field(name, 'Food name'),
+              _field(grams, 'Grams'),
+              _field(kcal, 'Calories'),
+              _field(protein, 'Protein (g)'),
+              _field(carbs, 'Carbs (g)'),
+              _field(fat, 'Fat (g)'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(
+              context,
+              _WebMeal(
+                name: name.text.trim(),
+                grams: _number(grams.text),
+                kcal: _number(kcal.text),
+                protein: _number(protein.text),
+                carbs: _number(carbs.text),
+                fat: _number(fat.text),
+                createdAt: original.createdAt,
+              ),
+            ),
+            child: const Text('Save changes'),
+          ),
+        ],
+      ),
+    );
+    for (final controller in [name, grams, kcal, protein, carbs, fat]) {
+      controller.dispose();
+    }
+    if (edited == null || edited.name.isEmpty || !mounted) return;
+    final index = _meals.indexOf(original);
+    setState(() => _meals = [..._meals]..[index] = edited);
+  }
+
+  Future<void> _deleteMeal(_WebMeal meal) async {
+    final remove = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete entry?'),
+        content: Text('Remove ${meal.name} from your diary?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (remove == true && mounted) setState(() => _meals.remove(meal));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedMeals = _eventsFor(_selectedDay);
+    final total = selectedMeals.fold<double>(0, (sum, meal) => sum + meal.kcal);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Diary calendar'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => Navigator.pop(context, _meals),
+        ),
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 940),
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: TableCalendar<_WebMeal>(
+                    firstDay: DateTime.now().subtract(
+                      const Duration(days: 730),
+                    ),
+                    lastDay: DateTime.now().add(const Duration(days: 365)),
+                    focusedDay: _focusedDay,
+                    selectedDayPredicate: (day) =>
+                        DateUtils.isSameDay(day, _selectedDay),
+                    eventLoader: _eventsFor,
+                    startingDayOfWeek: StartingDayOfWeek.monday,
+                    calendarStyle: const CalendarStyle(
+                      markerDecoration: BoxDecoration(
+                        color: Color(0xffb9ff64),
+                        shape: BoxShape.circle,
+                      ),
+                      selectedDecoration: BoxDecoration(
+                        color: Color(0xff1d5d50),
+                        shape: BoxShape.circle,
+                      ),
+                      todayDecoration: BoxDecoration(
+                        color: Color(0xff72a896),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    onDaySelected: (selected, focused) => setState(() {
+                      _selectedDay = selected;
+                      _focusedDay = focused;
+                    }),
+                    onPageChanged: (focused) => _focusedDay = focused,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  const Icon(Icons.today_rounded, color: Color(0xff1d5d50)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${_selectedDay.year}-${_selectedDay.month.toString().padLeft(2, '0')}-${_selectedDay.day.toString().padLeft(2, '0')}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${total.toStringAsFixed(0)} kcal',
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (selectedMeals.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'No meals logged for this day.',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              for (final meal in selectedMeals)
+                Card(
+                  child: ListTile(
+                    onTap: () => _editMeal(meal),
+                    title: Text(
+                      meal.name,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: Text(
+                      '${meal.grams.toStringAsFixed(0)} g · P ${meal.protein.toStringAsFixed(1)} g · C ${meal.carbs.toStringAsFixed(1)} g · F ${meal.fat.toStringAsFixed(1)} g',
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('${meal.kcal.toStringAsFixed(0)} kcal'),
+                        IconButton(
+                          onPressed: () => _deleteMeal(meal),
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          tooltip: 'Delete entry',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _field(TextEditingController controller, String label) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: TextField(
+      controller: controller,
+      keyboardType: label == 'Food name'
+          ? TextInputType.text
+          : const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+    ),
+  );
+}
+
 class _ProfileAndDataScreen extends StatefulWidget {
   const _ProfileAndDataScreen({required this.profile, required this.meals});
 
@@ -1446,6 +2159,10 @@ class _ProfileAndDataScreenState extends State<_ProfileAndDataScreen> {
   late final TextEditingController _weight;
   late final TextEditingController _dietaryPreferences;
   late final TextEditingController _healthContext;
+  late final TextEditingController _targetKcal;
+  late final TextEditingController _targetProtein;
+  late final TextEditingController _targetCarbs;
+  late final TextEditingController _targetFat;
   late String _sex;
   late String _activityLevel;
   late String _goal;
@@ -1485,6 +2202,10 @@ class _ProfileAndDataScreenState extends State<_ProfileAndDataScreen> {
       text: profile.dietaryPreferences,
     );
     _healthContext = TextEditingController(text: profile.healthContext);
+    _targetKcal = TextEditingController(text: profile.targetKcal);
+    _targetProtein = TextEditingController(text: profile.targetProtein);
+    _targetCarbs = TextEditingController(text: profile.targetCarbs);
+    _targetFat = TextEditingController(text: profile.targetFat);
     _sex = _sexOptions.contains(profile.sex) ? profile.sex : '';
     _activityLevel = _activityOptions.contains(profile.activityLevel)
         ? profile.activityLevel
@@ -1501,6 +2222,10 @@ class _ProfileAndDataScreenState extends State<_ProfileAndDataScreen> {
       _weight,
       _dietaryPreferences,
       _healthContext,
+      _targetKcal,
+      _targetProtein,
+      _targetCarbs,
+      _targetFat,
     ]) {
       controller.dispose();
     }
@@ -1517,6 +2242,10 @@ class _ProfileAndDataScreenState extends State<_ProfileAndDataScreen> {
     goal: _goal,
     dietaryPreferences: _dietaryPreferences.text.trim(),
     healthContext: _healthContext.text.trim(),
+    targetKcal: _targetKcal.text.trim(),
+    targetProtein: _targetProtein.text.trim(),
+    targetCarbs: _targetCarbs.text.trim(),
+    targetFat: _targetFat.text.trim(),
   );
 
   void _exportData() {
@@ -1663,7 +2392,42 @@ class _ProfileAndDataScreenState extends State<_ProfileAndDataScreen> {
                           onChanged: (value) =>
                               setState(() => _goal = value ?? ''),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 22),
+                        Text(
+                          'Daily targets',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Optional goals for your dashboard rings. Your AI coach treats these as preferences, not medical prescriptions.',
+                        ),
+                        const SizedBox(height: 14),
+                        LayoutBuilder(
+                          builder: (context, constraints) => Wrap(
+                            spacing: 12,
+                            children: [
+                              for (final field in [
+                                (_targetKcal, 'Calories (kcal)'),
+                                (_targetProtein, 'Protein (g)'),
+                                (_targetCarbs, 'Carbs (g)'),
+                                (_targetFat, 'Fat (g)'),
+                              ])
+                                SizedBox(
+                                  width: constraints.maxWidth < 520
+                                      ? constraints.maxWidth
+                                      : (constraints.maxWidth - 12) / 2,
+                                  child: _field(
+                                    field.$1,
+                                    field.$2,
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
                         _field(
                           _dietaryPreferences,
                           'Dietary preferences or restrictions',

@@ -1,9 +1,17 @@
 {
-  "name": "OpenNutriTracker Web",
+  "name": "NutriTrack Fitness",
   "short_name": "NutriTracker",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#f7f9f6",
-  "theme_color": "#236b45",
-  "description": "A private, local-first nutrition tracker."
+  "background_color": "#f1f5f2",
+  "theme_color": "#1d5d50",
+  "description": "A private, local-first nutrition and fitness tracker.",
+  "icons": [
+    {
+      "src": "assets/assets/icon/ont_logo_square_color_back_1024x1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
