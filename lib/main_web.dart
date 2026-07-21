@@ -19,25 +19,30 @@ class NutritionWebApp extends StatelessWidget {
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xff287a54),
+        seedColor: const Color(0xff1d5d50),
         brightness: Brightness.light,
-        surface: const Color(0xfffbfdf9),
+        surface: const Color(0xfffcfdfa),
       ),
       useMaterial3: true,
-      scaffoldBackgroundColor: const Color(0xfff4f7f2),
+      scaffoldBackgroundColor: const Color(0xfff1f5f2),
       cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xffdfe9df)),
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xffdce8df)),
         ),
       ),
-      appBarTheme: const AppBarThemeData(
-        backgroundColor: Color(0xfff4f7f2),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color(0xff1d5d50),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
       ),
     ),
     home: const NutritionWebHome(),
@@ -748,9 +753,9 @@ $entryLines''';
         title: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.eco_rounded, color: Color(0xff287a54)),
+            Icon(Icons.bolt_rounded, color: Color(0xff1d5d50)),
             SizedBox(width: 8),
-            Text('NutriTrack'),
+            Text('NUTRITRACK'),
           ],
         ),
         actions: [
@@ -773,314 +778,533 @@ $entryLines''';
         label: const Text('Add meal'),
       ),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1040),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wideLayout = constraints.maxWidth >= 1100;
+            return Row(
               children: [
-                Text(
-                  greetingWithName,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: const Color(0xff527060),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Your food, in focus.',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xffdff2e5),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Row(
-                    children: [
-                      const CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Color(0xff287a54),
-                        child: Icon(
-                          Icons.restaurant_menu_rounded,
-                          color: Colors.white,
-                        ),
+                if (wideLayout) _fitnessSidebar(),
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: wideLayout ? 1480 : 1040,
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Today\'s nutrition',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(
+                          wideLayout ? 34 : 20,
+                          wideLayout ? 26 : 12,
+                          wideLayout ? 34 : 20,
+                          110,
+                        ),
+                        children: [
+                          Text(
+                            greetingWithName,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: const Color(0xff527060),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Fuel the work.\nOwn the day.',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              height: 0.98,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Color(0xff163e36), Color(0xff287a62)],
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Row(
+                              children: [
+                                const CircleAvatar(
+                                  radius: 24,
+                                  backgroundColor: Color(0xffb9ff64),
+                                  child: Icon(
+                                    Icons.bolt_rounded,
+                                    color: Color(0xff163e36),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'TODAY\'S FUEL',
+                                        style: theme.textTheme.titleLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.white,
+                                              letterSpacing: 0.5,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        today.isEmpty
+                                            ? 'Start with a meal, a photo, or a quick note.'
+                                            : '${today.length} ${today.length == 1 ? 'entry' : 'entries'} logged today.',
+                                        style: const TextStyle(
+                                          color: Color(0xffd6eee1),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        kcal.toStringAsFixed(0),
+                                        style: const TextStyle(
+                                          color: Color(0xffb9ff64),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                      const Text(
+                                        'KCAL',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.8,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              _stat(
+                                'Calories',
+                                '${kcal.toStringAsFixed(0)} kcal',
+                                Icons.local_fire_department_rounded,
+                                const Color(0xffd96836),
+                              ),
+                              _stat(
+                                'Protein',
+                                '${protein.toStringAsFixed(0)} g',
+                                Icons.fitness_center_rounded,
+                                const Color(0xff5e67a7),
+                              ),
+                              _stat(
+                                'Carbs',
+                                '${carbs.toStringAsFixed(0)} g',
+                                Icons.grain_rounded,
+                                const Color(0xffbd7d22),
+                              ),
+                              _stat(
+                                'Fat',
+                                '${fat.toStringAsFixed(0)} g',
+                                Icons.water_drop_rounded,
+                                const Color(0xff287a54),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 28),
+                          _section(
+                            title: 'Photo log',
+                            subtitle:
+                                'Drop a meal photo anywhere on this page, or select one below.',
+                            icon: Icons.camera_alt_outlined,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (_image == null)
+                                  _photoDropZone()
+                                else ...[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.memory(
+                                      _image!,
+                                      height: 250,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _photoDropZone(compact: true),
+                                ],
+                                const SizedBox(height: 14),
+                                Wrap(
+                                  spacing: 10,
+                                  runSpacing: 10,
+                                  children: [
+                                    OutlinedButton.icon(
+                                      onPressed: _working ? null : _selectPhoto,
+                                      icon: const Icon(
+                                        Icons.photo_library_outlined,
+                                      ),
+                                      label: Text(
+                                        _image == null
+                                            ? 'Choose photo'
+                                            : 'Replace photo',
+                                      ),
+                                    ),
+                                    FilledButton.icon(
+                                      onPressed: _image == null || _working
+                                          ? null
+                                          : _analyzePhoto,
+                                      icon: _working
+                                          ? const SizedBox.square(
+                                              dimension: 16,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : const Icon(
+                                              Icons.auto_awesome_rounded,
+                                            ),
+                                      label: Text(
+                                        _working
+                                            ? 'Analyzing…'
+                                            : 'Analyze meal',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (_photoItems.isNotEmpty) ...[
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    'Review estimates',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w700),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Tap an item to adjust it before adding it to your diary.',
+                                  ),
+                                  const SizedBox(height: 10),
+                                  for (var i = 0; i < _photoItems.length; i++)
+                                    Container(
+                                      margin: const EdgeInsets.only(bottom: 8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xfff4f8f3),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: ListTile(
+                                        onTap: () => _editPhotoItem(i),
+                                        leading: const CircleAvatar(
+                                          child: Icon(Icons.restaurant_rounded),
+                                        ),
+                                        title: Text(_photoItems[i].name),
+                                        subtitle: Text(
+                                          '${_photoItems[i].grams.toStringAsFixed(0)} g · ${_photoItems[i].kcal.toStringAsFixed(0)} kcal',
+                                        ),
+                                        trailing: IconButton(
+                                          onPressed: () => setState(
+                                            () =>
+                                                _photoItems = [..._photoItems]
+                                                  ..removeAt(i),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.delete_outline_rounded,
+                                          ),
+                                          tooltip: 'Remove item',
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(height: 4),
+                                  FilledButton.icon(
+                                    onPressed: _savePhotoItems,
+                                    icon: const Icon(Icons.check_rounded),
+                                    label: const Text('Add to diary'),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _section(
+                            title: 'AI diary insights',
+                            subtitle:
+                                'Based only on the meals and macros you have logged.',
+                            icon: Icons.auto_graph_rounded,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                FilledButton.icon(
+                                  onPressed: _working
+                                      ? null
+                                      : _generateInsights,
+                                  icon: const Icon(Icons.insights_rounded),
+                                  label: const Text('Analyze diary'),
+                                ),
+                                if (_insight != null) ...[
+                                  const SizedBox(height: 14),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xfff2f7f1),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Text(
+                                      _insight!,
+                                      style: const TextStyle(height: 1.45),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+                          Row(
+                            children: [
+                              Text(
+                                'Today\'s diary',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                '${today.length} ${today.length == 1 ? 'item' : 'items'}',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: const Color(0xff527060),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          if (today.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: const Color(0xffdfe9df),
+                                ),
+                              ),
+                              child: const Column(
+                                children: [
+                                  Icon(
+                                    Icons.lunch_dining_outlined,
+                                    size: 36,
+                                    color: Color(0xff527060),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text('Nothing logged yet'),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'Add a meal or use a photo to begin your diary.',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 3),
-                            Text(
-                              today.isEmpty
-                                  ? 'Start with a meal, a photo, or a quick note.'
-                                  : '${today.length} ${today.length == 1 ? 'entry' : 'entries'} logged today.',
+                          for (final meal in today.reversed) ...[
+                            Card(
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 6,
+                                ),
+                                leading: const CircleAvatar(
+                                  backgroundColor: Color(0xffe2f1e5),
+                                  child: Icon(
+                                    Icons.restaurant_rounded,
+                                    color: Color(0xff287a54),
+                                  ),
+                                ),
+                                title: Text(
+                                  meal.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  '${meal.grams.toStringAsFixed(0)} g · P ${meal.protein.toStringAsFixed(1)} g · C ${meal.carbs.toStringAsFixed(1)} g · F ${meal.fat.toStringAsFixed(1)} g',
+                                ),
+                                trailing: Text(
+                                  '${meal.kcal.toStringAsFixed(0)}\nkcal',
+                                  textAlign: TextAlign.right,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
                             ),
+                            const SizedBox(height: 8),
                           ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    _stat(
-                      'Calories',
-                      '${kcal.toStringAsFixed(0)} kcal',
-                      Icons.local_fire_department_rounded,
-                      const Color(0xffd96836),
-                    ),
-                    _stat(
-                      'Protein',
-                      '${protein.toStringAsFixed(0)} g',
-                      Icons.fitness_center_rounded,
-                      const Color(0xff5e67a7),
-                    ),
-                    _stat(
-                      'Carbs',
-                      '${carbs.toStringAsFixed(0)} g',
-                      Icons.grain_rounded,
-                      const Color(0xffbd7d22),
-                    ),
-                    _stat(
-                      'Fat',
-                      '${fat.toStringAsFixed(0)} g',
-                      Icons.water_drop_rounded,
-                      const Color(0xff287a54),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 28),
-                _section(
-                  title: 'Photo log',
-                  subtitle:
-                      'Drop a meal photo anywhere on this page, or select one below.',
-                  icon: Icons.camera_alt_outlined,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_image == null)
-                        _photoDropZone()
-                      else ...[
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.memory(
-                            _image!,
-                            height: 250,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _photoDropZone(compact: true),
-                      ],
-                      const SizedBox(height: 14),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          OutlinedButton.icon(
-                            onPressed: _working ? null : _selectPhoto,
-                            icon: const Icon(Icons.photo_library_outlined),
-                            label: Text(
-                              _image == null ? 'Choose photo' : 'Replace photo',
-                            ),
-                          ),
-                          FilledButton.icon(
-                            onPressed: _image == null || _working
-                                ? null
-                                : _analyzePhoto,
-                            icon: _working
-                                ? const SizedBox.square(
-                                    dimension: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.auto_awesome_rounded),
-                            label: Text(
-                              _working ? 'Analyzing…' : 'Analyze meal',
-                            ),
-                          ),
                         ],
                       ),
-                      if (_photoItems.isNotEmpty) ...[
-                        const SizedBox(height: 20),
-                        Text(
-                          'Review estimates',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Tap an item to adjust it before adding it to your diary.',
-                        ),
-                        const SizedBox(height: 10),
-                        for (var i = 0; i < _photoItems.length; i++)
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xfff4f8f3),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: ListTile(
-                              onTap: () => _editPhotoItem(i),
-                              leading: const CircleAvatar(
-                                child: Icon(Icons.restaurant_rounded),
-                              ),
-                              title: Text(_photoItems[i].name),
-                              subtitle: Text(
-                                '${_photoItems[i].grams.toStringAsFixed(0)} g · ${_photoItems[i].kcal.toStringAsFixed(0)} kcal',
-                              ),
-                              trailing: IconButton(
-                                onPressed: () => setState(
-                                  () =>
-                                      _photoItems = [..._photoItems]
-                                        ..removeAt(i),
-                                ),
-                                icon: const Icon(Icons.delete_outline_rounded),
-                                tooltip: 'Remove item',
-                              ),
-                            ),
-                          ),
-                        const SizedBox(height: 4),
-                        FilledButton.icon(
-                          onPressed: _savePhotoItems,
-                          icon: const Icon(Icons.check_rounded),
-                          label: const Text('Add to diary'),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                _section(
-                  title: 'AI diary insights',
-                  subtitle:
-                      'Based only on the meals and macros you have logged.',
-                  icon: Icons.auto_graph_rounded,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FilledButton.icon(
-                        onPressed: _working ? null : _generateInsights,
-                        icon: const Icon(Icons.insights_rounded),
-                        label: const Text('Analyze diary'),
-                      ),
-                      if (_insight != null) ...[
-                        const SizedBox(height: 14),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xfff2f7f1),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Text(
-                            _insight!,
-                            style: const TextStyle(height: 1.45),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Row(
-                  children: [
-                    Text(
-                      'Today\'s diary',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      '${today.length} ${today.length == 1 ? 'item' : 'items'}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xff527060),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                if (today.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xffdfe9df)),
-                    ),
-                    child: const Column(
-                      children: [
-                        Icon(
-                          Icons.lunch_dining_outlined,
-                          size: 36,
-                          color: Color(0xff527060),
-                        ),
-                        SizedBox(height: 10),
-                        Text('Nothing logged yet'),
-                        SizedBox(height: 4),
-                        Text(
-                          'Add a meal or use a photo to begin your diary.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                for (final meal in today.reversed) ...[
-                  Card(
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      leading: const CircleAvatar(
-                        backgroundColor: Color(0xffe2f1e5),
-                        child: Icon(
-                          Icons.restaurant_rounded,
-                          color: Color(0xff287a54),
-                        ),
-                      ),
-                      title: Text(
-                        meal.name,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      subtitle: Text(
-                        '${meal.grams.toStringAsFixed(0)} g · P ${meal.protein.toStringAsFixed(1)} g · C ${meal.carbs.toStringAsFixed(1)} g · F ${meal.fat.toStringAsFixed(1)} g',
-                      ),
-                      trailing: Text(
-                        '${meal.kcal.toStringAsFixed(0)}\nkcal',
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
               ],
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
   }
+
+  Widget _fitnessSidebar() => Container(
+    width: 264,
+    margin: const EdgeInsets.fromLTRB(16, 16, 0, 16),
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(28),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xff102d29), Color(0xff1d5d50), Color(0xff133a35)],
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Color(0xffb9ff64),
+              child: Icon(Icons.bolt_rounded, color: Color(0xff163e36)),
+            ),
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'NUTRITRACK',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+                Text(
+                  'FUEL YOUR TRAINING',
+                  style: TextStyle(
+                    color: Color(0xffb7d6c6),
+                    fontSize: 10,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 42),
+        _sideAction(Icons.grid_view_rounded, 'Dashboard', selected: true),
+        _sideAction(Icons.camera_alt_outlined, 'Photo fuel'),
+        _sideAction(Icons.auto_graph_rounded, 'AI coach'),
+        _sideAction(
+          Icons.person_outline_rounded,
+          'Profile & data',
+          onTap: _openProfileAndData,
+        ),
+        _sideAction(Icons.tune_rounded, 'AI settings', onTap: _settings),
+        const Spacer(),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.11),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'PERSONAL MODE',
+                style: TextStyle(
+                  color: Color(0xffb9ff64),
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                _profile.hasDetails
+                    ? 'Profile-powered insights are on.'
+                    : 'Add a profile to personalize your AI coach.',
+                style: const TextStyle(color: Colors.white, height: 1.3),
+              ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: _openProfileAndData,
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xffb9ff64),
+                  padding: EdgeInsets.zero,
+                ),
+                child: const Text('Set up profile  →'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _sideAction(
+    IconData icon,
+    String label, {
+    bool selected = false,
+    VoidCallback? onTap,
+  }) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Material(
+      color: selected
+          ? Colors.white.withValues(alpha: 0.14)
+          : Colors.transparent,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: selected
+                    ? const Color(0xffb9ff64)
+                    : const Color(0xffd8ece0),
+                size: 21,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 
   Widget _photoDropZone({bool compact = false}) => AnimatedContainer(
     duration: const Duration(milliseconds: 180),
