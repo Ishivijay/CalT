@@ -281,6 +281,13 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
         await _loadImageFile(file);
       }),
     );
+    _dropSubscriptions.add(
+      html.document.onPaste.listen((event) async {
+        final file = event.clipboardData?.files?.firstOrNull;
+        if (file == null) return;
+        await _loadImageFile(file);
+      }),
+    );
   }
 
   Future<void> _selectPhoto() async {
@@ -1106,7 +1113,7 @@ $entryLines''';
         if (!compact) ...[
           const SizedBox(height: 4),
           const Text(
-            'JPG, PNG, and WebP are supported.',
+            'Drop, paste, or choose a JPG, PNG, or WebP image.',
             textAlign: TextAlign.center,
           ),
         ],
