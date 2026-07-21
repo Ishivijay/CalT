@@ -107,6 +107,79 @@ class _AiItem {
   );
 }
 
+class _PersonProfile {
+  const _PersonProfile({
+    this.name = '',
+    this.age = '',
+    this.sex = '',
+    this.heightCm = '',
+    this.weightKg = '',
+    this.activityLevel = '',
+    this.goal = '',
+    this.dietaryPreferences = '',
+    this.healthContext = '',
+  });
+
+  static const empty = _PersonProfile();
+
+  final String name;
+  final String age;
+  final String sex;
+  final String heightCm;
+  final String weightKg;
+  final String activityLevel;
+  final String goal;
+  final String dietaryPreferences;
+  final String healthContext;
+
+  bool get hasDetails => [
+    age,
+    sex,
+    heightCm,
+    weightKg,
+    activityLevel,
+    goal,
+    dietaryPreferences,
+    healthContext,
+  ].any((value) => value.trim().isNotEmpty);
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'age': age,
+    'sex': sex,
+    'heightCm': heightCm,
+    'weightKg': weightKg,
+    'activityLevel': activityLevel,
+    'goal': goal,
+    'dietaryPreferences': dietaryPreferences,
+    'healthContext': healthContext,
+  };
+
+  factory _PersonProfile.fromJson(Map<String, dynamic> json) => _PersonProfile(
+    name: json['name']?.toString() ?? '',
+    age: json['age']?.toString() ?? '',
+    sex: json['sex']?.toString() ?? '',
+    heightCm: json['heightCm']?.toString() ?? '',
+    weightKg: json['weightKg']?.toString() ?? '',
+    activityLevel: json['activityLevel']?.toString() ?? '',
+    goal: json['goal']?.toString() ?? '',
+    dietaryPreferences: json['dietaryPreferences']?.toString() ?? '',
+    healthContext: json['healthContext']?.toString() ?? '',
+  );
+
+  String get promptContext =>
+      '''PERSON PROFILE (optional context supplied by the person):
+Age: ${age.trim().isEmpty ? 'not provided' : age.trim()}
+Sex: ${sex.trim().isEmpty ? 'not provided' : sex.trim()}
+Height: ${heightCm.trim().isEmpty ? 'not provided' : '${heightCm.trim()} cm'}
+Weight: ${weightKg.trim().isEmpty ? 'not provided' : '${weightKg.trim()} kg'}
+Activity level: ${activityLevel.trim().isEmpty ? 'not provided' : activityLevel.trim()}
+Goal: ${goal.trim().isEmpty ? 'not provided' : goal.trim()}
+Dietary preferences or restrictions: ${dietaryPreferences.trim().isEmpty ? 'not provided' : dietaryPreferences.trim()}
+Health context: ${healthContext.trim().isEmpty ? 'not provided' : healthContext.trim()}
+Use this only to tailor general food-pattern observations. Do not diagnose, prescribe, or make claims about medical conditions.''';
+}
+
 double _number(dynamic value) => value is num
     ? value.toDouble()
     : double.tryParse(value?.toString() ?? '') ?? 0;
@@ -120,9 +193,11 @@ class NutritionWebHome extends StatefulWidget {
 class _NutritionWebHomeState extends State<NutritionWebHome> {
   static const _mealKey = 'ont_web_meals_v1';
   static const _configKey = 'ont_web_ai_config_v1';
+  static const _profileKey = 'ont_web_profile_v1';
   final _factory = LlmProviderFactory(http.Client());
   List<_WebMeal> _meals = [];
   AiProviderConfig _config = AiProviderConfig.empty;
+  _PersonProfile _profile = _PersonProfile.empty;
   Uint8List? _image;
   List<_AiItem> _photoItems = [];
   bool _working = false;
@@ -149,6 +224,7 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
     try {
       final storedMeals = html.window.localStorage[_mealKey];
       final storedConfig = html.window.sessionStorage[_configKey];
+      final storedProfile = html.window.localStorage[_profileKey];
       _meals = storedMeals == null
           ? []
           : (jsonDecode(storedMeals) as List)
@@ -162,9 +238,15 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
           : AiProviderConfig.fromJson(
               Map<String, dynamic>.from(jsonDecode(storedConfig) as Map),
             );
+      _profile = storedProfile == null
+          ? _PersonProfile.empty
+          : _PersonProfile.fromJson(
+              Map<String, dynamic>.from(jsonDecode(storedProfile) as Map),
+            );
     } catch (_) {
       _meals = [];
       _config = AiProviderConfig.empty;
+      _profile = _PersonProfile.empty;
     }
   }
 
@@ -173,6 +255,8 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
   );
   void _saveConfig() =>
       html.window.sessionStorage[_configKey] = jsonEncode(_config.toJson());
+  void _saveProfile() =>
+      html.window.localStorage[_profileKey] = jsonEncode(_profile.toJson());
 
   void _listenForImageDrops() {
     final body = html.document.body;
@@ -383,6 +467,8 @@ NUTRIENT PATTERN:
 FOOD-CHOICE INSIGHTS:
 ONE USEFUL NEXT STEP:
 DATA LIMIT:
+
+${_profile.promptContext}
 
 Diary coverage: ${scoped.length} entries across ${byDay.length} logged day(s). ${entries.length > scoped.length ? 'Only the latest 100 entries are included.' : ''}
 
@@ -608,6 +694,21 @@ $entryLines''';
       });
   }
 
+  Future<void> _openProfileAndData() async {
+    final profile = await Navigator.of(context).push<_PersonProfile>(
+      MaterialPageRoute(
+        builder: (context) =>
+            _ProfileAndDataScreen(profile: _profile, meals: _meals),
+      ),
+    );
+    if (profile == null || !mounted) return;
+    setState(() {
+      _profile = profile;
+      _saveProfile();
+    });
+    _show('Profile saved locally. Future AI insights will use it.');
+  }
+
   @override
   Widget build(BuildContext context) {
     final today = _meals
@@ -624,6 +725,9 @@ $entryLines''';
         : hour < 18
         ? 'Good afternoon'
         : 'Good evening';
+    final greetingWithName = _profile.name.trim().isEmpty
+        ? greeting
+        : '$greeting, ${_profile.name.trim()}';
 
     return Scaffold(
       appBar: AppBar(
@@ -636,6 +740,11 @@ $entryLines''';
           ],
         ),
         actions: [
+          IconButton(
+            onPressed: _openProfileAndData,
+            icon: const Icon(Icons.person_outline_rounded),
+            tooltip: 'Profile and data',
+          ),
           IconButton(
             onPressed: _settings,
             icon: const Icon(Icons.tune_rounded),
@@ -657,7 +766,7 @@ $entryLines''';
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
               children: [
                 Text(
-                  greeting,
+                  greetingWithName,
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: const Color(0xff527060),
                   ),
@@ -1077,6 +1186,329 @@ $entryLines''';
           const SizedBox(height: 18),
           child,
         ],
+      ),
+    ),
+  );
+}
+
+class _ProfileAndDataScreen extends StatefulWidget {
+  const _ProfileAndDataScreen({required this.profile, required this.meals});
+
+  final _PersonProfile profile;
+  final List<_WebMeal> meals;
+
+  @override
+  State<_ProfileAndDataScreen> createState() => _ProfileAndDataScreenState();
+}
+
+class _ProfileAndDataScreenState extends State<_ProfileAndDataScreen> {
+  late final TextEditingController _name;
+  late final TextEditingController _age;
+  late final TextEditingController _height;
+  late final TextEditingController _weight;
+  late final TextEditingController _dietaryPreferences;
+  late final TextEditingController _healthContext;
+  late String _sex;
+  late String _activityLevel;
+  late String _goal;
+
+  static const _sexOptions = [
+    '',
+    'Female',
+    'Male',
+    'Intersex',
+    'Prefer not to say',
+  ];
+  static const _activityOptions = [
+    '',
+    'Mostly sedentary',
+    'Lightly active',
+    'Moderately active',
+    'Very active',
+  ];
+  static const _goalOptions = [
+    '',
+    'Maintain weight',
+    'Gain weight',
+    'Lose weight',
+    'Build muscle',
+    'Improve general nutrition',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = widget.profile;
+    _name = TextEditingController(text: profile.name);
+    _age = TextEditingController(text: profile.age);
+    _height = TextEditingController(text: profile.heightCm);
+    _weight = TextEditingController(text: profile.weightKg);
+    _dietaryPreferences = TextEditingController(
+      text: profile.dietaryPreferences,
+    );
+    _healthContext = TextEditingController(text: profile.healthContext);
+    _sex = _sexOptions.contains(profile.sex) ? profile.sex : '';
+    _activityLevel = _activityOptions.contains(profile.activityLevel)
+        ? profile.activityLevel
+        : '';
+    _goal = _goalOptions.contains(profile.goal) ? profile.goal : '';
+  }
+
+  @override
+  void dispose() {
+    for (final controller in [
+      _name,
+      _age,
+      _height,
+      _weight,
+      _dietaryPreferences,
+      _healthContext,
+    ]) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  _PersonProfile _currentProfile() => _PersonProfile(
+    name: _name.text.trim(),
+    age: _age.text.trim(),
+    sex: _sex,
+    heightCm: _height.text.trim(),
+    weightKg: _weight.text.trim(),
+    activityLevel: _activityLevel,
+    goal: _goal,
+    dietaryPreferences: _dietaryPreferences.text.trim(),
+    healthContext: _healthContext.text.trim(),
+  );
+
+  void _exportData() {
+    final snapshot = {
+      'exportedAt': DateTime.now().toIso8601String(),
+      'profile': _currentProfile().toJson(),
+      'meals': widget.meals.map((meal) => meal.toJson()).toList(),
+    };
+    final blob = html.Blob([jsonEncode(snapshot)], 'application/json');
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final link = html.AnchorElement(href: url)
+      ..download = 'nutritrack-backup.json'
+      ..style.display = 'none';
+    html.document.body?.append(link);
+    link.click();
+    link.remove();
+    html.Url.revokeObjectUrl(url);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Your diary backup is downloading.')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile & data'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          tooltip: 'Back',
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
+              children: [
+                Text(
+                  'Make your insights personal',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Add only what you are comfortable sharing. This profile is saved in this browser and is used to tailor diary insights, not to diagnose or prescribe.',
+                ),
+                const SizedBox(height: 20),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'About you',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _field(_name, 'Name (shown only in this browser)'),
+                        _field(_age, 'Age', keyboardType: TextInputType.number),
+                        DropdownButtonFormField<String>(
+                          initialValue: _sex,
+                          decoration: const InputDecoration(labelText: 'Sex'),
+                          items: _sexOptions
+                              .map(
+                                (value) => DropdownMenuItem(
+                                  value: value,
+                                  child: Text(
+                                    value.isEmpty ? 'Prefer not to say' : value,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => _sex = value ?? ''),
+                        ),
+                        const SizedBox(height: 12),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final stacked = constraints.maxWidth < 480;
+                            final heightField = _field(
+                              _height,
+                              'Height (cm)',
+                              keyboardType: TextInputType.number,
+                            );
+                            final weightField = _field(
+                              _weight,
+                              'Weight (kg)',
+                              keyboardType: TextInputType.number,
+                            );
+                            if (stacked) {
+                              return Column(
+                                children: [heightField, weightField],
+                              );
+                            }
+                            return Row(
+                              children: [
+                                Expanded(child: heightField),
+                                const SizedBox(width: 12),
+                                Expanded(child: weightField),
+                              ],
+                            );
+                          },
+                        ),
+                        DropdownButtonFormField<String>(
+                          initialValue: _activityLevel,
+                          decoration: const InputDecoration(
+                            labelText: 'Usual activity level',
+                          ),
+                          items: _activityOptions
+                              .map(
+                                (value) => DropdownMenuItem(
+                                  value: value,
+                                  child: Text(
+                                    value.isEmpty ? 'Not specified' : value,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => _activityLevel = value ?? ''),
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          initialValue: _goal,
+                          decoration: const InputDecoration(labelText: 'Goal'),
+                          items: _goalOptions
+                              .map(
+                                (value) => DropdownMenuItem(
+                                  value: value,
+                                  child: Text(
+                                    value.isEmpty ? 'Not specified' : value,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => _goal = value ?? ''),
+                        ),
+                        const SizedBox(height: 12),
+                        _field(
+                          _dietaryPreferences,
+                          'Dietary preferences or restrictions',
+                          maxLines: 3,
+                        ),
+                        _field(
+                          _healthContext,
+                          'Health context you want considered (optional)',
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Avoid entering anything you would not want sent to your chosen AI provider when you request insights.',
+                          style: TextStyle(
+                            color: Color(0xff527060),
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        FilledButton.icon(
+                          onPressed: () =>
+                              Navigator.pop(context, _currentProfile()),
+                          icon: const Icon(Icons.save_outlined),
+                          label: const Text('Save profile'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your saved data',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${widget.meals.length} diary ${widget.meals.length == 1 ? 'entry' : 'entries'} are saved automatically in this browser.',
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Download a backup before clearing browser data or switching devices. Your AI API key is session-only and is never included in the backup.',
+                          style: TextStyle(color: Color(0xff527060)),
+                        ),
+                        const SizedBox(height: 16),
+                        OutlinedButton.icon(
+                          onPressed: _exportData,
+                          icon: const Icon(Icons.download_rounded),
+                          label: const Text('Download diary backup'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _field(
+    TextEditingController controller,
+    String label, {
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
       ),
     ),
   );
