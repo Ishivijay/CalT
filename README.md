@@ -1,135 +1,105 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/icon/ont_logo_square_color_white_1024x1024.png">
-    <img alt="Logo" src="assets/icon/ont_logo_square_color_back_1024x1024.png" width="128" />
-  </picture>
-  <h1 align="center">OpenNutriTracker</h1>
-</p>
+# CalT — a frictionless calorie tracker
 
-<p align="center">
-  <a href="https://opensource.org/licenses/MIT" alt="License">
-        <img src="https://img.shields.io/badge/license-GPLv3-blue" /></a>
-  <a href="https://github.com/simonoppowa/OpenNutriTracker/stargazers" alt="GitHub Stars">
-        <img src="https://img.shields.io/github/stars/simonoppowa/OpenNutriTracker.svg" /></a>
-  <a href="https://github.com/simonoppowa/OpenNutriTracker/issues" alt="GitHub Issues">
-        <img src="https://img.shields.io/github/issues/simonoppowa/OpenNutriTracker.svg" /></a>
-  <a href="https://github.com/simonoppowa/OpenNutriTracker/pulls" alt="GitHub Pull Requests">
-        <img src="https://img.shields.io/github/issues-pr/simonoppowa/OpenNutriTracker.svg" /></a>
-</p>
+CalT is an Android-first nutrition tracker designed to make daily food logging feel quick, private, and useful. It combines a compact calorie and macro dashboard with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
 
-## Description
-OpenNutriTracker is an open-source mobile application designed to simplify nutritional tracking and management. Whether you are looking to improve your health, lose weight, or simply maintain a balanced diet, OpenNutriTracker provides a minimalistic interface to easily track and analyze your daily nutrition.
+This is a working Flutter application. The Android package ID is `com.calt.tracker`, so it installs separately from OpenNutriTracker.
 
-[Website](https://simonoppowa.github.io/OpenNutriTracker/)
+## Challenge category
 
-## Screenshots
-<p align="center">
-  <img alt="Logo" src="fastlane/metadata/android/en-US/images/phoneScreenshots/1_en-US.png" width="20%" />
-  &nbsp;&nbsp;
-  <img alt="Logo" src="fastlane/metadata/android/en-US/images/phoneScreenshots/2_en-US.png" width="20%" />
-  &nbsp;&nbsp;
-  <img alt="Logo" src="fastlane/metadata/android/en-US/images/phoneScreenshots/3_en-US.png" width="20%" />
-  &nbsp;&nbsp;
-  <img alt="Logo" src="fastlane/metadata/android/en-US/images/phoneScreenshots/4_en-US.png" width="20%" />
-</p>
+**Health & Fitness**
 
-## Install
-[<img src="fastlane/metadata/android/en-US/images/appstore_banner.png" width="30%">](https://apps.apple.com/us/app/opennutritracker/id6451490901)
-[<img src="fastlane/metadata/android/en-US/images/playstore_banner.png" width="30%">](https://play.google.com/store/apps/details?id=com.opennutritracker.ont.opennutritracker)
+## How it works
 
-## Key Features
+1. Create a profile with your age, height, weight, activity level, and goal.
+2. Log meals by searching, scanning a barcode, quick-adding, building a recipe, or reviewing an AI photo estimate.
+3. Follow calories and macro targets from the compact home dashboard.
+4. Optionally connect your own OpenAI, Gemini, Anthropic, or OpenAI-compatible provider in **Settings → AI Provider**. CalT Coach uses the profile and today's logged meals to give a concise, non-medical review and answer follow-up questions.
 
-- **🍎 Nutritional tracking:** Log meals and snacks against a large food database — Open Food Facts plus a multi-source reference backend covering USDA FoodData Central and the German Bundeslebensmittelschlüssel (BLS), with the sources selectable in Settings → Food databases. Each entry can be searched, scanned, or added straight as a number when you already know the calorie cost.
-- **📓 Food diary:** A calendar-driven diary that breaks the day into Breakfast, Lunch, Dinner, and Snack, with per-meal kcal targets (Standard, OMAD, Five-small, Mediterranean, Two-meal, or a custom share), drag-to-rearrange between meals, and sort by time or by macro contribution.
-- **🥕 Micronutrient panel:** Day and week views for fibre, sodium, saturated fat, sugar, calcium, iron, potassium, vitamin D, vitamin B12, and magnesium, with optional Dietary Reference Intake bars from the IOM tables so you can see where you sit against the reference range.
-- **🍽️ Custom meals + recipes:** Build a one-off custom meal or save a reusable recipe with photo, brand, and barcode. The recipe builder has its own ingredient picker with barcode scanning so you can compose meals from real products without leaving the screen.
-- **⚡ Quick add:** When you already know roughly how much you ate, skip the search flow entirely — Quick add takes a title plus kcal (and optional macros) and logs it straight to the meal section.
-- **📷 Barcode scanner:** Scan packaged items for instant lookup, paste a barcode manually when the camera struggles, or attach a barcode to a custom meal so future scans recognise your own foods.
-- **✨ Optional AI photo logging (BYOK):** Connect OpenAI, Anthropic, Gemini, or an OpenAI-compatible service with your own API key. Take or choose a meal photo, optionally add context, then edit every AI estimate before it enters your diary. When a safe database match is found it is marked verified; otherwise it remains visibly an AI estimate.
-- **💡 Optional AI insights (BYOK):** Generate a cached daily summary of your recent aggregate food patterns, practical non-judgmental suggestions, and a positive observation. The card always states that it is AI-generated and not medical advice.
-- **🏃 Activities:** Log workouts from a categorised activity catalogue or define your own custom activities with direct kcal entry and reusable templates.
-- **💧 Water tracker:** A water chip on the home screen with quick-add increments, an editable goal, and undo for the last entry.
-- **⏱️ Fasting timer:** Optional intermittent-fasting timer with content-warning gate, a home chip showing time remaining, and a completion notification when you reach your window.
-- **⚖️ Weight history:** Capture weight during onboarding and on demand, see the trend on a chart with a dashed line at your target weight, and optionally taper the calorie goal as you approach it.
-- **🎨 Material You + theme picker:** Adopt the system accent colour on Android 12+, or pick from sixteen built-in presets. The app icon adapts to iOS dark and tinted appearances and to Android themed icons.
-- **🔢 kcal or kJ:** Switch the energy unit globally; every diary entry, target, and chart reflects the choice.
-- **📤 Export and import:** Export your full diary, activities, and custom catalogue to a JSON zip or CSV, paste a JSON blob to import meals, and share a single meal or activity as a QR code another phone can scan.
-- **🔒 Privacy first:** All data is AES-encrypted and stored locally. Anonymous crash reporting is opt-in during onboarding, can be turned off at any time, and the App Store privacy manifest declares exactly what the app does and does not collect.
-- **🚫💰 No subscriptions, in-app purchases, or ads:** OpenNutriTracker is free, with no paid tier and no advertising.
+Your diary is stored locally on-device. API keys are kept in encrypted platform storage and are only used when you choose an AI feature.
 
-## Privacy
-See [Data Protection](https://www.iubenda.com/privacy-policy/53501884)
-- **Data Encryption**: All collected user data is encrypted and stored locally on your device
-- **Minimal Data Collection**: OpenNutriTracker only collects the necessary information required for tracking nutrition and providing personalized insights. Your data will not be shared with third parties without your consent.
-- **Open-Source**: OpenNutriTracker is an open-source application
+## Features
 
-### Optional AI features
+- Daily calorie and macro targets with progress rings
+- Meal diary with edit, delete, calendar, recipes, and activities
+- Food search, custom meals, barcode lookup, and photo meal logging
+- CalT Coach: concise, profile-aware daily meal review and persistent local chat history
+- Weight and water tracking, fasting timer, trends, data export/import, and offline-friendly local storage
+- Optional **Load 7-day CalT test diary** action from the Add (`+`) menu for repeatable demo data; **Remove CalT test meals** removes only those generated samples
 
-AI features are off until you configure a provider in **Settings → AI Provider (BYOK)**. Your API key is stored only in encrypted platform storage and is never logged or included in crash reports. When you use photo logging or generate insights, the selected photo or a compact aggregate of your diary is sent to the provider you configured, under that provider's terms. Review AI estimates before saving: they can be inaccurate and are not medical advice.
+## Run on Android
 
-### Running a local build
+### Requirements
 
-A fresh checkout can run without a `.env` file. Local data and Open Food Facts remain available; the optional self-hosted Supabase food database is skipped until configured. Supply its credentials at build time only when needed:
+- Flutter stable (the project currently uses Flutter 3.44.7)
+- Android SDK and either an Android device with USB debugging enabled or an Android emulator
+
+### Install dependencies and run
 
 ```sh
-flutter run --flavor full \
-  --dart-define=SUPABASE_PROJECT_URL=https://your-project.supabase.co \
-  --dart-define=SUPABASE_PROJECT_ANON_KEY=your-anon-key
+flutter pub get
+flutter devices
+flutter run --flavor full
 ```
 
-## Verifying APK signatures
-
-If you are side-loading an OpenNutriTracker APK from GitHub Releases — or from F-Droid, once the app is published there — you may reasonably want to confirm that the file you downloaded was signed by the same key the maintainer uses for every release, rather than by someone who intercepted the download or repackaged the app. The check below is for anyone who would like that extra reassurance before installing.
-
-The official SHA256 fingerprint of the Android release signing certificate is:
-
-```
-SHA256: 84:E8:60:74:EC:7E:DA:BB:10:F2:01:79:86:DD:F0:9E:53:1C:AF:7A:73:08:0A:C1:17:2B:80:C4:9C:62:08:27
-```
-
-To verify a downloaded APK against that fingerprint, run:
+To build a sideloadable debug APK instead:
 
 ```sh
-apksigner verify --print-certs /path/to/opennutritracker.apk
+flutter build apk --debug --flavor full
 ```
 
-The `SHA-256` line in the output should match the value above exactly.
+The resulting APK is at:
 
-## Contribution
-Contributions to OpenNutriTracker are welcome! If you find any issues or have suggestions for new features, please open an issue or submit a pull request. See [CONTRIBUTING.md](CONTRIBUTING.md) for the project's conventions — including the requirement to target the `develop` branch and the steps for adding localized strings.
+```text
+build/app/outputs/flutter-apk/app-full-debug.apk
+```
 
-Thanks to all the contributors:
-<a href="https://github.com/simonoppowa/OpenNutriTracker/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=simonoppowa/OpenNutriTracker" />
-</a>
+Install it on a connected device with:
 
-### Getting Started With Development
-See the [Getting Started](GettingStarted.md) file for more information.
+```sh
+adb install build/app/outputs/flutter-apk/app-full-debug.apk
+```
 
-The data export bundle (Settings → Export / Import App Data → Export) is
-documented at [`docs/export-format.md`](docs/export-format.md) — both the
-JSON schema and the CSV companion the import / export round-trip uses.
+If Android reports that the package already exists with a different signature, uninstall that old app from the device first, then install the APK again.
 
-The multi-source food database lives in its own repository, [OpenNutriTracker-Backend](https://github.com/simonoppowa/OpenNutriTracker-Backend) — schema, import pipeline, and translation tooling. Self-hosting it and pointing a local build at your own Supabase project is documented at [`docs/supabase-self-hosting.md`](docs/supabase-self-hosting.md).
+## Optional AI setup
+
+CalT works without an AI provider. To enable the photo estimate and CalT Coach:
+
+1. Open **Settings → AI Provider (BYOK)**.
+2. Select the provider that issued your key.
+3. Enter a model ID supported by that provider and save the key.
+4. Use **Test connection** before trying photo analysis or coaching.
+
+The provider account must have access to the chosen model and any required billing or quota. AI responses are suggestions, not medical advice; review food estimates before saving them.
+
+## Sample data for a demo
+
+Open the Add (`+`) menu and choose **Load 7-day CalT test diary**. It creates one week of clearly marked example meals for demonstrating the dashboard, diary, calendar, and coach. It never loads automatically. Choose **Remove CalT test meals** to clean it up.
+
+## Built with Codex and GPT-5.6
+
+CalT was built iteratively with Codex using GPT-5.6. Codex accelerated the work by turning product feedback into working Flutter changes, including the separate CalT Android identity, compact dashboard, profile-aware coach prompts, local chat history, photo logging flows, test-data seeding, and Android build troubleshooting.
+
+Key implementation decisions were made directly in the project:
+
+- Keep the core diary local and usable without an AI subscription.
+- Make AI opt-in and BYOK, using encrypted local key storage.
+- Keep coach output tied to the person's profile and today's meals rather than generic wellness copy.
+- Focus the challenge submission on the separate CalT Android build, with repeatable in-app sample data for judging.
+
+For the demo video, show the profile, meal logging, dashboard, seven-day test diary, CalT Coach, and the Android APK running on a phone. Explain that Codex and GPT-5.6 were used to iterate from the product requirements to the final Flutter implementation.
+
+## Validation
+
+```sh
+flutter test test/features/home/presentation/widgets/intake_vertical_list_test.dart
+flutter build apk --debug --flavor full
+```
+
+## License and attribution
+
+CalT is a derivative of OpenNutriTracker and remains licensed under the [GNU General Public License v3.0](LICENSE). It uses Open Food Facts and optional food-data backends; see the in-app **Sources & References** screen for nutrition references. The project has been materially adapted into the CalT Android experience described above.
 
 ## Disclaimer
-OpenNutriTracker is not a medical application. All data provided is not validated and should be used with caution. Please maintain a healthy lifestyle and consult a professional if you have any problems. Use during illness, pregnancy or lactation is not recommended.
 
-The application is still under construction. Errors, bugs and crashes might occur.
-
-## Acknowledgments
-The OpenNutriTracker project was inspired by the need for a simple and effective nutrition tracking tool.
-The food database used in OpenNutriTracker is powered by [Open Food Facts](https://world.openfoodfacts.org/) together with a multi-source reference backend hosted in Supabase: [USDA FoodData Central](https://fdc.nal.usda.gov/) (CC0) and the [Bundeslebensmittelschlüssel](https://www.blsdb.de) 4.0 (CC BY 4.0, © Max Rubner-Institut), with the [Anuvaad INDB](https://anuvaad.org.in) (CC BY 4.0) and [TBCA Brazil](https://www.tbca.net.br) (USP/FoRC) prepared as future sources. The schema and import pipeline live in the [OpenNutriTracker-Backend](https://github.com/simonoppowa/OpenNutriTracker-Backend) repository; self-hosting is documented in [`docs/supabase-self-hosting.md`](docs/supabase-self-hosting.md).
-
-Dietary Reference Intake values for the micronutrient panel come from the U.S. National Academies' Institute of Medicine tables. The in-app **Sources & References** screen (one tap from the home calorie ring or the profile BMI card) lists the peer-reviewed sources used for energy needs, BMI classification, macro distribution, MET activity calories, and non-binary calorie estimation.
-
-## License
-This project is licensed under the GNU General Public License v3.0 License. See the [LICENSE](LICENSE) file for more information.
-
-## Contact
-For questions, suggestions, or collaborations, feel free to contact the project maintainer:
-
-Simon Oppowa
-
-- GitHub: [@simonoppowa](https://github.com/simonoppowa)
-- Email: [opennutritracker-dev@pm.me](mailto:opennutritracker-dev@pm.me)
+CalT is not a medical application. Nutrition estimates and AI-generated information may be inaccurate and should not replace advice from a qualified healthcare professional.
