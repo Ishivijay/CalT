@@ -203,7 +203,7 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
   bool _working = false;
   bool _isDraggingFile = false;
   String? _insight;
-  final List<StreamSubscription> _dropSubscriptions = [];
+  final List<void Function()> _webEventCleanups = [];
 
   @override
   void initState() {
@@ -214,8 +214,8 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
 
   @override
   void dispose() {
-    for (final subscription in _dropSubscriptions) {
-      subscription.cancel();
+    for (final cleanup in _webEventCleanups) {
+      cleanup();
     }
     super.dispose();
   }
@@ -259,35 +259,42 @@ class _NutritionWebHomeState extends State<NutritionWebHome> {
       html.window.localStorage[_profileKey] = jsonEncode(_profile.toJson());
 
   void _listenForImageDrops() {
-    final body = html.document.body;
-    if (body == null) return;
-    _dropSubscriptions.add(
-      body.onDragOver.listen((event) {
-        event.preventDefault();
-        if (mounted && !_isDraggingFile) setState(() => _isDraggingFile = true);
-      }),
-    );
-    _dropSubscriptions.add(
-      body.onDragLeave.listen((event) {
-        if (mounted) setState(() => _isDraggingFile = false);
-      }),
-    );
-    _dropSubscriptions.add(
-      body.onDrop.listen((event) async {
-        event.preventDefault();
-        if (mounted) setState(() => _isDraggingFile = false);
-        final file = event.dataTransfer.files?.firstOrNull;
-        if (file == null) return;
-        await _loadImageFile(file);
-      }),
-    );
-    _dropSubscriptions.add(
-      html.document.onPaste.listen((event) async {
-        final file = event.clipboardData?.files?.firstOrNull;
-        if (file == null) return;
-        await _loadImageFile(file);
-      }),
-    );
+    void listen(String type, void Function(html.Event) handler) {
+      html.document.addEventListener(type, handler, true);
+      _webEventCleanups.add(
+        () => html.document.removeEventListener(type, handler, true),
+      );
+    }
+
+    // Flutter renders inside a browser canvas. Capture these events before the
+    // canvas can consume them or the browser navigates to the dropped file.
+    listen('dragover', _handleGlobalDragOver);
+    listen('dragleave', _handleGlobalDragLeave);
+    listen('drop', _handleGlobalDrop);
+    listen('paste', _handleGlobalPaste);
+  }
+
+  void _handleGlobalDragOver(html.Event event) {
+    event.preventDefault();
+    if (mounted && !_isDraggingFile) setState(() => _isDraggingFile = true);
+  }
+
+  void _handleGlobalDragLeave(html.Event event) {
+    if (mounted) setState(() => _isDraggingFile = false);
+  }
+
+  void _handleGlobalDrop(html.Event event) {
+    event.preventDefault();
+    if (mounted) setState(() => _isDraggingFile = false);
+    if (event is! html.MouseEvent) return;
+    final file = event.dataTransfer.files?.firstOrNull;
+    if (file != null) unawaited(_loadImageFile(file));
+  }
+
+  void _handleGlobalPaste(html.Event event) {
+    if (event is! html.ClipboardEvent) return;
+    final file = event.clipboardData?.files?.firstOrNull;
+    if (file != null) unawaited(_loadImageFile(file));
   }
 
   Future<void> _selectPhoto() async {
