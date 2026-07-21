@@ -206,9 +206,9 @@ class AddItemBottomSheet extends StatelessWidget {
                     ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
-                leading: Container(
+                leading: const SizedBox(
                   height: double.infinity,
-                  child: const Icon(Icons.auto_awesome_outlined),
+                  child: Icon(Icons.auto_awesome_outlined),
                 ),
                 onTap: () => _showPhotoLogScreen(context),
               ),
