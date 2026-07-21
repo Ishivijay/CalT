@@ -92,6 +92,7 @@ import 'package:opennutritracker/features/photo_log/data/photo_food_matcher.dart
 import 'package:opennutritracker/features/photo_log/data/photo_meal_analyzer.dart';
 import 'package:opennutritracker/features/photo_log/domain/save_ai_photo_meals_usecase.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_cache_store.dart';
+import 'package:opennutritracker/features/ai_insights/data/calt_coach_chat_history_store.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_service.dart';
 import 'package:opennutritracker/features/ai_insights/domain/insights_aggregation.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/calendar_day_bloc.dart';
@@ -161,6 +162,9 @@ Future<void> initLocator() async {
   locator.registerLazySingleton<AiInsightsCacheStore>(
     () => AiInsightsCacheStore(const FlutterSecureStorage()),
   );
+  locator.registerLazySingleton<CalTCoachChatHistoryStore>(
+    () => CalTCoachChatHistoryStore(const FlutterSecureStorage()),
+  );
   locator.registerLazySingleton<InsightsAggregator>(InsightsAggregator.new);
   locator.registerLazySingleton<HiveDBProvider>(() => hiveDBProvider);
   locator.registerLazySingleton<DeleteAllUserDataUsecase>(
@@ -220,6 +224,8 @@ Future<void> initLocator() async {
   );
   locator.registerLazySingleton(
     () => CoachDemoDiarySeeder(
+      locator(),
+      locator(),
       locator(),
       locator(),
       locator(),

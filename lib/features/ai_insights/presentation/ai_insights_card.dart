@@ -139,9 +139,23 @@ class _AiInsightsCardState extends State<AiInsightsCard> {
           ),
         ),
         const SizedBox(height: 2),
-        Text(_result!.text, maxLines: 2, overflow: TextOverflow.ellipsis),
+        Text(
+          _twoLinePreview(_result!.text),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
+  }
+
+  String _twoLinePreview(String review) {
+    final points = review
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.replaceFirst(RegExp(r'^[-•]\s*'), '').trim())
+        .where((line) => line.isNotEmpty)
+        .take(2)
+        .toList();
+    return points.isEmpty ? review : points.join('\n');
   }
 
   Future<void> _showFullInsight(BuildContext context) => showDialog<void>(

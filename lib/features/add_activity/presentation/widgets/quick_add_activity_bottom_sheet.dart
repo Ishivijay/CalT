@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import 'package:opennutritracker/core/presentation/widgets/voice_input_button.dart';
 import 'package:opennutritracker/core/domain/entity/physical_activity_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_activity_entity.dart';
 import 'package:opennutritracker/core/domain/usecase/add_tracked_day_usecase.dart';
@@ -260,9 +259,6 @@ class _QuickAddActivityBottomSheetState
               : null,
           decoration: InputDecoration(
             labelText: isRequired ? '$label *' : label,
-            suffixIcon: numeric
-                ? null
-                : VoiceInputButton(controller: controller),
             filled: true,
             fillColor: palette.surfaceMuted,
             border: OutlineInputBorder(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:opennutritracker/core/presentation/widgets/voice_input_button.dart';
 import 'package:opennutritracker/core/utils/custom_text_input_formatter.dart';
 import 'package:opennutritracker/core/domain/entity/intake_entity.dart';
 import 'package:opennutritracker/core/domain/entity/intake_type_entity.dart';
@@ -310,12 +309,6 @@ class _QuickAddBottomSheetState extends State<QuickAddBottomSheet> {
           decoration: InputDecoration(
             labelText: isRequired ? '$label *' : label,
             border: const OutlineInputBorder(),
-            suffixIcon: numeric
-                ? null
-                : VoiceInputButton(
-                    controller: controller,
-                    onChanged: (_) => _onRequiredFieldChanged(),
-                  ),
           ),
         ),
       ),

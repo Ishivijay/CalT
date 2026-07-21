@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:opennutritracker/core/domain/entity/recipe_entity.dart';
 import 'package:opennutritracker/core/presentation/widgets/user_image_picker_tile.dart';
-import 'package:opennutritracker/core/presentation/widgets/voice_input_button.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
@@ -178,10 +177,6 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
                     labelText: S.of(context).recipeNameLabel,
                     border: fieldBorder,
                     enabledBorder: fieldBorder,
-                    suffixIcon: VoiceInputButton(
-                      controller: _nameController,
-                      onChanged: (v) => _bloc.add(UpdateNameEvent(v)),
-                    ),
                   ),
                   onChanged: (v) => _bloc.add(UpdateNameEvent(v)),
                 ),
@@ -193,10 +188,6 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
                     labelText: S.of(context).recipeDescriptionLabel,
                     border: fieldBorder,
                     enabledBorder: fieldBorder,
-                    suffixIcon: VoiceInputButton(
-                      controller: _descriptionController,
-                      onChanged: (v) => _bloc.add(UpdateDescriptionEvent(v)),
-                    ),
                   ),
                   onChanged: (v) => _bloc.add(UpdateDescriptionEvent(v)),
                 ),
@@ -226,17 +217,6 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
                     helperMaxLines: 2,
                     border: fieldBorder,
                     enabledBorder: fieldBorder,
-                    suffixIcon: VoiceInputButton(
-                      controller: _tagsController,
-                      onChanged: (v) {
-                        final tags = v
-                            .split(',')
-                            .map((tag) => tag.trim())
-                            .where((tag) => tag.isNotEmpty)
-                            .toList();
-                        _bloc.add(UpdateTagsEvent(tags));
-                      },
-                    ),
                   ),
                   onChanged: (v) {
                     final parsed = v

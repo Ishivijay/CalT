@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:opennutritracker/core/domain/entity/intake_type_entity.dart';
-import 'package:opennutritracker/core/presentation/widgets/voice_input_button.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
 import 'package:opennutritracker/core/utils/navigation_options.dart';
 import 'package:opennutritracker/features/ai_provider/data/ai_provider_config_store.dart';
@@ -187,9 +186,6 @@ class _PhotoLogScreenState extends State<PhotoLogScreen> {
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
-        suffixIcon: label == 'Food name'
-            ? VoiceInputButton(controller: controller)
-            : null,
       ),
       keyboardType: label == 'Food name'
           ? TextInputType.text
@@ -270,7 +266,6 @@ class _PhotoLogScreenState extends State<PhotoLogScreen> {
             labelText: 'Optional meal hint',
             hintText: 'e.g. pan-fried in olive oil, large portion',
             border: const OutlineInputBorder(),
-            suffixIcon: VoiceInputButton(controller: _hint),
           ),
         ),
         const SizedBox(height: 12),

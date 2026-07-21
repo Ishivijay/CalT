@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:opennutritracker/core/presentation/widgets/voice_input_button.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
+import 'package:opennutritracker/features/ai_insights/data/calt_coach_chat_history_store.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_service.dart';
 import 'package:opennutritracker/features/ai_provider/domain/llm_provider.dart';
 
@@ -21,8 +21,29 @@ class _CalTCoachChatSheet extends StatefulWidget {
 
 class _CalTCoachChatSheetState extends State<_CalTCoachChatSheet> {
   final _question = TextEditingController();
-  final _messages = <_ChatMessage>[];
+  final _messages = <CalTCoachChatMessage>[];
   bool _asking = false;
+  bool _loadingHistory = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final history = await locator<CalTCoachChatHistoryStore>().read();
+    if (!mounted) return;
+    setState(() {
+      _messages
+        ..clear()
+        ..addAll(history);
+      _loadingHistory = false;
+    });
+  }
+
+  Future<void> _saveHistory() =>
+      locator<CalTCoachChatHistoryStore>().save(_messages);
 
   @override
   void dispose() {
@@ -35,15 +56,20 @@ class _CalTCoachChatSheetState extends State<_CalTCoachChatSheet> {
     if (question.isEmpty || _asking) return;
     setState(() {
       _asking = true;
-      _messages.add(_ChatMessage(question, isUser: true));
+      _messages.add(CalTCoachChatMessage(text: question, isUser: true));
       _question.clear();
     });
+    await _saveHistory();
     try {
       final answer = await locator<AiInsightsService>().answerQuestion(
         question,
       );
       if (mounted) {
-        setState(() => _messages.add(_ChatMessage(answer, isUser: false)));
+        setState(
+          () =>
+              _messages.add(CalTCoachChatMessage(text: answer, isUser: false)),
+        );
+        await _saveHistory();
       }
     } on LlmException catch (error) {
       if (mounted) {
@@ -87,7 +113,9 @@ class _CalTCoachChatSheetState extends State<_CalTCoachChatSheet> {
               ),
               const Divider(height: 1),
               Expanded(
-                child: _messages.isEmpty
+                child: _loadingHistory
+                    ? const Center(child: CircularProgressIndicator())
+                    : _messages.isEmpty
                     ? const Center(
                         child: Padding(
                           padding: EdgeInsets.all(24),
@@ -145,7 +173,6 @@ class _CalTCoachChatSheetState extends State<_CalTCoachChatSheet> {
                     suffixIcon: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        VoiceInputButton(controller: _question),
                         IconButton(
                           tooltip: 'Send question',
                           onPressed: _asking ? null : _ask,
@@ -169,10 +196,4 @@ class _CalTCoachChatSheetState extends State<_CalTCoachChatSheet> {
       ),
     );
   }
-}
-
-class _ChatMessage {
-  const _ChatMessage(this.text, {required this.isUser});
-  final String text;
-  final bool isUser;
 }

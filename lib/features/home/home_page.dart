@@ -223,10 +223,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       icon: Icons.restaurant_menu_rounded,
                       title: 'Your diary is ready',
                       subtitle:
-                          'Log food or activity, or add a two-day demo to try CalT coach.',
+                          'Log food or activity, or load a 7-day test diary to try CalT coach.',
                       actionLabel: 'Log food or activity',
                       onAction: () => _openAddSheet(context),
-                      secondaryActionLabel: 'Load two-day coach demo',
+                      secondaryActionLabel: 'Load 7-day CalT test diary',
                       onSecondaryAction: () => _loadCoachDemo(context),
                     ),
                   if (CalorieGoalCalc.isBelowRecommendedDailyKcalFloor(
@@ -409,7 +409,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          'Two days of sample meals added. Tap CalT coach to generate insights.',
+          'Seven days of sample meals added. Tap CalT coach to generate insights.',
         ),
       ),
     );

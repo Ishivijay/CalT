@@ -63,10 +63,6 @@
 	<string>Camera permission is used to scan barcodes and to attach a photo to a custom meal so it's easier to recognise in your saved list.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
     <string>Used to attach a photo to a custom meal so it's easier to recognise in your saved list, and for exporting data.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Used for optional voice input in food, recipe, and activity text fields.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Used to turn optional voice input into text in CalT.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

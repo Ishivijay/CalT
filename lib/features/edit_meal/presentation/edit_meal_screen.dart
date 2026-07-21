@@ -19,7 +19,6 @@ import 'package:opennutritracker/core/utils/barcode_validator.dart';
 import 'package:opennutritracker/core/utils/user_image_storage.dart';
 import 'package:opennutritracker/core/utils/calc/unit_calc.dart';
 import 'package:opennutritracker/core/utils/custom_text_input_formatter.dart';
-import 'package:opennutritracker/core/presentation/widgets/voice_input_button.dart';
 import 'package:opennutritracker/core/utils/energy_unit_provider.dart';
 import 'package:opennutritracker/core/utils/extensions.dart';
 import 'package:opennutritracker/core/utils/food_name_validator.dart';
@@ -428,7 +427,6 @@ class _EditMealScreenState extends State<EditMealScreen> {
             border: const OutlineInputBorder(
               borderRadius: Dimens.borderRadiusM,
             ),
-            suffixIcon: VoiceInputButton(controller: _nameTextController),
           ),
           keyboardType: TextInputType.text,
         ),
@@ -440,7 +438,6 @@ class _EditMealScreenState extends State<EditMealScreen> {
             border: const OutlineInputBorder(
               borderRadius: Dimens.borderRadiusM,
             ),
-            suffixIcon: VoiceInputButton(controller: _brandsTextController),
           ),
           keyboardType: TextInputType.text,
         ),

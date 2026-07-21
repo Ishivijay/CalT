@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:opennutritracker/core/presentation/widgets/voice_input_button.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/custom_icons.dart';
@@ -74,18 +73,9 @@ class _MealSearchBarState extends State<MealSearchBar> {
                   size: 24,
                   color: palette.textMuted,
                 ),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    VoiceInputButton(
-                      controller: _searchTextController,
-                      onChanged: (input) {
-                        widget.searchStringListener.value = input;
-                        widget.onSearchChanged?.call(input);
-                      },
-                    ),
-                    if (widget.onBarcodePressed != null)
-                      Semantics(
+                suffixIcon: widget.onBarcodePressed == null
+                    ? null
+                    : Semantics(
                         identifier: 'meal-search-barcode',
                         child: IconButton(
                           icon: Icon(
@@ -96,8 +86,6 @@ class _MealSearchBarState extends State<MealSearchBar> {
                           onPressed: widget.onBarcodePressed,
                         ),
                       ),
-                  ],
-                ),
                 filled: true,
                 fillColor: palette.surfaceMuted,
                 contentPadding: const EdgeInsets.symmetric(

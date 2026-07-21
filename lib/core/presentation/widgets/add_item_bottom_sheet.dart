@@ -216,13 +216,13 @@ class AddItemBottomSheet extends StatelessWidget {
             const Divider(indent: 16, endIndent: 16),
             ListTile(
               title: Text(
-                'Load two-day coach demo',
+                'Load 7-day CalT test diary',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               subtitle: Text(
-                'Add sample meals to test personalized CalT insights',
+                'Replace test meals with a week of sample foods',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(
                     context,
@@ -234,6 +234,28 @@ class AddItemBottomSheet extends StatelessWidget {
                 child: const Icon(Icons.auto_graph_rounded),
               ),
               onTap: () => _loadCoachDemo(context),
+            ),
+            const Divider(indent: 16, endIndent: 16),
+            ListTile(
+              title: Text(
+                'Remove CalT test meals',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              subtitle: Text(
+                'Remove only the sample meals added by CalT',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+              leading: const SizedBox(
+                height: double.infinity,
+                child: Icon(Icons.delete_sweep_outlined),
+              ),
+              onTap: () => _removeCoachDemo(context),
             ),
             const Divider(indent: 16, endIndent: 16),
             Semantics(
@@ -322,7 +344,25 @@ class AddItemBottomSheet extends StatelessWidget {
     messenger.showSnackBar(
       const SnackBar(
         content: Text(
-          'Two days of sample meals added. Generate CalT coach insights now.',
+          'Seven days of sample meals added. Generate CalT coach insights now.',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _removeCoachDemo(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).pop();
+    final removed = await locator<CoachDemoDiarySeeder>().removeSampleMeals();
+    locator<HomeBloc>().add(const LoadItemsEvent());
+    locator<DiaryBloc>().add(const LoadDiaryYearEvent());
+    locator<CalendarDayBloc>().add(RefreshCalendarDayEvent());
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          removed == 0
+              ? 'No CalT test meals were found.'
+              : 'Removed $removed CalT test meals.',
         ),
       ),
     );
