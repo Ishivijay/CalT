@@ -21,7 +21,9 @@ class AiInsightsResult {
 
 class AiInsightsCacheStore {
   AiInsightsCacheStore(this._storage);
-  static const _key = 'ai_insights_cache_v1';
+  // A prompt-format change must not keep showing yesterday's cached coaching
+  // response after an app update.
+  static const _key = 'ai_insights_cache_v2';
   final FlutterSecureStorage _storage;
   Future<AiInsightsResult?> read() async {
     final raw = await _storage.read(key: _key);

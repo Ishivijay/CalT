@@ -1,5 +1,4 @@
 import 'package:opennutritracker/core/domain/entity/intake_entity.dart';
-import 'package:opennutritracker/core/domain/entity/intake_type_entity.dart';
 import 'package:opennutritracker/core/domain/usecase/get_intake_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_kcal_goal_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_macro_goal_usecase.dart';
@@ -8,7 +7,6 @@ import 'package:opennutritracker/core/domain/entity/user_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_pal_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_weight_goal_entity.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_cache_store.dart';
-import 'package:opennutritracker/features/ai_insights/domain/insights_aggregation.dart';
 import 'package:opennutritracker/features/ai_provider/data/ai_provider_config_store.dart';
 import 'package:opennutritracker/features/ai_provider/data/http_llm_providers.dart';
 import 'package:opennutritracker/features/ai_provider/domain/llm_provider.dart';
@@ -22,7 +20,6 @@ class AiInsightsService {
     this._configStore,
     this._providerFactory,
     this._cache,
-    this._aggregator,
   );
   final GetIntakeUsecase _intake;
   final GetKcalGoalUsecase _kcalGoal;
@@ -31,7 +28,6 @@ class AiInsightsService {
   final AiProviderConfigStore _configStore;
   final LlmProviderFactory _providerFactory;
   final AiInsightsCacheStore _cache;
-  final InsightsAggregator _aggregator;
 
   Future<AiInsightsResult?> cachedForToday() async {
     final cached = await _cache.read();
@@ -55,10 +51,7 @@ class AiInsightsService {
     if (!config.isConfigured) {
       throw const LlmException('No AI provider configured.');
     }
-    final aggregation = _aggregator.aggregate(
-      await _recentEntries(),
-      DateTime.now(),
-    );
+    final todayEntries = await _todayEntries();
     final user = await _user.getUserData();
     final kcalGoal = await _kcalGoal.getKcalGoal();
     final macroGoals = [
@@ -71,7 +64,12 @@ class AiInsightsService {
           (await _providerFactory
                   .create(config)
                   .sendTextPrompt(
-                    _prompt(aggregation, kcalGoal, macroGoals, user),
+                    _todayReviewPrompt(
+                      todayEntries,
+                      kcalGoal,
+                      macroGoals,
+                      user,
+                    ),
                   ))
               .rawText
               .trim(),
@@ -84,31 +82,67 @@ class AiInsightsService {
     return result;
   }
 
-  Future<List<IntakeEntity>> _recentEntries() async {
+  Future<String> answerQuestion(String question) async {
+    final trimmed = question.trim();
+    if (trimmed.isEmpty) {
+      throw const LlmException('Type or dictate a question first.');
+    }
+    final config = await _configStore.read();
+    if (!config.isConfigured) {
+      throw const LlmException('No AI provider configured.');
+    }
+    final user = await _user.getUserData();
+    final kcalGoal = await _kcalGoal.getKcalGoal();
+    final macroGoals = [
+      await _macroGoal.getProteinsGoal(kcalGoal),
+      await _macroGoal.getCarbsGoal(kcalGoal),
+      await _macroGoal.getFatsGoal(kcalGoal),
+    ];
+    final response = await _providerFactory.create(config).sendTextPrompt(
+      '''You are CalT, a practical nutrition coach. Answer the user's question using their exact profile, goal, targets, and TODAY'S logged meals below. Be concise, specific, and helpful. Do not diagnose or make medical claims. If the diary does not contain the information needed, say so clearly. Do not use markdown.
+
+${_profileContext(user, kcalGoal, macroGoals)}
+${_todayDiaryContext(await _todayEntries())}
+
+User question: $trimmed''',
+    );
+    final text = response.rawText.trim();
+    if (text.isEmpty) {
+      throw const LlmException('The AI provider returned an empty answer.');
+    }
+    return text;
+  }
+
+  Future<List<IntakeEntity>> _todayEntries() async {
     final now = DateTime.now();
     final futures = <Future<List<IntakeEntity>>>[];
-    for (var offset = 0; offset < 30; offset++) {
-      final day = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(Duration(days: offset));
-      futures.add(_intake.getBreakfastIntakeByDay(day));
-      futures.add(_intake.getLunchIntakeByDay(day));
-      futures.add(_intake.getDinnerIntakeByDay(day));
-      futures.add(_intake.getSnackIntakeByDay(day));
-    }
+    final day = DateTime(now.year, now.month, now.day);
+    futures.add(_intake.getBreakfastIntakeByDay(day));
+    futures.add(_intake.getLunchIntakeByDay(day));
+    futures.add(_intake.getDinnerIntakeByDay(day));
+    futures.add(_intake.getSnackIntakeByDay(day));
     return (await Future.wait(futures)).expand((entries) => entries).toList();
   }
 
-  String _prompt(
-    InsightsAggregation data,
+  String _todayReviewPrompt(
+    List<IntakeEntity> entries,
     double kcalGoal,
     List<double> macroGoals,
     UserEntity user,
   ) {
-    String period(String label, NutritionPeriodSummary p) =>
-        '$label: ${p.loggedDays}/${p.days} days logged; average ${p.kcalDailyAverage.toStringAsFixed(0)} kcal/day; protein ${p.proteinDailyAverage.toStringAsFixed(0)}g/day; carbs ${p.carbs.toStringAsFixed(0)}g total; fat ${p.fat.toStringAsFixed(0)}g total; meal counts breakfast ${p.mealCounts[IntakeTypeEntity.breakfast]}, lunch ${p.mealCounts[IntakeTypeEntity.lunch]}, dinner ${p.mealCounts[IntakeTypeEntity.dinner]}, snack ${p.mealCounts[IntakeTypeEntity.snack]}; logged foods: ${p.foodNames.isEmpty ? 'none' : p.foodNames.join(', ')}.';
+    return '''You are CalT, a concise and practical nutrition coach. Review only this person's TODAY'S logged meals. Explain what was good for their health or goal, what is missing or unbalanced, and one or two realistic improvements using specific foods. Be direct but non-judgmental.
+
+${_profileContext(user, kcalGoal, macroGoals)}
+${_todayDiaryContext(entries)}
+
+Return one short, natural paragraph of no more than 110 words. Do not use headings, labels, bullets, markdown, generic encouragement, diagnoses, medical claims, or advice based on meals not logged.''';
+  }
+
+  String _profileContext(
+    UserEntity user,
+    double kcalGoal,
+    List<double> macroGoals,
+  ) {
     final goal = switch (user.goal) {
       UserWeightGoalEntity.loseWeight => 'lose weight',
       UserWeightGoalEntity.maintainWeight => 'maintain weight',
@@ -120,16 +154,33 @@ class AiInsightsService {
       UserPALEntity.active => 'active',
       UserPALEntity.veryActive => 'very active',
     };
-    return '''You are CalT, a concise and practical nutrition coach. Personalize the response to this exact person and their ACTUAL food diary. Person: age ${user.age}, height ${user.heightCM.toStringAsFixed(0)} cm, weight ${user.weightKG.toStringAsFixed(1)} kg, activity level $activity, stated goal $goal${user.targetWeightKg == null ? '' : ', target weight ${user.targetWeightKg!.toStringAsFixed(1)} kg'}. Daily targets: ${kcalGoal.toStringAsFixed(0)} kcal, protein ${macroGoals[0].toStringAsFixed(0)}g, carbs ${macroGoals[1].toStringAsFixed(0)}g, fat ${macroGoals[2].toStringAsFixed(0)}g.
+    return 'Person: age ${user.age}, height ${user.heightCM.toStringAsFixed(0)} cm, weight ${user.weightKG.toStringAsFixed(1)} kg, activity $activity, goal $goal${user.targetWeightKg == null ? '' : ', target weight ${user.targetWeightKg!.toStringAsFixed(1)} kg'}. Daily targets: ${kcalGoal.toStringAsFixed(0)} kcal, protein ${macroGoals[0].toStringAsFixed(0)}g, carbs ${macroGoals[1].toStringAsFixed(0)}g, fat ${macroGoals[2].toStringAsFixed(0)}g.';
+  }
 
-Return no more than 90 words in exactly three plain-text lines:
-TODAY: one highly specific observation about current or recent intake versus this person's goal.
-PATTERN: one specific pattern from the logged foods, protein timing, energy, or consistency.
-NEXT: one small, realistic next food choice or logging action tailored to this person's goal.
-
-Do not use generic encouragement, bullets, markdown, diagnoses, medical claims, or invented nutrients. If the diary is sparse, say that directly and only comment on the actual logged foods.
-
-${period('Last 7 days', data.last7Days)}
-${period('Last 30 days', data.last30Days)}''';
+  String _todayDiaryContext(List<IntakeEntity> entries) {
+    if (entries.isEmpty) return 'Today\'s diary: no meals logged.';
+    final kcal = entries.fold<double>(0, (sum, entry) => sum + entry.totalKcal);
+    final protein = entries.fold<double>(
+      0,
+      (sum, entry) => sum + entry.totalProteinsGram,
+    );
+    final carbs = entries.fold<double>(
+      0,
+      (sum, entry) => sum + entry.totalCarbsGram,
+    );
+    final fat = entries.fold<double>(
+      0,
+      (sum, entry) => sum + entry.totalFatsGram,
+    );
+    final meals = entries
+        .map(
+          (entry) =>
+              '${entry.type.name}: ${entry.meal.name ?? 'Unnamed meal'} '
+              '(${entry.totalKcal.toStringAsFixed(0)} kcal, '
+              '${entry.totalProteinsGram.toStringAsFixed(0)}g protein)',
+        )
+        .join('; ');
+    return 'Today\'s diary: $meals. Totals: ${kcal.toStringAsFixed(0)} kcal, '
+        '${protein.toStringAsFixed(0)}g protein, ${carbs.toStringAsFixed(0)}g carbs, ${fat.toStringAsFixed(0)}g fat.';
   }
 }

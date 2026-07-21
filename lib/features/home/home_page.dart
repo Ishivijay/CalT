@@ -213,7 +213,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 snackIntakeList.isEmpty &&
                 userActivities.isEmpty)
               EmptyHint(
-                icon: Icons.add_circle_outline_rounded,
+                icon: Icons.restaurant_menu_rounded,
                 title: 'Your diary is ready',
                 subtitle:
                     'Log food or activity, or add a two-day demo to try CalT coach.',
