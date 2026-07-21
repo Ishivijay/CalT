@@ -135,7 +135,7 @@ User question: $trimmed''',
 ${_profileContext(user, kcalGoal, macroGoals)}
 ${_todayDiaryContext(entries)}
 
-Return one short, natural paragraph of no more than 110 words. Do not use headings, labels, bullets, markdown, generic encouragement, diagnoses, medical claims, or advice based on meals not logged.''';
+Return exactly three short bullet points, each no more than 28 words: one specific positive, one specific nutrition gap, and one realistic improvement. Do not use headings, labels, generic encouragement, diagnoses, medical claims, or advice based on meals not logged.''';
   }
 
   String _profileContext(

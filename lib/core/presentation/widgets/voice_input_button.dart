@@ -36,8 +36,13 @@ class _VoiceInputButtonState extends State<VoiceInputButton> {
           setState(() => _listening = false);
         }
       },
-      onError: (_) {
-        if (mounted) setState(() => _listening = false);
+      onError: (error) {
+        if (mounted) {
+          setState(() => _listening = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Voice input: ${error.errorMsg}')),
+          );
+        }
       },
     );
     if (!available) {
@@ -53,17 +58,28 @@ class _VoiceInputButtonState extends State<VoiceInputButton> {
       return;
     }
 
+    final existingText = widget.controller.text.trim();
     setState(() => _listening = true);
     await _speech.listen(
       onResult: (result) {
-        final text = result.recognizedWords.trim();
-        if (text.isEmpty) return;
+        final spokenText = result.recognizedWords.trim();
+        if (spokenText.isEmpty) return;
+        final text = existingText.isEmpty
+            ? spokenText
+            : '$existingText $spokenText';
         widget.controller.value = TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: text.length),
         );
         widget.onChanged?.call(text);
       },
+      listenOptions: speech.SpeechListenOptions(
+        partialResults: true,
+        cancelOnError: true,
+        listenMode: speech.ListenMode.dictation,
+        pauseFor: const Duration(seconds: 5),
+        listenFor: const Duration(seconds: 45),
+      ),
     );
   }
 

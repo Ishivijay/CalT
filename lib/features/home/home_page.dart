@@ -28,6 +28,7 @@ import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart
 import 'package:opennutritracker/features/home/presentation/widgets/quick_weight_widget.dart';
 import 'package:opennutritracker/features/home/domain/usecase/coach_demo_diary_seeder.dart';
 import 'package:opennutritracker/features/ai_insights/presentation/ai_insights_card.dart';
+import 'package:opennutritracker/features/ai_insights/presentation/calt_coach_chat_sheet.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
 class HomePage extends StatefulWidget {
@@ -313,6 +314,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
             ),
           ],
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 16, 16),
+            child: FloatingActionButton.extended(
+              heroTag: 'calt-coach-chat',
+              onPressed: () => showCalTCoachChat(context),
+              icon: const Icon(Icons.chat_bubble_rounded),
+              label: const Text('Ask CalT'),
+            ),
+          ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
