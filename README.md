@@ -1,6 +1,6 @@
 # CalT — a frictionless calorie tracker
 
-CalT is an Android-first nutrition tracker designed to make daily food logging feel quick, private, and useful. It combines a compact calorie and macro dashboard with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
+CalT is an Android-first nutrition tracker built on top of the open-source OpenNutriTracker project. It adapts that foundation into a distinct, compact calorie-tracking experience with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
 
 This is a working Flutter application. The Android package ID is `com.calt.tracker`, so it installs separately from OpenNutriTracker.
 
