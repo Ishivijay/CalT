@@ -61,8 +61,7 @@ Future<void> main() async {
 
   final config = await configRepo.getConfig();
   final savedLocaleCode = await configRepo.getSelectedLocale();
-  final savedLocale =
-      savedLocaleCode != null ? Locale(savedLocaleCode) : null;
+  final savedLocale = savedLocaleCode != null ? Locale(savedLocaleCode) : null;
 
   // #312: Restore scheduled notifications after app start / device reboot.
   // Load the user's localized strings first — there's no widget tree yet, so
@@ -72,7 +71,8 @@ Future<void> main() async {
   // reverting to English on each launch.
   if (config.notificationsEnabled) {
     await S.load(
-        savedLocale ?? WidgetsBinding.instance.platformDispatcher.locale);
+      savedLocale ?? WidgetsBinding.instance.platformDispatcher.locale,
+    );
     final s = S.current;
     final notificationService = locator<NotificationService>();
     await notificationService.initialize();
@@ -85,8 +85,8 @@ Future<void> main() async {
       channelDescription: s.notificationsDailyReminderChannelDescription,
     );
   }
-  final hasAcceptedAnonymousData =
-      await configRepo.getConfigHasAcceptedAnonymousData();
+  final hasAcceptedAnonymousData = await configRepo
+      .getConfigHasAcceptedAnonymousData();
   final savedAppTheme = await configRepo.getConfigAppTheme();
   final savedUsesKilojoules = config.usesKilojoules;
   final savedUseMaterialYou = config.useMaterialYou;
@@ -97,12 +97,24 @@ Future<void> main() async {
   // sentry enabled, else run without it
   if (kReleaseMode && hasAcceptedAnonymousData) {
     log.info('Starting App with Sentry enabled ...');
-    _runAppWithSentryReporting(isUserInitialized, savedAppTheme, savedLocale,
-        savedUsesKilojoules, savedUseMaterialYou, savedAccentColor);
+    _runAppWithSentryReporting(
+      isUserInitialized,
+      savedAppTheme,
+      savedLocale,
+      savedUsesKilojoules,
+      savedUseMaterialYou,
+      savedAccentColor,
+    );
   } else {
     log.info('Starting App ...');
-    runAppWithChangeNotifiers(isUserInitialized, savedAppTheme, savedLocale,
-        savedUsesKilojoules, savedUseMaterialYou, savedAccentColor);
+    runAppWithChangeNotifiers(
+      isUserInitialized,
+      savedAppTheme,
+      savedLocale,
+      savedUsesKilojoules,
+      savedUseMaterialYou,
+      savedAccentColor,
+    );
   }
 }
 
@@ -119,8 +131,14 @@ void _runAppWithSentryReporting(
       options.dsn = Env.sentryDns;
       options.tracesSampleRate = 1.0;
     },
-    appRunner: () => runAppWithChangeNotifiers(isUserInitialized, savedAppTheme,
-        savedLocale, savedUsesKilojoules, savedUseMaterialYou, savedAccentColor),
+    appRunner: () => runAppWithChangeNotifiers(
+      isUserInitialized,
+      savedAppTheme,
+      savedLocale,
+      savedUsesKilojoules,
+      savedUseMaterialYou,
+      savedAccentColor,
+    ),
   );
 }
 
@@ -131,33 +149,31 @@ void runAppWithChangeNotifiers(
   bool savedUsesKilojoules,
   bool savedUseMaterialYou,
   int? savedAccentColor,
-) =>
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-            create: (_) => ThemeModeProvider(
-              appTheme: savedAppTheme,
-              useMaterialYou: savedUseMaterialYou,
-              accentColor: savedAccentColor,
-            ),
-          ),
-          ChangeNotifierProvider(
-            create: (_) => LocaleProvider(locale: savedLocale),
-          ),
-          ChangeNotifierProvider(
-            create: (_) =>
-                EnergyUnitProvider(usesKilojoules: savedUsesKilojoules),
-          ),
-        ],
-        child: OpenNutriTrackerApp(userInitialized: userInitialized),
+) => runApp(
+  MultiProvider(
+    providers: [
+      ChangeNotifierProvider(
+        create: (_) => ThemeModeProvider(
+          appTheme: savedAppTheme,
+          useMaterialYou: savedUseMaterialYou,
+          accentColor: savedAccentColor,
+        ),
       ),
-    );
+      ChangeNotifierProvider(
+        create: (_) => LocaleProvider(locale: savedLocale),
+      ),
+      ChangeNotifierProvider(
+        create: (_) => EnergyUnitProvider(usesKilojoules: savedUsesKilojoules),
+      ),
+    ],
+    child: CalTApp(userInitialized: userInitialized),
+  ),
+);
 
-class OpenNutriTrackerApp extends StatelessWidget {
+class CalTApp extends StatelessWidget {
   final bool userInitialized;
 
-  const OpenNutriTrackerApp({super.key, required this.userInitialized});
+  const CalTApp({super.key, required this.userInitialized});
 
   @override
   Widget build(BuildContext context) {

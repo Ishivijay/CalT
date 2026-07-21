@@ -177,7 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "OpenNutriTracker je bezplatná open-source aplikácia na sledovanie kalórií a živín, ktorá rešpektuje vaše súkromie.",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("Licencia GPL-3.0"),
-    "appTitle": MessageLookupByLibrary.simpleMessage("OpenNutriTracker"),
+    "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
     "appVersionName": m1,
     "barcodeInvalidEan13CheckDigit": MessageLookupByLibrary.simpleMessage(
       "Tento 13-miestny čiarový kód vyzerá ako preklep: posledná číslica nesedí so zvyškom",

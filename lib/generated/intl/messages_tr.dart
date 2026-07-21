@@ -162,7 +162,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "OpenNutriTracker, gizliliğinize saygı duyan ücretsiz ve açık kaynaklı bir kalori ve besin takipçisidir.",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("GPL-3.0 lisansı"),
-    "appTitle": MessageLookupByLibrary.simpleMessage("OpenNutriTracker"),
+    "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
     "appVersionName": m1,
     "barcodeInvalidEan13CheckDigit": MessageLookupByLibrary.simpleMessage(
       "Bu 13 haneli barkod yanlış girilmiş gibi: son hane diğerleriyle uyuşmuyor",

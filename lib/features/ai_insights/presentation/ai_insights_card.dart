@@ -11,38 +11,168 @@ class AiInsightsCard extends StatefulWidget {
   @override
   State<AiInsightsCard> createState() => _AiInsightsCardState();
 }
+
 class _AiInsightsCardState extends State<AiInsightsCard> {
-  AiInsightsResult? _result; bool _loading = true; bool _configured = false;
+  AiInsightsResult? _result;
+  bool _loading = true;
+  bool _configured = false;
   @override
-  void initState() { super.initState(); _load(); }
+  void initState() {
+    super.initState();
+    _load();
+  }
+
   Future<void> _load() async {
     final config = await locator<AiProviderConfigStore>().read();
     final cached = await locator<AiInsightsService>().cachedForToday();
-    if (mounted) setState(() { _configured = config.isConfigured; _result = cached; _loading = false; });
+    if (mounted) {
+      setState(() {
+        _configured = config.isConfigured;
+        _result = cached;
+        _loading = false;
+      });
+    }
   }
+
   Future<void> _refresh() async {
     setState(() => _loading = true);
-    try { final result = await locator<AiInsightsService>().generate(force: true); if (mounted) setState(() => _result = result); }
-    on LlmException catch (error) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message))); }
-    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not generate insights. Please try again.'))); }
-    finally { if (mounted) setState(() => _loading = false); }
+    try {
+      final result = await locator<AiInsightsService>().generate(force: true);
+      if (mounted) {
+        setState(() => _result = result);
+      }
+    } on LlmException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not generate insights. Please try again.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
   }
+
   @override
   Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-    child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 8), Text('AI insights', style: Theme.of(context).textTheme.titleMedium), const Spacer(), IconButton(tooltip: 'Refresh insights', onPressed: _loading || !_configured ? null : _refresh, icon: const Icon(Icons.refresh))]),
-      const SizedBox(height: 8),
-      if (_loading) const LinearProgressIndicator() else if (!_configured) ...[
-        const Text('Connect an AI provider to receive a private summary of your logged patterns.'),
-        TextButton(onPressed: () async { await Navigator.of(context).pushNamed(NavigationOptions.aiProviderSettingsRoute); _load(); }, child: const Text('Set up AI provider')),
-      ] else if (_result == null) ...[
-        const Text('Generate a summary of your last 7 and 30 days. Your diary is sent only to the provider you configured.'),
-        TextButton(onPressed: _refresh, child: const Text('Generate insights')),
-      ] else ...[
-        Text(_result!.text), const SizedBox(height: 10), Text('Generated ${_format(_result!.generatedAt)} · AI-generated, not medical advice.', style: Theme.of(context).textTheme.bodySmall),
-      ],
-    ])),
+    margin: const EdgeInsets.fromLTRB(16, 10, 16, 2),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: _result == null ? null : () => _showFullInsight(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: _content(context)),
+            if (_result != null) const Icon(Icons.chevron_right_rounded),
+          ],
+        ),
+      ),
+    ),
   );
-  String _format(DateTime date) => '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+  Widget _content(BuildContext context) {
+    if (_loading) {
+      return const LinearProgressIndicator();
+    }
+    if (!_configured) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'CalT coach',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          TextButton(
+            onPressed: () async {
+              await Navigator.of(
+                context,
+              ).pushNamed(NavigationOptions.aiProviderSettingsRoute);
+              _load();
+            },
+            child: const Text('Connect AI for personal coaching'),
+          ),
+        ],
+      );
+    }
+    if (_result == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'CalT coach',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          TextButton(
+            onPressed: _refresh,
+            child: const Text('Generate your personalized summary'),
+          ),
+        ],
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'CALT COACH',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            letterSpacing: .8,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          _todayLine(_result!.text),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  String _todayLine(String text) => text
+      .split(RegExp(r'\r?\n'))
+      .firstWhere((line) => line.trim().isNotEmpty, orElse: () => text)
+      .replaceFirst(RegExp(r'^TODAY:\s*', caseSensitive: false), '')
+      .trim();
+
+  Future<void> _showFullInsight(BuildContext context) => showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('CalT coach'),
+      content: SingleChildScrollView(child: Text(_result!.text)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
+        ),
+        FilledButton.icon(
+          onPressed: () {
+            Navigator.pop(context);
+            _refresh();
+          },
+          icon: const Icon(Icons.refresh),
+          label: const Text('Refresh'),
+        ),
+      ],
+    ),
+  );
 }

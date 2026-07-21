@@ -153,7 +153,7 @@
   "alphaVersionName": "[Alfa]",
   "appDescription": "OpenNutriTracker je volně šiřitelný open-source tracker kalorického příjmu a nutričních hodnot, který respektuje Vaše soukromí.",
   "appLicenseLabel": "Licence GPL-3.0",
-  "appTitle": "OpenNutriTracker",
+  "appTitle": "CalT",
   "appVersionName": "Verze {versionNumber}",
   "barcodeInvalidEan13CheckDigit": "Tento 13místný čárový kód vypadá překlepnutě: poslední číslice nesouhlasí s ostatními",
   "baseQuantityLabel": "Výživové hodnoty na",

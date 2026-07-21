@@ -32,7 +32,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.opennutritracker.ont.opennutritracker"
+    namespace "com.calt.tracker"
     compileSdkVersion 36
     ndkVersion flutter.ndkVersion
 
@@ -59,7 +59,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.opennutritracker.ont.opennutritracker"
+        applicationId "com.calt.tracker"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()

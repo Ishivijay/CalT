@@ -184,7 +184,7 @@
   "alphaVersionName": "[Alpha]",
   "appDescription": "OpenNutriTracker, gizliliğinize saygı duyan ücretsiz ve açık kaynaklı bir kalori ve besin takipçisidir.",
   "appLicenseLabel": "GPL-3.0 lisansı",
-  "appTitle": "OpenNutriTracker",
+  "appTitle": "CalT",
   "appVersionName": "Versiyon {versionNumber}",
   "barcodeInvalidEan13CheckDigit": "Bu 13 haneli barkod yanlış girilmiş gibi: son hane diğerleriyle uyuşmuyor",
   "baseQuantityLabel": "Besin değeri başına",

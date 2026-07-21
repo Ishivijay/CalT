@@ -153,7 +153,7 @@
   "alphaVersionName": "[Альфа]",
   "appDescription": "OpenNutriTracker — це безкоштовний трекер калорій та поживних речовин з відкритим кодом, який поважає вашу конфіденційність і не містить реклами",
   "appLicenseLabel": "Ліцензія GPL-3.0",
-  "appTitle": "OpenNutriTracker",
+  "appTitle": "CalT",
   "appVersionName": "Версія {versionNumber}",
   "barcodeInvalidEan13CheckDigit": "Цей 13-значний штрих-код, схоже, введено з помилкою: остання цифра не збігається з рештою",
   "baseQuantityLabel": "Поживність на",

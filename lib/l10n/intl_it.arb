@@ -153,7 +153,7 @@
   "alphaVersionName": "[Alpha]",
   "appDescription": "OpenNutriTracker è un tracker di calorie e nutrienti gratuito e open-source che rispetta la tua privacy.",
   "appLicenseLabel": "Licenza GPL-3.0",
-  "appTitle": "OpenNutriTracker",
+  "appTitle": "CalT",
   "appVersionName": "Versione {versionNumber}",
   "barcodeInvalidEan13CheckDigit": "Questo codice a barre a 13 cifre sembra digitato male, l'ultima cifra non corrisponde alle altre",
   "baseQuantityLabel": "Valori nutrizionali per",

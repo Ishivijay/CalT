@@ -21,7 +21,6 @@ import 'package:opennutritracker/features/add_meal/presentation/add_meal_type.da
 import 'package:opennutritracker/features/home/presentation/bloc/home_bloc.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/dashboard_widget.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/intake_vertical_list.dart';
-import 'package:opennutritracker/features/home/presentation/widgets/fasting_home_chip.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/quick_water_widget.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/quick_weight_widget.dart';
@@ -166,6 +165,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       children: [
         ListView(
           children: [
+            const AiInsightsCard(),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 Dimens.spacing16,
@@ -190,8 +190,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 ],
               ),
             ),
-            const FastingHomeChip(),
-            const SizedBox(height: Dimens.spacing8),
             DashboardWidget(
               totalKcalDaily: totalKcalDaily,
               totalKcalLeft: totalKcalLeft,
@@ -204,7 +202,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               totalFatsGoal: totalFatsGoal,
               totalProteinsGoal: totalProteinsGoal,
             ),
-            const AiInsightsCard(),
             // Day-one / empty-day guidance: when nothing is logged yet, point
             // the way to the centre + rather than leaving a silent dashboard.
             if (breakfastIntakeList.isEmpty &&
@@ -227,7 +224,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   caloriesProfile: userCaloriesProfile,
                 ),
               ),
-            if (showActivityTracking)
+            if (showActivityTracking && userActivities.isNotEmpty)
               ActivityVerticalList(
                 day: DateTime.now(),
                 title: S.of(context).activityLabel,
@@ -240,7 +237,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             // section entirely so the home view doesn't carry an empty header
             // the user explicitly opted out of. Already-logged intakes for a
             // hidden section still count toward daily totals.
-            if (breakfastSharePct > 0)
+            if (breakfastSharePct > 0 && breakfastIntakeList.isNotEmpty)
               IntakeVerticalList(
                 day: DateTime.now(),
                 title: S.of(context).breakfastLabel,
@@ -254,7 +251,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 showMealMacros: showMealMacros,
                 mealKcalTarget: breakfastKcalTarget,
               ),
-            if (lunchSharePct > 0)
+            if (lunchSharePct > 0 && lunchIntakeList.isNotEmpty)
               IntakeVerticalList(
                 day: DateTime.now(),
                 title: S.of(context).lunchLabel,
@@ -268,7 +265,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 showMealMacros: showMealMacros,
                 mealKcalTarget: lunchKcalTarget,
               ),
-            if (dinnerSharePct > 0)
+            if (dinnerSharePct > 0 && dinnerIntakeList.isNotEmpty)
               IntakeVerticalList(
                 day: DateTime.now(),
                 title: S.of(context).dinnerLabel,
@@ -282,7 +279,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 showMealMacros: showMealMacros,
                 mealKcalTarget: dinnerKcalTarget,
               ),
-            if (snackSharePct > 0)
+            if (snackSharePct > 0 && snackIntakeList.isNotEmpty)
               IntakeVerticalList(
                 day: DateTime.now(),
                 title: S.of(context).snackLabel,

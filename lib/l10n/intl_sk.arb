@@ -201,7 +201,7 @@
   "alphaVersionName": "[Alfa]",
   "appDescription": "OpenNutriTracker je bezplatná open-source aplikácia na sledovanie kalórií a živín, ktorá rešpektuje vaše súkromie.",
   "appLicenseLabel": "Licencia GPL-3.0",
-  "appTitle": "OpenNutriTracker",
+  "appTitle": "CalT",
   "appVersionName": "Verzia {versionNumber}",
   "barcodeInvalidEan13CheckDigit": "Tento 13-miestny čiarový kód vyzerá ako preklep: posledná číslica nesedí so zvyškom",
   "baseQuantityLabel": "Výživové hodnoty na",

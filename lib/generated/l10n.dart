@@ -389,10 +389,10 @@ class S {
     );
   }
 
-  /// `OpenNutriTracker is a free and open-source calorie and nutrient tracker that respects your privacy.`
+  /// `CalT is a private, frictionless calorie tracker built around your real food and goals.`
   String get appDescription {
     return Intl.message(
-      'OpenNutriTracker is a free and open-source calorie and nutrient tracker that respects your privacy.',
+      'CalT is a private, frictionless calorie tracker built around your real food and goals.',
       name: 'appDescription',
       desc: '',
       args: [],
@@ -409,10 +409,10 @@ class S {
     );
   }
 
-  /// `OpenNutriTracker`
+  /// `CalT`
   String get appTitle {
     return Intl.message(
-      'OpenNutriTracker',
+      'CalT',
       name: 'appTitle',
       desc: '',
       args: [],
@@ -2663,10 +2663,10 @@ class S {
     );
   }
 
-  /// `OpenNutriTracker`
+  /// `CalT`
   String get notificationsDailyReminderTitle {
     return Intl.message(
-      'OpenNutriTracker',
+      'CalT',
       name: 'notificationsDailyReminderTitle',
       desc: '',
       args: [],

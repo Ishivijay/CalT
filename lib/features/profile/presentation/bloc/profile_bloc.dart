@@ -13,6 +13,7 @@ import 'package:opennutritracker/core/utils/locator.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/calendar_day_bloc.dart';
 import 'package:opennutritracker/features/diary/presentation/bloc/diary_bloc.dart';
 import 'package:opennutritracker/features/home/presentation/bloc/home_bloc.dart';
+import 'package:opennutritracker/features/ai_insights/data/ai_insights_cache_store.dart';
 
 part 'profile_event.dart';
 
@@ -72,6 +73,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> updateUser(UserEntity userEntity) async {
     // Update user in DB
     await _addUserUsecase.addUser(userEntity);
+    // Profile fields (goal, weight, height, activity) shape AI coaching, so
+    // never retain a same-day summary made with an older profile.
+    await locator<AiInsightsCacheStore>().clear();
 
     // Update Tracked Day
     await _updateTrackedDayCalorieGoal(userEntity, DateTime.now());

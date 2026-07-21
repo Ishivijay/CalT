@@ -45,44 +45,45 @@ class AppPalette {
 
   static const light = AppPalette(
     brightness: Brightness.light,
-    canvas: Color(0xFFF7F4EF),
+    canvas: Color(0xFFF2F7F3),
     surface: Color(0xFFFFFFFF),
-    surfaceMuted: Color(0xFFEFEAE1),
-    border: Color(0xFFE7E1D6),
-    shadow: Color(0x14403A2E),
+    surfaceMuted: Color(0xFFE2EEE7),
+    border: Color(0xFFD4E4D9),
+    shadow: Color(0x14102F29),
     // Deepened from #1FA971 so white-on-accent and accent-as-text both clear
     // WCAG AA (~4.6:1) on the light surface — buttons, nav labels and the ring.
-    accent: Color(0xFF0E7A4D),
+    accent: Color(0xFF1D5D50),
     onAccent: Color(0xFFFFFFFF),
-    carbsColor: Color(0xFFB87410),
-    fatColor: Color(0xFFD05536),
-    proteinColor: Color(0xFF1F8E80),
-    textStrong: Color(0xFF2B2A27),
+    carbsColor: Color(0xFFC17A18),
+    fatColor: Color(0xFFD76342),
+    proteinColor: Color(0xFF3D6DCA),
+    textStrong: Color(0xFF132F2A),
     // Darkened from #8A857C (~3.5:1) to ~4.6:1 so secondary text passes AA.
-    textMuted: Color(0xFF6E685E),
+    textMuted: Color(0xFF587068),
   );
 
   static const dark = AppPalette(
     brightness: Brightness.dark,
-    canvas: Color(0xFF1B1A18),
-    surface: Color(0xFF252320),
-    surfaceMuted: Color(0xFF302D28),
-    border: Color(0xFF38352F),
+    canvas: Color(0xFF0E211D),
+    surface: Color(0xFF142E28),
+    surfaceMuted: Color(0xFF1E3B34),
+    border: Color(0xFF2B4A41),
     shadow: Color(0x33000000),
-    accent: Color(0xFF34D08A),
-    onAccent: Color(0xFF06281A),
-    carbsColor: Color(0xFFF2B45A),
-    fatColor: Color(0xFFFF937B),
-    proteinColor: Color(0xFF49C9B8),
-    textStrong: Color(0xFFECE8E1),
-    textMuted: Color(0xFFA39E94),
+    accent: Color(0xFFB9FF64),
+    onAccent: Color(0xFF123A34),
+    carbsColor: Color(0xFFFFC766),
+    fatColor: Color(0xFFFFA183),
+    proteinColor: Color(0xFF7A9DFF),
+    textStrong: Color(0xFFE8F4EC),
+    textMuted: Color(0xFFA8C1B4),
   );
 
   /// Returns a copy with the accent swapped for [newAccent] (accent picker or a
   /// harmonized Material You primary). The neutral canvas, surfaces and macro
   /// colours are untouched, so only the one vivid role follows the user.
   AppPalette withAccent(Color newAccent) {
-    final onNew = ThemeData.estimateBrightnessForColor(newAccent) == Brightness.dark
+    final onNew =
+        ThemeData.estimateBrightnessForColor(newAccent) == Brightness.dark
         ? Colors.white
         : const Color(0xFF20201C);
     return AppPalette(
@@ -103,32 +104,36 @@ class AppPalette {
   }
 
   ColorScheme get colorScheme => ColorScheme(
-        brightness: brightness,
-        primary: accent,
-        onPrimary: onAccent,
-        primaryContainer: accent,
-        onPrimaryContainer: onAccent,
-        secondary: proteinColor,
-        onSecondary: onAccent,
-        secondaryContainer: surfaceMuted,
-        onSecondaryContainer: textStrong,
-        tertiary: carbsColor,
-        onTertiary: onAccent,
-        tertiaryContainer: surfaceMuted,
-        onTertiaryContainer: textStrong,
-        error: brightness == Brightness.light ? const Color(0xFFC4453A) : const Color(0xFFFFB4AB),
-        onError: brightness == Brightness.light ? Colors.white : const Color(0xFF690005),
-        surface: surface,
-        onSurface: textStrong,
-        surfaceContainerLowest: canvas,
-        surfaceContainerLow: canvas,
-        surfaceContainer: surfaceMuted,
-        surfaceContainerHigh: surfaceMuted,
-        surfaceContainerHighest: surfaceMuted,
-        onSurfaceVariant: textMuted,
-        outline: border,
-        outlineVariant: border,
-        surfaceTint: Colors.transparent,
-        shadow: shadow,
-      );
+    brightness: brightness,
+    primary: accent,
+    onPrimary: onAccent,
+    primaryContainer: accent,
+    onPrimaryContainer: onAccent,
+    secondary: proteinColor,
+    onSecondary: onAccent,
+    secondaryContainer: surfaceMuted,
+    onSecondaryContainer: textStrong,
+    tertiary: carbsColor,
+    onTertiary: onAccent,
+    tertiaryContainer: surfaceMuted,
+    onTertiaryContainer: textStrong,
+    error: brightness == Brightness.light
+        ? const Color(0xFFC4453A)
+        : const Color(0xFFFFB4AB),
+    onError: brightness == Brightness.light
+        ? Colors.white
+        : const Color(0xFF690005),
+    surface: surface,
+    onSurface: textStrong,
+    surfaceContainerLowest: canvas,
+    surfaceContainerLow: canvas,
+    surfaceContainer: surfaceMuted,
+    surfaceContainerHigh: surfaceMuted,
+    surfaceContainerHighest: surfaceMuted,
+    onSurfaceVariant: textMuted,
+    outline: border,
+    outlineVariant: border,
+    surfaceTint: Colors.transparent,
+    shadow: shadow,
+  );
 }

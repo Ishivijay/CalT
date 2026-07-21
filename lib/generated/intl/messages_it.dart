@@ -178,7 +178,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "OpenNutriTracker è un tracker di calorie e nutrienti gratuito e open-source che rispetta la tua privacy.",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("Licenza GPL-3.0"),
-    "appTitle": MessageLookupByLibrary.simpleMessage("OpenNutriTracker"),
+    "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
     "appVersionName": m1,
     "barcodeInvalidEan13CheckDigit": MessageLookupByLibrary.simpleMessage(
       "Questo codice a barre a 13 cifre sembra digitato male, l\'ultima cifra non corrisponde alle altre",

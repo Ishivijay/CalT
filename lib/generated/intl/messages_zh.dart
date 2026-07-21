@@ -155,7 +155,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "OpenNutriTracker是一款免费开源的卡路里和营养追踪应用，尊重您的隐私。",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("GPL-3.0 许可证"),
-    "appTitle": MessageLookupByLibrary.simpleMessage("OpenNutriTracker"),
+    "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
     "appVersionName": m1,
     "barcodeInvalidEan13CheckDigit": MessageLookupByLibrary.simpleMessage(
       "这个 13 位条形码看起来输入有误：最后一位与前面的数字不匹配",

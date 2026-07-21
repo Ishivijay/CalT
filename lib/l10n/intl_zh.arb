@@ -154,7 +154,7 @@
   "alphaVersionName": "[Alpha]",
   "appDescription": "OpenNutriTracker是一款免费开源的卡路里和营养追踪应用，尊重您的隐私。",
   "appLicenseLabel": "GPL-3.0 许可证",
-  "appTitle": "OpenNutriTracker",
+  "appTitle": "CalT",
   "appVersionName": "版本 {versionNumber}",
   "barcodeInvalidEan13CheckDigit": "这个 13 位条形码看起来输入有误：最后一位与前面的数字不匹配",
   "baseQuantityLabel": "营养基准",

@@ -171,10 +171,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "allItemsLabel": MessageLookupByLibrary.simpleMessage("All"),
     "alphaVersionName": MessageLookupByLibrary.simpleMessage("[Alpha]"),
     "appDescription": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker is a free and open-source calorie and nutrient tracker that respects your privacy.",
+      "CalT is a private, frictionless calorie tracker built around your real food and goals.",
     ),
     "appLicenseLabel": MessageLookupByLibrary.simpleMessage("GPL-3.0 license"),
-    "appTitle": MessageLookupByLibrary.simpleMessage("OpenNutriTracker"),
+    "appTitle": MessageLookupByLibrary.simpleMessage("CalT"),
     "appVersionName": m1,
     "barcodeInvalidEan13CheckDigit": MessageLookupByLibrary.simpleMessage(
       "This 13-digit barcode looks miskeyed: its last digit doesn\'t match the rest",
@@ -774,7 +774,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationsDailyReminderChannelName":
         MessageLookupByLibrary.simpleMessage("Daily Reminders"),
     "notificationsDailyReminderTitle": MessageLookupByLibrary.simpleMessage(
-      "OpenNutriTracker",
+      "CalT",
     ),
     "notificationsPermissionDeniedSnack": MessageLookupByLibrary.simpleMessage(
       "Notification permission denied.",
