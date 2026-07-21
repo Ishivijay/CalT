@@ -768,19 +768,36 @@ $entryLines''';
       setState(() => _photoItems = [..._photoItems]..[index] = edited);
   }
 
-  Widget _input(TextEditingController controller, String label) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: TextField(
-      controller: controller,
-      keyboardType: label == 'Food name'
-          ? TextInputType.text
-          : const TextInputType.numberWithOptions(decimal: true),
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
+  Widget _input(
+    TextEditingController controller,
+    String label, {
+    bool obscureText = false,
+    Widget? suffixIcon,
+  }) {
+    const numericLabels = {
+      'Grams',
+      'Calories',
+      'Protein (g)',
+      'Carbs (g)',
+      'Fat (g)',
+      'Serving amount (g)',
+    };
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: numericLabels.contains(label)
+            ? const TextInputType.numberWithOptions(decimal: true)
+            : TextInputType.text,
+        decoration: InputDecoration(
+          labelText: label,
+          suffixIcon: suffixIcon,
+          border: const OutlineInputBorder(),
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Future<void> _viewDiaryMeal(_WebMeal meal) async {
     await showDialog<void>(
@@ -970,6 +987,7 @@ $entryLines''';
 
   Future<void> _settings() async {
     var provider = _config.provider;
+    var revealKey = false;
     final model = TextEditingController(text: _config.modelId);
     final key = TextEditingController(text: _config.apiKey);
     final base = TextEditingController(text: _config.baseUrl ?? '');
@@ -1012,7 +1030,20 @@ $entryLines''';
                 _input(model, 'Model ID'),
                 if (provider == AiProviderKind.customOpenAi)
                   _input(base, 'Base URL'),
-                _input(key, 'API key'),
+                _input(
+                  key,
+                  'API key',
+                  obscureText: !revealKey,
+                  suffixIcon: IconButton(
+                    onPressed: () => update(() => revealKey = !revealKey),
+                    icon: Icon(
+                      revealKey
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                    ),
+                    tooltip: revealKey ? 'Hide API key' : 'Show API key',
+                  ),
+                ),
               ],
             ),
           ),
@@ -1048,10 +1079,16 @@ $entryLines''';
   }
 
   Future<void> _openProfileAndData() async {
-    final profile = await Navigator.of(context).push<_PersonProfile>(
-      MaterialPageRoute(
-        builder: (context) =>
-            _ProfileAndDataScreen(profile: _profile, meals: _meals),
+    final profile = await showDialog<_PersonProfile>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        clipBehavior: Clip.antiAlias,
+        insetPadding: const EdgeInsets.all(18),
+        child: SizedBox(
+          width: 760,
+          height: MediaQuery.sizeOf(dialogContext).height * 0.88,
+          child: _ProfileAndDataScreen(profile: _profile, meals: _meals),
+        ),
       ),
     );
     if (profile == null || !mounted) return;
