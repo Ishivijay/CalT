@@ -53,10 +53,13 @@ class WeightTrendChart extends StatelessWidget {
     // how the calorie/water charts window their range.
     final windowStart = today.subtract(Duration(days: windowDays - 1));
 
-    final inWindow = entries
-        .where((e) => !e.date.isBefore(windowStart) && !e.date.isAfter(today))
-        .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final inWindow =
+        entries
+            .where(
+              (e) => !e.date.isBefore(windowStart) && !e.date.isAfter(today),
+            )
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
 
     if (inWindow.length < 2) {
       return Padding(
@@ -96,14 +99,18 @@ class WeightTrendChart extends StatelessWidget {
     // Only draw the dashed reference when the target sits within (or just
     // adjacent to) the auto y-range, so a far-off target doesn't autoscale
     // the chart away from the recorded weights.
-    final showTargetLine = targetY != null &&
+    final showTargetLine =
+        targetY != null &&
         targetY >= (minY - yPadding) &&
         targetY <= (maxY + yPadding);
 
     final localeTag = Localizations.localeOf(context).toLanguageTag();
     final dateFormat = DateFormat.MMMd(localeTag);
     // ~5 evenly spaced date labels regardless of window length.
-    final labelInterval = (windowDays / 5).ceilToDouble().clamp(1, 30).toDouble();
+    final labelInterval = (windowDays / 5)
+        .ceilToDouble()
+        .clamp(1, 30)
+        .toDouble();
 
     return Padding(
       key: const Key('weightHistoryChart'),
@@ -130,7 +137,9 @@ class WeightTrendChart extends StatelessWidget {
                   showTitles: true,
                   reservedSize: 40,
                   getTitlesWidget: (value, meta) => Text(
-                    value.toStringAsFixed(bodyWeightUnit == BodyWeightUnit.st ? 1 : 0),
+                    value.toStringAsFixed(
+                      bodyWeightUnit == BodyWeightUnit.st ? 1 : 0,
+                    ),
                     style: theme.textTheme.labelSmall,
                   ),
                 ),
@@ -175,13 +184,59 @@ class WeightTrendChart extends StatelessWidget {
                   show: true,
                   getDotPainter: (spot, percent, bar, index) =>
                       FlDotCirclePainter(
-                    radius: 3,
-                    color: lineColor,
-                    strokeWidth: 0,
-                  ),
+                        radius: 3,
+                        color: lineColor,
+                        strokeWidth: 0,
+                      ),
                 ),
               ),
             ],
+            // Tap or drag along the line to see the exact weight + date for
+            // any reading, instead of having to eyeball the curve.
+            lineTouchData: LineTouchData(
+              enabled: true,
+              getTouchedSpotIndicator: (barData, indicators) => indicators
+                  .map(
+                    (i) => TouchedSpotIndicatorData(
+                      FlLine(
+                        color: lineColor.withValues(alpha: 0.3),
+                        strokeWidth: 2,
+                      ),
+                      FlDotData(
+                        getDotPainter: (spot, percent, bar, index) =>
+                            FlDotCirclePainter(
+                              radius: 5.5,
+                              color: lineColor,
+                              strokeWidth: 2,
+                              strokeColor: theme.colorScheme.surface,
+                            ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+              touchTooltipData: LineTouchTooltipData(
+                getTooltipColor: (_) => theme.colorScheme.inverseSurface,
+                tooltipPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                getTooltipItems: (touchedSpots) => touchedSpots.map((spot) {
+                  final day = windowStart.add(Duration(days: spot.x.round()));
+                  return LineTooltipItem(
+                    '${spot.y.toStringAsFixed(bodyWeightUnit == BodyWeightUnit.st
+                        ? 1
+                        : bodyWeightUnit == BodyWeightUnit.kg
+                        ? 1
+                        : 0)} ${bodyWeightUnit.name}\n${dateFormat.format(day)}',
+                    TextStyle(
+                      color: theme.colorScheme.onInverseSurface,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
         ),
       ),

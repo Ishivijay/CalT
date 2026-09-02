@@ -55,18 +55,33 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
           headerStyle: HeaderStyle(
             titleCentered: true,
             formatButtonVisible: false,
-            titleTextStyle: textTheme.titleMedium?.copyWith(
+            titleTextStyle:
+                textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: palette.textStrong,
                 ) ??
                 const TextStyle(),
-            leftChevronIcon: Icon(Icons.chevron_left_rounded, color: palette.textMuted, size: 26),
-            rightChevronIcon: Icon(Icons.chevron_right_rounded, color: palette.textMuted, size: 26),
-            headerPadding: const EdgeInsets.symmetric(vertical: Dimens.spacing8),
+            leftChevronIcon: Icon(
+              Icons.chevron_left_rounded,
+              color: palette.textMuted,
+              size: 26,
+            ),
+            rightChevronIcon: Icon(
+              Icons.chevron_right_rounded,
+              color: palette.textMuted,
+              size: 26,
+            ),
+            headerPadding: const EdgeInsets.symmetric(
+              vertical: Dimens.spacing8,
+            ),
           ),
           daysOfWeekStyle: DaysOfWeekStyle(
-            weekdayStyle: textTheme.labelSmall?.copyWith(color: palette.textMuted) ?? const TextStyle(),
-            weekendStyle: textTheme.labelSmall?.copyWith(color: palette.textMuted) ?? const TextStyle(),
+            weekdayStyle:
+                textTheme.labelSmall?.copyWith(color: palette.textMuted) ??
+                const TextStyle(),
+            weekendStyle:
+                textTheme.labelSmall?.copyWith(color: palette.textMuted) ??
+                const TextStyle(),
           ),
           focusedDay: widget.focusedDate,
           firstDay: widget.currentDate.subtract(widget.calendarDurationDays),
@@ -77,10 +92,17 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
           },
           calendarStyle: CalendarStyle(
             markersMaxCount: 1,
-            defaultTextStyle: textTheme.bodyMedium?.copyWith(color: palette.textStrong) ?? const TextStyle(),
-            weekendTextStyle: textTheme.bodyMedium?.copyWith(color: palette.textStrong) ?? const TextStyle(),
-            outsideTextStyle: textTheme.bodyMedium?.copyWith(color: palette.textMuted) ?? const TextStyle(),
-            todayTextStyle: textTheme.bodyMedium?.copyWith(
+            defaultTextStyle:
+                textTheme.bodyMedium?.copyWith(color: palette.textStrong) ??
+                const TextStyle(),
+            weekendTextStyle:
+                textTheme.bodyMedium?.copyWith(color: palette.textStrong) ??
+                const TextStyle(),
+            outsideTextStyle:
+                textTheme.bodyMedium?.copyWith(color: palette.textMuted) ??
+                const TextStyle(),
+            todayTextStyle:
+                textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: accent,
                 ) ??
@@ -89,7 +111,8 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
               border: Border.all(color: accent, width: 2.0),
               shape: BoxShape.circle,
             ),
-            selectedTextStyle: textTheme.bodyMedium?.copyWith(
+            selectedTextStyle:
+                textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ) ??
@@ -101,22 +124,36 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
           ),
           selectedDayPredicate: (day) => isSameDay(widget.selectedDate, day),
           calendarBuilders: CalendarBuilders(
-            markerBuilder: (context, date, events) {
+            // Heatmap: every logged day's cell is tinted by how close it
+            // landed to its calorie goal — darker/stronger fill means closer
+            // to on-target, a berry-pink tint means meaningfully over. Days
+            // with no tracked data (not logged, or in the future) fall back
+            // to the plain default cell by returning null. Today/selected
+            // keep their own outline/filled-circle treatment untouched —
+            // this only replaces the default cell for ordinary days.
+            defaultBuilder: (context, date, focusedDay) {
               final trackedDay = widget.trackedDaysMap[date.toParsedDay()];
-              if (trackedDay != null) {
-                return Container(
-                  margin: const EdgeInsets.only(top: 10),
-                  padding: const EdgeInsets.all(1),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: trackedDay.getCalendarDayRatingColor(context),
-                  ),
-                  width: 5.0,
-                  height: 5.0,
-                );
-              } else {
-                return const SizedBox();
+              if (trackedDay == null || trackedDay.calorieGoal <= 0) {
+                return null;
               }
+              final ratio = trackedDay.caloriesTracked / trackedDay.calorieGoal;
+              final over = ratio > 1.15;
+              final closeness = (1 - (ratio - 1).abs()).clamp(0.0, 1.0);
+              final tint = over ? palette.fatColor : accent;
+              return Container(
+                margin: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: tint.withValues(alpha: 0.14 + closeness * 0.34),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '${date.day}',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: palette.textStrong,
+                  ),
+                ),
+              );
             },
           ),
         ),

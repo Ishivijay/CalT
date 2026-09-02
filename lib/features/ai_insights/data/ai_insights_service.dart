@@ -1,12 +1,15 @@
 import 'package:opennutritracker/core/domain/entity/intake_entity.dart';
+import 'package:opennutritracker/core/domain/entity/user_activity_entity.dart';
 import 'package:opennutritracker/core/domain/usecase/get_intake_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_kcal_goal_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_macro_goal_usecase.dart';
+import 'package:opennutritracker/core/domain/usecase/get_user_activity_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_user_usecase.dart';
 import 'package:opennutritracker/core/domain/entity/user_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_pal_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_weight_goal_entity.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_cache_store.dart';
+import 'package:opennutritracker/features/ai_insights/data/coach_prompt_store.dart';
 import 'package:opennutritracker/features/ai_provider/data/ai_provider_config_store.dart';
 import 'package:opennutritracker/features/ai_provider/data/http_llm_providers.dart';
 import 'package:opennutritracker/features/ai_provider/domain/llm_provider.dart';
@@ -20,6 +23,8 @@ class AiInsightsService {
     this._configStore,
     this._providerFactory,
     this._cache,
+    this._activity,
+    this._promptStore,
   );
   final GetIntakeUsecase _intake;
   final GetKcalGoalUsecase _kcalGoal;
@@ -28,6 +33,31 @@ class AiInsightsService {
   final AiProviderConfigStore _configStore;
   final LlmProviderFactory _providerFactory;
   final AiInsightsCacheStore _cache;
+  final GetUserActivityUsecase _activity;
+  final CoachPromptStore _promptStore;
+
+  /// The built-in coaching instruction, shown to the user as the starting
+  /// point when they open the prompt editor and used whenever they haven't
+  /// saved an override. Explicitly steers away from restating numbers the
+  /// diary already shows — "you ate 40g protein" is not insight, it's a
+  /// readout, and re-reading it back to the user in a coach message reads
+  /// as filler rather than help.
+  static const defaultReviewInstruction =
+      '''You are CalT, a concise and practical nutrition coach. Review only this person's TODAY'S logged meals and activity. Do not restate totals, grams, or kcal figures the person can already see in their diary — every point must add something they could not already tell from glancing at the numbers: a pattern across meals (timing, combination, repetition), a food-choice tradeoff, or a consequence of what/how they ate that isn't obvious from the raw figures. Be direct but non-judgmental.
+
+Answer exactly three short bullet points, each no more than 28 words: one non-obvious positive observation about today's pattern, one non-obvious nutrition or activity gap or risk (not just "low in X"), and one realistic improvement using specific foods or activities. Do not use headings, labels, generic encouragement, diagnoses, medical claims, or advice based on meals not logged.''';
+
+  /// Appended after whichever instruction is active (default or the
+  /// user's own) so the one-line takeaway is always requested even if
+  /// someone rewrites the main instruction — it's a fixed output-format
+  /// requirement, not part of the coaching persona/tone itself.
+  static const _summaryLineInstruction =
+      '\n\nAfter the three bullet points, add one final line starting with '
+      'exactly "SUMMARY:" followed by a short, natural-language takeaway in '
+      'six words or fewer (for example: SUMMARY: Eating well, could use '
+      'more protein) that sums up today\'s overall picture at a glance — a '
+      'real phrase, not a copy of one of the bullet points. No markdown or '
+      'quotes around it.';
 
   Future<AiInsightsResult?> cachedForToday() async {
     final cached = await _cache.read();
@@ -52,6 +82,7 @@ class AiInsightsService {
       throw const LlmException('No AI provider configured.');
     }
     final todayEntries = await _todayEntries();
+    final todayActivities = await _todayActivities();
     final user = await _user.getUserData();
     final kcalGoal = await _kcalGoal.getKcalGoal();
     final macroGoals = [
@@ -59,20 +90,25 @@ class AiInsightsService {
       await _macroGoal.getCarbsGoal(kcalGoal),
       await _macroGoal.getFatsGoal(kcalGoal),
     ];
+    final customInstruction = await _promptStore.read();
+    final rawText = (await _providerFactory
+            .create(config)
+            .sendTextPrompt(
+              _todayReviewPrompt(
+                todayEntries,
+                todayActivities,
+                kcalGoal,
+                macroGoals,
+                user,
+                customInstruction,
+              ),
+            ))
+        .rawText
+        .trim();
+    final (text: bulletText, summary: summary) = _splitSummaryLine(rawText);
     final result = AiInsightsResult(
-      text:
-          (await _providerFactory
-                  .create(config)
-                  .sendTextPrompt(
-                    _todayReviewPrompt(
-                      todayEntries,
-                      kcalGoal,
-                      macroGoals,
-                      user,
-                    ),
-                  ))
-              .rawText
-              .trim(),
+      text: bulletText,
+      summary: summary,
       generatedAt: DateTime.now(),
     );
     if (result.text.isEmpty) {
@@ -80,6 +116,27 @@ class AiInsightsService {
     }
     await _cache.save(result);
     return result;
+  }
+
+  /// Pulls the "SUMMARY: ..." line requested by [_summaryLineInstruction]
+  /// out of the raw response, leaving the three bullet points on their own
+  /// (that's what the Coach screen's "Today's review" section renders —
+  /// a stray fourth line would show up there as an unlabelled bullet).
+  static ({String text, String? summary}) _splitSummaryLine(String raw) {
+    final summaryPattern = RegExp(r'^SUMMARY:\s*(.+)$', caseSensitive: false);
+    String? summary;
+    final bulletLines = <String>[];
+    for (final line in raw.split(RegExp(r'\r?\n'))) {
+      final trimmedLine = line.trim();
+      if (trimmedLine.isEmpty) continue;
+      final match = summaryPattern.firstMatch(trimmedLine);
+      if (match != null) {
+        summary = match.group(1)?.trim();
+      } else {
+        bulletLines.add(line);
+      }
+    }
+    return (text: bulletLines.join('\n').trim(), summary: summary);
   }
 
   Future<String> answerQuestion(String question) async {
@@ -98,11 +155,17 @@ class AiInsightsService {
       await _macroGoal.getCarbsGoal(kcalGoal),
       await _macroGoal.getFatsGoal(kcalGoal),
     ];
+    final customInstruction = await _promptStore.read();
+    final persona =
+        (customInstruction != null && customInstruction.trim().isNotEmpty)
+        ? customInstruction.trim()
+        : 'You are CalT, a practical nutrition coach.';
     final response = await _providerFactory.create(config).sendTextPrompt(
-      '''You are CalT, a practical nutrition coach. Answer the user's question using their exact profile, goal, targets, and TODAY'S logged meals below. Be concise, specific, and helpful. Do not diagnose or make medical claims. If the diary does not contain the information needed, say so clearly. Do not use markdown.
+      '''$persona Answer the user's question using their exact profile, goal, targets, today's logged meals, AND today's exercise/activity below. Be concise, specific, and helpful. Do not diagnose or make medical claims. If the diary does not contain the information needed, say so clearly. Do not use markdown.
 
 ${_profileContext(user, kcalGoal, macroGoals)}
 ${_todayDiaryContext(await _todayEntries())}
+${_todayActivityContext(await _todayActivities())}
 
 User question: $trimmed''',
     );
@@ -124,18 +187,26 @@ User question: $trimmed''',
     return (await Future.wait(futures)).expand((entries) => entries).toList();
   }
 
+  Future<List<UserActivityEntity>> _todayActivities() =>
+      _activity.getTodayUserActivity();
+
   String _todayReviewPrompt(
     List<IntakeEntity> entries,
+    List<UserActivityEntity> activities,
     double kcalGoal,
     List<double> macroGoals,
     UserEntity user,
+    String? customInstruction,
   ) {
-    return '''You are CalT, a concise and practical nutrition coach. Review only this person's TODAY'S logged meals. Explain what was good for their health or goal, what is missing or unbalanced, and one or two realistic improvements using specific foods. Be direct but non-judgmental.
+    final instruction =
+        (customInstruction != null && customInstruction.trim().isNotEmpty)
+        ? customInstruction.trim()
+        : defaultReviewInstruction;
+    return '''$instruction$_summaryLineInstruction
 
 ${_profileContext(user, kcalGoal, macroGoals)}
 ${_todayDiaryContext(entries)}
-
-Return exactly three short bullet points, each no more than 28 words: one specific positive, one specific nutrition gap, and one realistic improvement. Do not use headings, labels, generic encouragement, diagnoses, medical claims, or advice based on meals not logged.''';
+${_todayActivityContext(activities)}''';
   }
 
   String _profileContext(
@@ -182,5 +253,27 @@ Return exactly three short bullet points, each no more than 28 words: one specif
         .join('; ');
     return 'Today\'s diary: $meals. Totals: ${kcal.toStringAsFixed(0)} kcal, '
         '${protein.toStringAsFixed(0)}g protein, ${carbs.toStringAsFixed(0)}g carbs, ${fat.toStringAsFixed(0)}g fat.';
+  }
+
+  String _todayActivityContext(List<UserActivityEntity> activities) {
+    if (activities.isEmpty) {
+      return 'Today\'s activity: no exercise logged.';
+    }
+    final kcal = activities.fold<double>(
+      0,
+      (sum, a) => sum + a.effectiveBurnedKcal,
+    );
+    final lines = activities
+        .map((a) {
+          final source = a.source == 'healthConnect'
+              ? 'synced from Health Connect'
+              : 'logged manually';
+          return '${a.duration.toStringAsFixed(0)} min '
+              '${a.physicalActivityEntity.specificActivity} '
+              '(${a.effectiveBurnedKcal.toStringAsFixed(0)} kcal, $source)';
+        })
+        .join('; ');
+    return 'Today\'s activity: $lines. '
+        'Total burned: ${kcal.toStringAsFixed(0)} kcal.';
   }
 }

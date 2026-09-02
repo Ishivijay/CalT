@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:opennutritracker/core/presentation/widgets/dynamic_ont_logo.dart';
+import 'package:opennutritracker/features/ai_insights/presentation/coach_screen.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
 class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -25,6 +26,20 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
+      actions: [
+        Semantics(
+          identifier: 'home-ask-calt',
+          child: IconButton(
+            tooltip: 'Ask CalT',
+            icon: const Icon(Icons.chat_bubble_outline_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const CoachScreen(scrollToAsk: true),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

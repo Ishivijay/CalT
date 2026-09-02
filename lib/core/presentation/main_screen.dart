@@ -3,6 +3,7 @@ import 'package:opennutritracker/core/domain/usecase/get_config_usecase.dart';
 import 'package:opennutritracker/core/presentation/widgets/add_item_bottom_sheet.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
+import 'package:opennutritracker/core/utils/main_tab_controller.dart';
 import 'package:opennutritracker/features/diary/diary_page.dart';
 import 'package:opennutritracker/core/presentation/widgets/home_appbar.dart';
 import 'package:opennutritracker/features/home/home_page.dart';
@@ -19,10 +20,25 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedPageIndex = 0;
+  final _tabController = locator<MainTabController>();
+  int get _selectedPageIndex => _tabController.value;
 
   late List<Widget> _bodyPages;
   late List<PreferredSizeWidget> _appbarPages;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController.addListener(_onTabChanged);
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_onTabChanged);
+    super.dispose();
+  }
+
+  void _onTabChanged() => setState(() {});
 
   @override
   void didChangeDependencies() {
@@ -115,9 +131,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _setPage(int selectedIndex) {
-    setState(() {
-      _selectedPageIndex = selectedIndex;
-    });
+    _tabController.value = selectedIndex;
   }
 
   Future<void> _onFabPressed(BuildContext context) async {
@@ -161,7 +175,9 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = index == selectedIndex;
-    final color = selected ? Theme.of(context).colorScheme.primary : palette.textMuted;
+    final color = selected
+        ? Theme.of(context).colorScheme.primary
+        : palette.textMuted;
     return Expanded(
       child: Semantics(
         identifier: id,
@@ -177,7 +193,9 @@ class _NavItem extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: color),
                 ),
               ],
             ),

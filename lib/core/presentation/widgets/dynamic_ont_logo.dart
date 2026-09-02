@@ -6,7 +6,7 @@ class DynamicOntLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CustomPaint(
     painter: _CaltLogoPainter(
-      ring: const Color(0xffB9FF64),
+      ring: const Color(0xFFFFC966), // mango, matches AppPalette.carbsColor
       bolt: Theme.of(context).colorScheme.primary,
     ),
   );

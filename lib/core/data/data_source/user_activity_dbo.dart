@@ -29,6 +29,18 @@ class UserActivityDBO extends HiveObject {
   @HiveField(5)
   final double? userKcal;
 
+  /// Provenance of this activity entry.
+  /// 'manual' — user logged it in CalT.
+  /// 'healthConnect' — imported from Health Connect.
+  /// 'shared' — imported via QR code from another CalT install.
+  @HiveField(6)
+  final String source;
+
+  /// Health Connect record UID used as the dedup key on re-sync. Null for
+  /// manual and shared entries.
+  @HiveField(7)
+  final String? externalId;
+
   UserActivityDBO(
     this.id,
     this.duration,
@@ -36,6 +48,8 @@ class UserActivityDBO extends HiveObject {
     this.date,
     this.physicalActivityDBO, {
     this.userKcal,
+    this.source = 'manual',
+    this.externalId,
   });
 
   factory UserActivityDBO.fromUserActivityEntity(
@@ -50,6 +64,8 @@ class UserActivityDBO extends HiveObject {
         userActivityEntity.physicalActivityEntity,
       ),
       userKcal: userActivityEntity.userKcal,
+      source: userActivityEntity.source,
+      externalId: userActivityEntity.externalId,
     );
   }
 

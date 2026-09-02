@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
+import 'package:opennutritracker/core/styles/app_palette.dart';
+import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
-import 'package:opennutritracker/core/utils/navigation_options.dart';
-import 'package:opennutritracker/features/ai_insights/data/ai_insights_cache_store.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_service.dart';
-import 'package:opennutritracker/features/ai_provider/data/ai_provider_config_store.dart';
-import 'package:opennutritracker/features/ai_provider/domain/llm_provider.dart';
+import 'package:opennutritracker/features/ai_insights/presentation/coach_screen.dart';
 
+/// The Home entry point into CalT Coach — a one-line summary of today's
+/// review when one exists, otherwise a plain invite. Tapping always opens
+/// the full Coach screen; this card itself stays a single line so it
+/// doesn't turn back into the noisy multi-state preview it used to be.
 class AiInsightsCard extends StatefulWidget {
   const AiInsightsCard({super.key});
+
   @override
   State<AiInsightsCard> createState() => _AiInsightsCardState();
 }
 
 class _AiInsightsCardState extends State<AiInsightsCard> {
-  AiInsightsResult? _result;
-  bool _loading = true;
-  bool _configured = false;
+  String? _summaryLine;
+
   @override
   void initState() {
     super.initState();
@@ -23,219 +27,66 @@ class _AiInsightsCardState extends State<AiInsightsCard> {
   }
 
   Future<void> _load() async {
-    final config = await locator<AiProviderConfigStore>().read();
     final cached = await locator<AiInsightsService>().cachedForToday();
-    if (mounted) {
-      setState(() {
-        _configured = config.isConfigured;
-        _result = cached;
-        _loading = false;
-      });
+    if (!mounted || cached == null) return;
+    // The service asks the model for its own one-line natural-language
+    // takeaway ("SUMMARY: Eating well, could use more protein") alongside
+    // the three bullet points, specifically so this card can show a real
+    // summary instead of a mechanically truncated bullet. Fall back to a
+    // truncated first point only for cache entries from before that field
+    // existed, or the rare response that omitted it.
+    final line = cached.summary ?? _firstPointFallback(cached.text);
+    if (line != null && line.isNotEmpty) {
+      setState(() => _summaryLine = line);
     }
   }
 
-  Future<void> _refresh() async {
-    setState(() => _loading = true);
-    try {
-      final result = await locator<AiInsightsService>().generate(force: true);
-      if (mounted) {
-        setState(() => _result = result);
-      }
-    } on LlmException catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.message)));
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not generate insights. Please try again.'),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _loading = false);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.fromLTRB(16, 10, 16, 2),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: _result == null ? null : () => _showFullInsight(context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: _content(context)),
-            if (_result != null) const Icon(Icons.chevron_right_rounded),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  Widget _content(BuildContext context) {
-    if (_loading) {
-      return const LinearProgressIndicator();
-    }
-    if (!_configured) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'CalT coach',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          TextButton(
-            onPressed: () async {
-              await Navigator.of(
-                context,
-              ).pushNamed(NavigationOptions.aiProviderSettingsRoute);
-              _load();
-            },
-            child: const Text('Connect AI for personal coaching'),
-          ),
-        ],
-      );
-    }
-    if (_result == null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'CalT coach',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          TextButton(
-            onPressed: _refresh,
-            child: const Text('Generate your personalized summary'),
-          ),
-        ],
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'CALT COACH',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w900,
-            letterSpacing: .8,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          _twoLinePreview(_result!.text),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-
-  String _twoLinePreview(String review) {
-    final points = review
+  static String? _firstPointFallback(String reviewText) {
+    final points = reviewText
         .split(RegExp(r'\r?\n'))
         .map((line) => line.replaceFirst(RegExp(r'^[-•]\s*'), '').trim())
         .where((line) => line.isNotEmpty)
-        .take(2)
         .toList();
-    return points.isEmpty ? review : points.join('\n');
+    return points.isEmpty ? null : points.first;
   }
-
-  Future<void> _showFullInsight(BuildContext context) => showDialog<void>(
-    context: context,
-    builder: (_) =>
-        _CoachReviewDialog(initialReview: _result!.text, onRefresh: _refresh),
-  );
-}
-
-class _CoachReviewDialog extends StatelessWidget {
-  const _CoachReviewDialog({
-    required this.initialReview,
-    required this.onRefresh,
-  });
-
-  final String initialReview;
-  final Future<void> Function() onRefresh;
-
-  @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: Row(
-      children: [
-        const Expanded(child: Text('CalT coach')),
-        IconButton(
-          tooltip: 'Refresh today\'s review',
-          onPressed: () async {
-            await onRefresh();
-            if (context.mounted) Navigator.pop(context);
-          },
-          icon: const Icon(Icons.refresh_rounded),
-        ),
-      ],
-    ),
-    content: SizedBox(width: 460, child: _ReviewPoints(text: initialReview)),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('Close'),
-      ),
-    ],
-  );
-}
-
-class _ReviewPoints extends StatelessWidget {
-  const _ReviewPoints({required this.text});
-  final String text;
 
   @override
   Widget build(BuildContext context) {
-    final points = text
-        .split(RegExp(r'\r?\n'))
-        .map((line) => line.replaceFirst(RegExp(r'^[-•]\s*'), '').trim())
-        .where((line) => line.isNotEmpty)
-        .toList();
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Today\'s meal review',
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 12),
-        for (final point in points)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.check_circle_outline_rounded,
-                  size: 19,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 10),
-                Expanded(child: Text(point)),
-              ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = isDark ? AppPalette.dark : AppPalette.light;
+    final accent = Theme.of(context).colorScheme.primary;
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
+      child: AppCard(
+        borderRadius: Dimens.radiusL,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const CoachScreen()))
+            .then((_) => _load()),
+        child: Row(
+          children: [
+            Icon(Icons.auto_awesome_rounded, color: accent, size: 22),
+            const SizedBox(width: Dimens.spacing12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('CalT Coach', style: textTheme.titleSmall),
+                  const SizedBox(height: 2),
+                  Text(
+                    _summaryLine ?? 'Tap for today\'s review & chat',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodyMedium?.copyWith(color: palette.textMuted),
+                  ),
+                ],
+              ),
             ),
-          ),
-      ],
+            Icon(Icons.chevron_right_rounded, color: palette.textMuted),
+          ],
+        ),
+      ),
     );
   }
 }

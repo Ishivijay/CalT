@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:opennutritracker/core/data/data_source/config_data_source.dart';
+import 'package:opennutritracker/core/utils/main_tab_controller.dart';
 import 'package:opennutritracker/core/data/data_source/custom_activity_template_data_source.dart';
 import 'package:opennutritracker/core/data/data_source/remote_search_cache_data_source.dart';
 import 'package:opennutritracker/core/data/data_source/custom_meal_data_source.dart';
@@ -92,6 +93,7 @@ import 'package:opennutritracker/features/photo_log/data/photo_food_matcher.dart
 import 'package:opennutritracker/features/photo_log/data/photo_meal_analyzer.dart';
 import 'package:opennutritracker/features/photo_log/domain/save_ai_photo_meals_usecase.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_cache_store.dart';
+import 'package:opennutritracker/features/ai_insights/data/coach_prompt_store.dart';
 import 'package:opennutritracker/features/ai_insights/data/calt_coach_chat_history_store.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_service.dart';
 import 'package:opennutritracker/features/ai_insights/domain/insights_aggregation.dart';
@@ -107,7 +109,6 @@ import 'package:opennutritracker/features/fasting/domain/usecase/get_active_fast
 import 'package:opennutritracker/features/fasting/domain/usecase/start_fasting_usecase.dart';
 import 'package:opennutritracker/features/fasting/presentation/bloc/fasting_bloc.dart';
 import 'package:opennutritracker/features/home/presentation/bloc/home_bloc.dart';
-import 'package:opennutritracker/features/home/domain/usecase/coach_demo_diary_seeder.dart';
 import 'package:opennutritracker/features/meal_detail/presentation/bloc/meal_detail_bloc.dart';
 import 'package:opennutritracker/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'package:opennutritracker/features/profile/presentation/bloc/profile_bloc.dart';
@@ -133,6 +134,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 final locator = GetIt.instance;
 
 Future<void> initLocator() async {
+  locator.registerLazySingleton<MainTabController>(() => MainTabController());
   // Init secure storage and Hive database;
   final secureAppStorageProvider = SecureAppStorageProvider();
   final hiveDBProvider = HiveDBProvider();
@@ -158,6 +160,9 @@ Future<void> initLocator() async {
   );
   locator.registerLazySingleton<PhotoFoodMatcher>(
     () => PhotoFoodMatcher(locator()),
+  );
+  locator.registerLazySingleton<CoachPromptStore>(
+    () => CoachPromptStore(const FlutterSecureStorage()),
   );
   locator.registerLazySingleton<AiInsightsCacheStore>(
     () => AiInsightsCacheStore(const FlutterSecureStorage()),
@@ -213,17 +218,6 @@ Future<void> initLocator() async {
       locator(),
       locator(),
       locator(),
-      locator(),
-      locator(),
-      locator(),
-      locator(),
-      locator(),
-      locator(),
-      locator(),
-    ),
-  );
-  locator.registerLazySingleton(
-    () => CoachDemoDiarySeeder(
       locator(),
       locator(),
       locator(),
@@ -402,10 +396,18 @@ Future<void> initLocator() async {
     () => AddIntakeUsecase(locator()),
   );
   locator.registerLazySingleton<SaveAiPhotoMealsUsecase>(
-    () => SaveAiPhotoMealsUsecase(locator(), locator(), locator(), locator()),
+    () => SaveAiPhotoMealsUsecase(
+      locator(),
+      locator(),
+      locator(),
+      locator(),
+      locator(),
+    ),
   );
   locator.registerLazySingleton<AiInsightsService>(
     () => AiInsightsService(
+      locator(),
+      locator(),
       locator(),
       locator(),
       locator(),

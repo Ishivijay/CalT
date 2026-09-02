@@ -3,6 +3,7 @@ import 'package:opennutritracker/core/domain/entity/intake_entity.dart';
 import 'package:opennutritracker/core/domain/entity/intake_type_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_activity_entity.dart';
 import 'package:opennutritracker/core/domain/usecase/get_intake_usecase.dart';
+import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
 import 'package:opennutritracker/core/utils/navigation_options.dart';
 import 'package:opennutritracker/features/add_activity/presentation/add_activity_screen.dart';
@@ -10,10 +11,6 @@ import 'package:opennutritracker/features/add_meal/presentation/add_meal_screen.
 import 'package:opennutritracker/features/add_meal/presentation/add_meal_type.dart';
 import 'package:opennutritracker/features/add_meal/presentation/widgets/meal_item_card.dart';
 import 'package:opennutritracker/features/photo_log/presentation/photo_log_screen.dart';
-import 'package:opennutritracker/features/home/domain/usecase/coach_demo_diary_seeder.dart';
-import 'package:opennutritracker/features/home/presentation/bloc/home_bloc.dart';
-import 'package:opennutritracker/features/diary/presentation/bloc/calendar_day_bloc.dart';
-import 'package:opennutritracker/features/diary/presentation/bloc/diary_bloc.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
 class AddItemBottomSheet extends StatelessWidget {
@@ -30,6 +27,11 @@ class AddItemBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Every row here is deliberately compact (dense ListTiles, no subtitles,
+    // recent items as a horizontal strip instead of stacked cards) so the
+    // whole menu fits on one screen without scrolling on a typical phone.
+    // SingleChildScrollView stays as a safety net for unusually short
+    // screens rather than risking an overflow.
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -37,251 +39,106 @@ class AddItemBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
               child: Text(
                 S.of(context).addItemLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
             _buildRecentSection(context),
-            if (showActivityTracking) ...[
-              Semantics(
+            if (showActivityTracking)
+              _row(
+                context,
                 identifier: 'add-item-activity',
-                child: ListTile(
-                  title: Text(
-                    S.of(context).activityLabel,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  subtitle: Text(
-                    S.of(context).activityExample,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  // ignore: sized_box_for_whitespace
-                  leading: Container(
-                    height: double.infinity,
-                    child: Icon(
-                      UserActivityEntity.getIconData(),
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  onTap: () {
-                    _showAddActivityScreen(context);
-                  },
-                ),
+                icon: UserActivityEntity.getIconData(),
+                label: S.of(context).activityLabel,
+                onTap: () => _showAddActivityScreen(context),
               ),
-              const Divider(indent: 16, endIndent: 16),
-            ],
-            Semantics(
-              identifier: 'add-item-breakfast',
-              child: ListTile(
-                title: Text(
-                  S.of(context).breakfastLabel,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                subtitle: Text(
-                  S.of(context).breakfastExample,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-                // ignore: sized_box_for_whitespace
-                leading: SizedBox(
-                  height: double.infinity,
-                  child: Icon(IntakeTypeEntity.breakfast.getIconData()),
-                ),
-                onTap: () {
-                  _showAddItemScreen(context, AddMealType.breakfastType);
-                },
-              ),
-            ),
-            Semantics(
-              identifier: 'add-item-lunch',
-              child: ListTile(
-                title: Text(
-                  S.of(context).lunchLabel,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                subtitle: Text(
-                  S.of(context).lunchExample,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-                // ignore: sized_box_for_whitespace
-                leading: Container(
-                  height: double.infinity,
-                  child: Icon(IntakeTypeEntity.lunch.getIconData()),
-                ),
-                onTap: () {
-                  _showAddItemScreen(context, AddMealType.lunchType);
-                },
-              ),
-            ),
-            Semantics(
-              identifier: 'add-item-dinner',
-              child: ListTile(
-                title: Text(
-                  S.of(context).dinnerLabel,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                subtitle: Text(
-                  S.of(context).dinnerExample,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-                // ignore: sized_box_for_whitespace
-                leading: Container(
-                  height: double.infinity,
-                  child: Icon(IntakeTypeEntity.dinner.getIconData()),
-                ),
-                onTap: () {
-                  _showAddItemScreen(context, AddMealType.dinnerType);
-                },
-              ),
-            ),
-            Semantics(
-              identifier: 'add-item-snack',
-              child: ListTile(
-                title: Text(
-                  S.of(context).snackLabel,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                subtitle: Text(
-                  S.of(context).snackExample,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-                // ignore: sized_box_for_whitespace
-                leading: Container(
-                  height: double.infinity,
-                  child: Icon(IntakeTypeEntity.snack.getIconData()),
-                ),
-                onTap: () {
-                  _showAddItemScreen(context, AddMealType.snackType);
-                },
-              ),
-            ),
-            const Divider(indent: 16, endIndent: 16),
-            Semantics(
+            _row(
+              context,
               identifier: 'add-item-photo-log',
-              child: ListTile(
-                title: Text(
-                  'Log with photo',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                subtitle: Text(
-                  'Get an AI estimate, then review it before saving',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-                leading: const SizedBox(
-                  height: double.infinity,
-                  child: Icon(Icons.auto_awesome_outlined),
-                ),
-                onTap: () => _showPhotoLogScreen(context),
-              ),
+              icon: Icons.auto_awesome_outlined,
+              label: 'Log with photo',
+              iconColor: Theme.of(context).colorScheme.primary,
+              onTap: () => _showPhotoLogScreen(context),
             ),
-            const Divider(indent: 16, endIndent: 16),
-            ListTile(
-              title: Text(
-                'Load 7-day CalT test diary',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              subtitle: Text(
-                'Replace test meals with a week of sample foods',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-              leading: SizedBox(
-                height: double.infinity,
-                child: const Icon(Icons.auto_graph_rounded),
-              ),
-              onTap: () => _loadCoachDemo(context),
+            const Divider(height: 1, indent: 16, endIndent: 16),
+            _row(
+              context,
+              identifier: 'add-item-breakfast',
+              icon: IntakeTypeEntity.breakfast.getIconData(),
+              label: S.of(context).breakfastLabel,
+              onTap: () => _showAddItemScreen(context, AddMealType.breakfastType),
             ),
-            const Divider(indent: 16, endIndent: 16),
-            ListTile(
-              title: Text(
-                'Remove CalT test meals',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              subtitle: Text(
-                'Remove only the sample meals added by CalT',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-              leading: const SizedBox(
-                height: double.infinity,
-                child: Icon(Icons.delete_sweep_outlined),
-              ),
-              onTap: () => _removeCoachDemo(context),
+            _row(
+              context,
+              identifier: 'add-item-lunch',
+              icon: IntakeTypeEntity.lunch.getIconData(),
+              label: S.of(context).lunchLabel,
+              onTap: () => _showAddItemScreen(context, AddMealType.lunchType),
             ),
-            const Divider(indent: 16, endIndent: 16),
-            Semantics(
+            _row(
+              context,
+              identifier: 'add-item-dinner',
+              icon: IntakeTypeEntity.dinner.getIconData(),
+              label: S.of(context).dinnerLabel,
+              onTap: () => _showAddItemScreen(context, AddMealType.dinnerType),
+            ),
+            _row(
+              context,
+              identifier: 'add-item-snack',
+              icon: IntakeTypeEntity.snack.getIconData(),
+              label: S.of(context).snackLabel,
+              onTap: () => _showAddItemScreen(context, AddMealType.snackType),
+            ),
+            const Divider(height: 1, indent: 16, endIndent: 16),
+            _row(
+              context,
               identifier: 'add-item-recipes',
-              child: ListTile(
-                title: Text(
-                  S.of(context).recipesLabel,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                // ignore: sized_box_for_whitespace
-                leading: Container(
-                  height: double.infinity,
-                  child: const Icon(Icons.menu_book_outlined),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(
-                    context,
-                  ).pushNamed(NavigationOptions.recipesRoute);
-                },
-              ),
+              icon: Icons.menu_book_outlined,
+              label: S.of(context).recipesLabel,
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed(NavigationOptions.recipesRoute);
+              },
             ),
+            const SizedBox(height: Dimens.spacing8),
           ],
         ),
+      ),
+    );
+  }
+
+  /// One compact, single-line menu row — icon, label, dense vertical
+  /// footprint. No subtitle: with 6-7 of these plus the recent strip on one
+  /// sheet, a caption under every row is what was pushing this into
+  /// scrolling territory.
+  Widget _row(
+    BuildContext context, {
+    required String identifier,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
+    return Semantics(
+      identifier: identifier,
+      child: ListTile(
+        dense: true,
+        visualDensity: const VisualDensity(vertical: -3),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        minLeadingWidth: 28,
+        leading: Icon(icon, color: iconColor, size: 22),
+        title: Text(
+          label,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        onTap: onTap,
       ),
     );
   }
@@ -298,28 +155,44 @@ class AddItemBottomSheet extends StatelessWidget {
         if (intakes == null || intakes.isEmpty) return const SizedBox.shrink();
         // getRecentIntake() already returns the most-recent *unique* foods
         // (the data source dedupes by meal), so take the first few for quick
-        // re-logging. Tapping a card opens its detail pre-filled.
-        final recent = intakes.take(4).toList();
+        // re-logging. A horizontal strip instead of a stacked list — 4
+        // full-width MealItemCards ate more vertical space than the rest of
+        // the menu combined.
+        final recent = intakes.take(6).toList();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Text(
                 S.of(context).recentlyAddedLabel,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            for (final intake in recent)
-              MealItemCard(
-                day: day,
-                mealEntity: intake.meal,
-                addMealType: AddMealExtension.fromIntakeTypeEntity(intake.type),
-                usesImperialUnits: usesImperialUnits,
+            SizedBox(
+              height: 108,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: recent.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (_, index) {
+                  final intake = recent[index];
+                  return SizedBox(
+                    width: 220,
+                    child: MealItemCard(
+                      day: day,
+                      mealEntity: intake.meal,
+                      addMealType: AddMealExtension.fromIntakeTypeEntity(intake.type),
+                      usesImperialUnits: usesImperialUnits,
+                    ),
+                  );
+                },
               ),
-            const Divider(indent: 16, endIndent: 16),
+            ),
+            const Divider(height: 1, indent: 16, endIndent: 16),
           ],
         );
       },
@@ -331,40 +204,6 @@ class AddItemBottomSheet extends StatelessWidget {
     Navigator.of(context).pushNamed(
       NavigationOptions.addMealRoute,
       arguments: AddMealScreenArguments(itemType, day),
-    );
-  }
-
-  Future<void> _loadCoachDemo(BuildContext context) async {
-    final messenger = ScaffoldMessenger.of(context);
-    Navigator.of(context).pop();
-    await locator<CoachDemoDiarySeeder>().seed();
-    locator<HomeBloc>().add(const LoadItemsEvent());
-    locator<DiaryBloc>().add(const LoadDiaryYearEvent());
-    locator<CalendarDayBloc>().add(RefreshCalendarDayEvent());
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Seven days of sample meals added. Generate CalT coach insights now.',
-        ),
-      ),
-    );
-  }
-
-  Future<void> _removeCoachDemo(BuildContext context) async {
-    final messenger = ScaffoldMessenger.of(context);
-    Navigator.of(context).pop();
-    final removed = await locator<CoachDemoDiarySeeder>().removeSampleMeals();
-    locator<HomeBloc>().add(const LoadItemsEvent());
-    locator<DiaryBloc>().add(const LoadDiaryYearEvent());
-    locator<CalendarDayBloc>().add(RefreshCalendarDayEvent());
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          removed == 0
-              ? 'No CalT test meals were found.'
-              : 'Removed $removed CalT test meals.',
-        ),
-      ),
     );
   }
 

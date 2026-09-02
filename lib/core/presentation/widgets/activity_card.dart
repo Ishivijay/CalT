@@ -70,23 +70,44 @@ class ActivityCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        activityEntity.physicalActivityEntity.getName(context),
-                        style: textTheme.titleSmall?.copyWith(color: palette.textStrong),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              activityEntity.physicalActivityEntity.getName(
+                                context,
+                              ),
+                              style: textTheme.titleSmall?.copyWith(
+                                color: palette.textStrong,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (activityEntity.source == 'healthConnect')
+                            Padding(
+                              padding: const EdgeInsets.only(left: 6),
+                              child: Icon(
+                                Icons.sync,
+                                size: 12,
+                                color: accent.withValues(alpha: 0.7),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${activityEntity.duration.toInt()} min',
-                        style: textTheme.bodySmall?.copyWith(color: palette.textMuted),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: palette.textMuted,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: Dimens.spacing8),
                 Text(
-                  "🔥${EnergyDisplay.formatWithUnit(context, activityEntity.burnedKcal)}",
+                  "🔥${EnergyDisplay.formatWithUnit(context, activityEntity.effectiveBurnedKcal)}",
                   style: textTheme.labelMedium?.copyWith(
                     color: palette.textStrong,
                     fontWeight: FontWeight.w700,
@@ -105,7 +126,8 @@ class ActivityCard extends StatelessWidget {
       data: activityEntity,
       onDragStarted: () => onItemDragCallback!.call(true),
       onDragEnd: (_) => onItemDragCallback!.call(false),
-      onDraggableCanceled: (velocity, offset) => onItemDragCallback!.call(false),
+      onDraggableCanceled: (velocity, offset) =>
+          onItemDragCallback!.call(false),
       feedback: Material(
         color: Colors.transparent,
         child: SizedBox(

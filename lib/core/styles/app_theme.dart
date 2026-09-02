@@ -3,35 +3,47 @@ import 'package:flutter/material.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 
-/// Friendly, highly readable type. Nunito carries everything — rounded enough to
-/// feel warm, calm enough to stay legible in dense lists. Heavy weights give the
-/// hero numbers presence without needing a separate display face.
+/// Friendly, playful type pairing. Fredoka (rounded, bubbly) carries display
+/// and headline roles — the big hero numbers and screen titles — where its
+/// personality reads clearly at size. Nunito (warm, humanist) carries body
+/// and label roles, where dense text needs to stay calm and legible rather
+/// than bubbly. Both ship as a single regular-weight file (no bold cut), so
+/// heavier weights below render via Flutter's synthetic bold rather than a
+/// true cut — a fast-follow would bundle the full Google Fonts weight
+/// families for crisper bold rendering, but the single-weight files already
+/// read fine at these sizes.
 TextTheme appTextTheme(AppPalette p) {
-  const f = 'Poppins';
-  TextStyle s(double size, FontWeight w, {double spacing = 0, Color? color}) =>
-      TextStyle(
-        fontFamily: f,
-        fontSize: size,
-        fontWeight: w,
-        letterSpacing: spacing,
-        color: color ?? p.textStrong,
-      );
+  const display = 'Fredoka';
+  const body = 'Nunito';
+  TextStyle s(
+    String family,
+    double size,
+    FontWeight w, {
+    double spacing = 0,
+    Color? color,
+  }) => TextStyle(
+    fontFamily: family,
+    fontSize: size,
+    fontWeight: w,
+    letterSpacing: spacing,
+    color: color ?? p.textStrong,
+  );
   return TextTheme(
-    displayLarge: s(57, FontWeight.w800, spacing: -1),
-    displayMedium: s(45, FontWeight.w800, spacing: -0.5),
-    displaySmall: s(36, FontWeight.w800),
-    headlineLarge: s(32, FontWeight.w800),
-    headlineMedium: s(28, FontWeight.w700),
-    headlineSmall: s(23, FontWeight.w700),
-    titleLarge: s(21, FontWeight.w700),
-    titleMedium: s(16, FontWeight.w700),
-    titleSmall: s(14, FontWeight.w600),
-    bodyLarge: s(16, FontWeight.w500),
-    bodyMedium: s(14, FontWeight.w500),
-    bodySmall: s(12.5, FontWeight.w500, color: p.textMuted),
-    labelLarge: s(15, FontWeight.w700),
-    labelMedium: s(13, FontWeight.w700),
-    labelSmall: s(11.5, FontWeight.w700, color: p.textMuted),
+    displayLarge: s(display, 57, FontWeight.w600, spacing: -1),
+    displayMedium: s(display, 45, FontWeight.w600, spacing: -0.5),
+    displaySmall: s(display, 36, FontWeight.w600),
+    headlineLarge: s(display, 32, FontWeight.w600),
+    headlineMedium: s(display, 28, FontWeight.w600),
+    headlineSmall: s(display, 23, FontWeight.w600),
+    titleLarge: s(display, 21, FontWeight.w600),
+    titleMedium: s(body, 16, FontWeight.w700),
+    titleSmall: s(body, 14, FontWeight.w700),
+    bodyLarge: s(body, 16, FontWeight.w500),
+    bodyMedium: s(body, 14, FontWeight.w500),
+    bodySmall: s(body, 12.5, FontWeight.w500, color: p.textMuted),
+    labelLarge: s(body, 15, FontWeight.w700),
+    labelMedium: s(body, 13, FontWeight.w700),
+    labelSmall: s(body, 11.5, FontWeight.w700, color: p.textMuted),
   );
 }
 

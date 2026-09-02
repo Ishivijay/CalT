@@ -152,7 +152,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         dayStartOffsetMinutes: dayStartOffsetMinutes,
       );
       final totalKcalActivities = userActivities
-          .map((activity) => activity.burnedKcal)
+          .map((activity) => activity.effectiveBurnedKcal)
           .toList()
           .sum;
 
@@ -333,16 +333,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   Future<void> deleteUserActivityItem(UserActivityEntity activityEntity) async {
     final dateTime = await _currentLogicalDay();
     await _deleteUserActivityUsecase.deleteUserActivity(activityEntity);
-    _addTrackedDayUseCase.reduceDayCalorieGoal(
-      dateTime,
-      activityEntity.burnedKcal,
-    );
+    final kcal = activityEntity.effectiveBurnedKcal;
+    _addTrackedDayUseCase.reduceDayCalorieGoal(dateTime, kcal);
 
-    final carbsAmount = MacroCalc.getTotalCarbsGoal(activityEntity.burnedKcal);
-    final fatAmount = MacroCalc.getTotalFatsGoal(activityEntity.burnedKcal);
-    final proteinAmount = MacroCalc.getTotalProteinsGoal(
-      activityEntity.burnedKcal,
-    );
+    final carbsAmount = MacroCalc.getTotalCarbsGoal(kcal);
+    final fatAmount = MacroCalc.getTotalFatsGoal(kcal);
+    final proteinAmount = MacroCalc.getTotalProteinsGoal(kcal);
 
     _addTrackedDayUseCase.reduceDayMacroGoals(
       dateTime,

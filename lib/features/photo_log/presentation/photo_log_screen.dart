@@ -31,6 +31,7 @@ class _PhotoLogScreenState extends State<PhotoLogScreen> {
   final _hint = TextEditingController();
   final _picker = ImagePicker();
   Uint8List? _image;
+  String? _pickedImagePath;
   List<AiPhotoMealItem> _items = const [];
   String? _notes;
   bool _working = false;
@@ -68,6 +69,7 @@ class _PhotoLogScreenState extends State<PhotoLogScreen> {
     if (mounted) {
       setState(() {
         _image = compressed;
+        _pickedImagePath = file.path;
         _items = const [];
         _notes = null;
       });
@@ -123,83 +125,25 @@ class _PhotoLogScreenState extends State<PhotoLogScreen> {
 
   Future<void> _edit(int index) async {
     final item = _items[index];
-    final name = TextEditingController(text: item.name);
-    final grams = TextEditingController(text: item.grams.toStringAsFixed(0));
-    final kcal = TextEditingController(text: item.kcal.toStringAsFixed(0));
-    final protein = TextEditingController(
-      text: item.proteinG.toStringAsFixed(1),
-    );
-    final carbs = TextEditingController(text: item.carbsG.toStringAsFixed(1));
-    final fat = TextEditingController(text: item.fatG.toStringAsFixed(1));
     final changed = await showDialog<AiPhotoMealItem>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit estimate'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _field(name, 'Food name'),
-              _field(grams, 'Grams'),
-              _field(kcal, 'Calories (kcal)'),
-              _field(protein, 'Protein (g)'),
-              _field(carbs, 'Carbs (g)'),
-              _field(fat, 'Fat (g)'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(
-              context,
-              item.copyWith(
-                name: name.text.trim(),
-                grams: _number(grams.text),
-                kcal: _number(kcal.text),
-                proteinG: _number(protein.text),
-                carbsG: _number(carbs.text),
-                fatG: _number(fat.text),
-                clearReferenceMeal: true,
-              ),
-            ),
-            child: const Text('Apply'),
-          ),
-        ],
-      ),
+      builder: (context) => _EditEstimateDialog(item: item),
     );
-    for (final controller in [name, grams, kcal, protein, carbs, fat]) {
-      controller.dispose();
-    }
     if (changed != null && mounted) {
       setState(() => _items = [..._items]..[index] = changed);
     }
   }
 
-  Widget _field(TextEditingController controller, String label) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-      keyboardType: label == 'Food name'
-          ? TextInputType.text
-          : const TextInputType.numberWithOptions(decimal: true),
-    ),
-  );
-  double _number(String text) =>
-      double.tryParse(text.replaceAll(',', '.')) ?? 0;
-
   Future<void> _save() async {
     if (_items.isEmpty) return;
     setState(() => _saving = true);
     try {
-      await locator<SaveAiPhotoMealsUsecase>().save(_items, _type, _day);
+      await locator<SaveAiPhotoMealsUsecase>().save(
+        _items,
+        _type,
+        _day,
+        photoSourcePath: _pickedImagePath,
+      );
       locator<HomeBloc>().add(const LoadItemsEvent());
       locator<DiaryBloc>().add(const LoadDiaryYearEvent());
       locator<CalendarDayBloc>().add(RefreshCalendarDayEvent());
@@ -356,4 +300,107 @@ class _PhotoLogScreenState extends State<PhotoLogScreen> {
       ),
     );
   }
+}
+
+/// Owns its own [TextEditingController]s as State fields so they're only
+/// disposed when the framework actually unmounts this widget, not when the
+/// showDialog() Future resolves — Navigator.pop() completes the future
+/// before the dialog route's exit transition (and any pending IME/focus
+/// callbacks into the still-live EditableText widgets) has finished, so
+/// disposing controllers synchronously after the await throws
+/// "A TextEditingController was used after being disposed."
+class _EditEstimateDialog extends StatefulWidget {
+  const _EditEstimateDialog({required this.item});
+  final AiPhotoMealItem item;
+
+  @override
+  State<_EditEstimateDialog> createState() => _EditEstimateDialogState();
+}
+
+class _EditEstimateDialogState extends State<_EditEstimateDialog> {
+  late final TextEditingController _name;
+  late final TextEditingController _grams;
+  late final TextEditingController _kcal;
+  late final TextEditingController _protein;
+  late final TextEditingController _carbs;
+  late final TextEditingController _fat;
+
+  @override
+  void initState() {
+    super.initState();
+    final item = widget.item;
+    _name = TextEditingController(text: item.name);
+    _grams = TextEditingController(text: item.grams.toStringAsFixed(0));
+    _kcal = TextEditingController(text: item.kcal.toStringAsFixed(0));
+    _protein = TextEditingController(text: item.proteinG.toStringAsFixed(1));
+    _carbs = TextEditingController(text: item.carbsG.toStringAsFixed(1));
+    _fat = TextEditingController(text: item.fatG.toStringAsFixed(1));
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _grams.dispose();
+    _kcal.dispose();
+    _protein.dispose();
+    _carbs.dispose();
+    _fat.dispose();
+    super.dispose();
+  }
+
+  double _number(String text) =>
+      double.tryParse(text.replaceAll(',', '.')) ?? 0;
+
+  Widget _field(TextEditingController controller, String label) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      keyboardType: label == 'Food name'
+          ? TextInputType.text
+          : const TextInputType.numberWithOptions(decimal: true),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Edit estimate'),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _field(_name, 'Food name'),
+          _field(_grams, 'Grams'),
+          _field(_kcal, 'Calories (kcal)'),
+          _field(_protein, 'Protein (g)'),
+          _field(_carbs, 'Carbs (g)'),
+          _field(_fat, 'Fat (g)'),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        onPressed: () => Navigator.pop(
+          context,
+          widget.item.copyWith(
+            name: _name.text.trim(),
+            grams: _number(_grams.text),
+            kcal: _number(_kcal.text),
+            proteinG: _number(_protein.text),
+            carbsG: _number(_carbs.text),
+            fatG: _number(_fat.text),
+            clearReferenceMeal: true,
+          ),
+        ),
+        child: const Text('Apply'),
+      ),
+    ],
+  );
 }

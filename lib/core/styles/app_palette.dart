@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-/// The palette behind the calm friendly-flat redesign.
+/// The palette behind the "Neutral canvas, one quiet accent" redesign.
 ///
-/// A warm-neutral canvas with a gentle surface ladder carries the app; depth
-/// comes from hairline borders and soft shadows, not colour. A single vivid
-/// [accent] (a fresh leaf-green by default, nodding to the nutrition brand) is
-/// the only loud colour and is user-overridable via the accent picker / Material
-/// You. The macro trio (carbs amber, fat coral, protein teal) stays fixed so the
-/// dashboard always reads the same, whatever accent is chosen.
+/// A near-white (near-black in dark mode) neutral canvas carries the app —
+/// no warm tint, no colour except where it means something. Depth comes
+/// from a hairline border alone; cards are flat by default. A single vivid
+/// [accent] (a deep coral by default) is used sparingly — the progress
+/// ring, the primary action, key numbers — not on every icon or badge, and
+/// is user-overridable via the accent picker / Material You. The macro trio
+/// (carbs mango, fat berry-pink, protein sky-blue) stays fixed as genuine
+/// data colour, distinct from decoration.
 class AppPalette {
   final Brightness brightness;
   final Color canvas; // scaffold background
@@ -45,37 +47,41 @@ class AppPalette {
 
   static const light = AppPalette(
     brightness: Brightness.light,
-    canvas: Color(0xFFF2F7F3),
+    canvas: Color(0xFFFAFAF8),
     surface: Color(0xFFFFFFFF),
-    surfaceMuted: Color(0xFFE2EEE7),
-    border: Color(0xFFD4E4D9),
-    shadow: Color(0x14102F29),
-    // Deepened from #1FA971 so white-on-accent and accent-as-text both clear
-    // WCAG AA (~4.6:1) on the light surface — buttons, nav labels and the ring.
-    accent: Color(0xFF1D5D50),
+    surfaceMuted: Color(0xFFF0EFEC),
+    border: Color(0xFFE5E3DE),
+    // Barely-there — flat cards lean on the hairline border for definition,
+    // not a shadow. Kept non-zero only so a card lifted for emphasis (a
+    // dialog, a bottom sheet) still separates from what's behind it.
+    shadow: Color(0x0A1A1A1A),
+    // Deep coral, computed to clear WCAG AA (~5.0:1) for white-on-accent —
+    // the ring, the primary button, the mark's bolt. Used sparingly
+    // elsewhere by design, not painted on every icon.
+    accent: Color(0xFFC7401F),
     onAccent: Color(0xFFFFFFFF),
-    carbsColor: Color(0xFFC17A18),
-    fatColor: Color(0xFFD76342),
-    proteinColor: Color(0xFF3D6DCA),
-    textStrong: Color(0xFF132F2A),
-    // Darkened from #8A857C (~3.5:1) to ~4.6:1 so secondary text passes AA.
-    textMuted: Color(0xFF587068),
+    carbsColor: Color(0xFFD98A15),
+    fatColor: Color(0xFFD14E85),
+    proteinColor: Color(0xFF3B72D6),
+    textStrong: Color(0xFF1A1A18),
+    // ~5.4:1 against the white surface — comfortably clears AA.
+    textMuted: Color(0xFF6B6B66),
   );
 
   static const dark = AppPalette(
     brightness: Brightness.dark,
-    canvas: Color(0xFF0E211D),
-    surface: Color(0xFF142E28),
-    surfaceMuted: Color(0xFF1E3B34),
-    border: Color(0xFF2B4A41),
-    shadow: Color(0x33000000),
-    accent: Color(0xFFB9FF64),
-    onAccent: Color(0xFF123A34),
-    carbsColor: Color(0xFFFFC766),
-    fatColor: Color(0xFFFFA183),
-    proteinColor: Color(0xFF7A9DFF),
-    textStrong: Color(0xFFE8F4EC),
-    textMuted: Color(0xFFA8C1B4),
+    canvas: Color(0xFF121110),
+    surface: Color(0xFF1A1918),
+    surfaceMuted: Color(0xFF242322),
+    border: Color(0xFF333130),
+    shadow: Color(0x40000000),
+    accent: Color(0xFFFF8A65),
+    onAccent: Color(0xFF3A1408),
+    carbsColor: Color(0xFFFFC966),
+    fatColor: Color(0xFFFF9EC4),
+    proteinColor: Color(0xFF8AB4FF),
+    textStrong: Color(0xFFF2F1EF),
+    textMuted: Color(0xFFA8A6A2),
   );
 
   /// Returns a copy with the accent swapped for [newAccent] (accent picker or a

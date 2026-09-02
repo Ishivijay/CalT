@@ -43,8 +43,9 @@ class MealDBO extends HiveObject {
   final MealNutrimentsDBO nutriments;
 
   /// Relative slug (e.g. `meal_images/<code>.webp`) of a user-attached
-  /// photo for this meal. Only ever populated for custom meals — OFF and
-  /// FDC entries carry their thumbnails as remote URLs via
+  /// photo for this meal. Populated for custom meals (typed or edited by
+  /// hand) and for meals created from the AI photo-log flow — never for
+  /// OFF/FDC entries, which carry their thumbnails as remote URLs via
   /// [thumbnailImageUrl] / [mainImageUrl] instead. Stored relative so the
   /// data survives reinstalls and iOS sandbox refreshes.
   @HiveField(13)
@@ -93,26 +94,26 @@ class MealDBO extends HiveObject {
   });
 
   factory MealDBO.fromMealEntity(MealEntity mealEntity) => MealDBO(
-        code: mealEntity.code,
-        name: mealEntity.name,
-        brands: mealEntity.brands,
-        thumbnailImageUrl: mealEntity.thumbnailImageUrl,
-        mainImageUrl: mealEntity.mainImageUrl,
-        url: mealEntity.url,
-        mealQuantity: mealEntity.mealQuantity,
-        mealUnit: mealEntity.mealUnit,
-        servingQuantity: mealEntity.servingQuantity,
-        servingUnit: mealEntity.servingUnit,
-        servingSize: mealEntity.servingSize,
-        nutriments: MealNutrimentsDBO.fromProductNutrimentsEntity(
-          mealEntity.nutriments,
-        ),
-        source: MealSourceDBO.fromMealSourceEntity(mealEntity.source),
-        localImagePath: mealEntity.localImagePath,
-        detailed: mealEntity.detailed,
-        backendSource: mealEntity.backendSource,
-        machineTranslatedName: mealEntity.machineTranslatedName,
-      );
+    code: mealEntity.code,
+    name: mealEntity.name,
+    brands: mealEntity.brands,
+    thumbnailImageUrl: mealEntity.thumbnailImageUrl,
+    mainImageUrl: mealEntity.mainImageUrl,
+    url: mealEntity.url,
+    mealQuantity: mealEntity.mealQuantity,
+    mealUnit: mealEntity.mealUnit,
+    servingQuantity: mealEntity.servingQuantity,
+    servingUnit: mealEntity.servingUnit,
+    servingSize: mealEntity.servingSize,
+    nutriments: MealNutrimentsDBO.fromProductNutrimentsEntity(
+      mealEntity.nutriments,
+    ),
+    source: MealSourceDBO.fromMealSourceEntity(mealEntity.source),
+    localImagePath: mealEntity.localImagePath,
+    detailed: mealEntity.detailed,
+    backendSource: mealEntity.backendSource,
+    machineTranslatedName: mealEntity.machineTranslatedName,
+  );
 
   factory MealDBO.fromJson(Map<String, dynamic> json) =>
       _$MealDBOFromJson(json);

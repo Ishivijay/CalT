@@ -26,9 +26,7 @@ import 'package:opennutritracker/features/home/presentation/widgets/intake_verti
 import 'package:opennutritracker/features/home/presentation/widgets/quick_water_widget.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/quick_weight_widget.dart';
-import 'package:opennutritracker/features/home/domain/usecase/coach_demo_diary_seeder.dart';
 import 'package:opennutritracker/features/ai_insights/presentation/ai_insights_card.dart';
-import 'package:opennutritracker/features/ai_insights/presentation/calt_coach_chat_sheet.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
 class HomePage extends StatefulWidget {
@@ -222,12 +220,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     EmptyHint(
                       icon: Icons.restaurant_menu_rounded,
                       title: 'Your diary is ready',
-                      subtitle:
-                          'Log food or activity, or load a 7-day test diary to try CalT coach.',
+                      subtitle: 'Log food or activity to try CalT coach.',
                       actionLabel: 'Log food or activity',
                       onAction: () => _openAddSheet(context),
-                      secondaryActionLabel: 'Load 7-day CalT test diary',
-                      onSecondaryAction: () => _loadCoachDemo(context),
                     ),
                   if (CalorieGoalCalc.isBelowRecommendedDailyKcalFloor(
                     goalKcal: totalKcalDaily,
@@ -316,18 +311,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ],
         ),
         Align(
-          alignment: Alignment.bottomRight,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 16, 16),
-            child: FloatingActionButton.extended(
-              heroTag: 'calt-coach-chat',
-              onPressed: () => showCalTCoachChat(context),
-              icon: const Icon(Icons.chat_bubble_rounded),
-              label: const Text('Ask CalT'),
-            ),
-          ),
-        ),
-        Align(
           alignment: Alignment.bottomCenter,
           child: Visibility(
             visible: _isDragging,
@@ -398,19 +381,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         day: DateTime.now(),
         showActivityTracking: config.showActivityTracking,
         usesImperialUnits: config.usesImperialFoodUnits,
-      ),
-    );
-  }
-
-  Future<void> _loadCoachDemo(BuildContext context) async {
-    await locator<CoachDemoDiarySeeder>().seed();
-    _homeBloc.add(const LoadItemsEvent());
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Seven days of sample meals added. Tap CalT coach to generate insights.',
-        ),
       ),
     );
   }

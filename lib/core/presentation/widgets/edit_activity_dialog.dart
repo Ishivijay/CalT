@@ -19,6 +19,7 @@ class _EditActivityDialogState extends State<EditActivityDialog> {
   bool _didSeed = false;
 
   bool get _isCustom => widget.activityEntity.physicalActivityEntity.isCustom;
+  bool get _isSynced => widget.activityEntity.source == 'healthConnect';
 
   @override
   void initState() {
@@ -55,6 +56,31 @@ class _EditActivityDialogState extends State<EditActivityDialog> {
         ? (usesKj ? S.of(context).kjLabel : S.of(context).kcalLabel)
         : 'min';
 
+    if (_isSynced) {
+      return AlertDialog(
+        title: Text(S.of(context).editItemDialogTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.sync, size: 32),
+            const SizedBox(height: 12),
+            Text(
+              'This activity was synced from Health Connect. '
+              'Editing is disabled for synced entries.',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(S.of(context).dialogCloseLabel),
+          ),
+        ],
+      );
+    }
+
     return AlertDialog(
       title: Text(S.of(context).editItemDialogTitle),
       content: Column(
@@ -68,8 +94,8 @@ class _EditActivityDialogState extends State<EditActivityDialog> {
               decoration: InputDecoration(
                 labelText: _isCustom
                     ? (usesKj
-                        ? S.of(context).mealEnergyLabel
-                        : S.of(context).customActivityKcalLabel)
+                          ? S.of(context).mealEnergyLabel
+                          : S.of(context).customActivityKcalLabel)
                     : S.of(context).quantityLabel,
                 suffixText: suffix,
               ),

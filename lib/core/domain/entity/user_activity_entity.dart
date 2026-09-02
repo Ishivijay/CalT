@@ -18,6 +18,12 @@ class UserActivityEntity extends Equatable {
   /// reasoning.
   final double? userKcal;
 
+  /// Provenance — 'manual', 'healthConnect', or 'shared'.
+  final String source;
+
+  /// Health Connect record UID for dedup on re-sync. Null for manual/shared.
+  final String? externalId;
+
   const UserActivityEntity(
     this.id,
     this.duration,
@@ -25,6 +31,8 @@ class UserActivityEntity extends Equatable {
     this.date,
     this.physicalActivityEntity, {
     this.userKcal,
+    this.source = 'manual',
+    this.externalId,
   });
 
   factory UserActivityEntity.fromUserActivityDBO(UserActivityDBO activityDBO) {
@@ -37,16 +45,26 @@ class UserActivityEntity extends Equatable {
         activityDBO.physicalActivityDBO,
       ),
       userKcal: activityDBO.userKcal,
+      source: activityDBO.source,
+      externalId: activityDBO.externalId,
     );
   }
 
   /// The kcal value to display and aggregate for this activity. Prefers
-  /// the user-entered value when one is present (Custom activities),
+  /// the user-entered or Health-Connect-sourced value when present,
   /// otherwise falls back to the MET-computed [burnedKcal].
   double get effectiveBurnedKcal => userKcal ?? burnedKcal;
 
   @override
-  List<Object?> get props => [id, duration, burnedKcal, date, userKcal];
+  List<Object?> get props => [
+    id,
+    duration,
+    burnedKcal,
+    date,
+    userKcal,
+    source,
+    externalId,
+  ];
 
   static IconData getIconData() => Icons.directions_run_outlined;
 }

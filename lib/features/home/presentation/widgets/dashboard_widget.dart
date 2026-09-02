@@ -6,6 +6,8 @@ import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/calc/unit_calc.dart';
 import 'package:opennutritracker/core/utils/energy_unit_provider.dart';
+import 'package:opennutritracker/core/utils/locator.dart';
+import 'package:opennutritracker/core/utils/main_tab_controller.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 import 'package:provider/provider.dart';
@@ -86,122 +88,121 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         Dimens.spacing16,
         Dimens.spacing4,
       ),
-      child: Column(
-        children: [
-          AppCard(
-            padding: const EdgeInsets.fromLTRB(
-              Dimens.spacing24,
-              Dimens.spacing20,
-              Dimens.spacing24,
-              Dimens.spacing24,
-            ),
-            child: Column(
+      child: AppCard(
+        padding: const EdgeInsets.fromLTRB(
+          Dimens.spacing20,
+          Dimens.spacing20,
+          Dimens.spacing20,
+          Dimens.spacing20,
+        ),
+        child: Column(
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    _MiniStat(
-                      icon: Icons.arrow_downward_rounded,
-                      value: '${displaySupplied.toInt()}',
-                      label: S.of(context).suppliedLabel,
-                      color: palette.proteinColor,
-                    ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const SourcesScreen(),
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.info_outline_rounded,
-                        color: palette.textMuted,
-                        size: 22,
-                      ),
-                    ),
-                    const Spacer(),
-                    _MiniStat(
-                      icon: Icons.local_fire_department_rounded,
-                      value: '${displayBurned.toInt()}',
-                      label: S.of(context).burnedLabel,
-                      color: palette.carbsColor,
-                      trailing: true,
-                    ),
-                  ],
+                _MiniStat(
+                  icon: Icons.arrow_downward_rounded,
+                  value: '${displaySupplied.toInt()}',
+                  label: S.of(context).suppliedLabel,
+                  color: palette.proteinColor,
                 ),
-                const SizedBox(height: Dimens.spacing16),
-                Semantics(
-                  label: '${displayValue.toInt()} $kcalLabelText',
-                  excludeSemantics: true,
-                  child: CircularPercentIndicator(
-                    radius: 90,
-                    lineWidth: 16,
-                    percent: gaugeValue.clamp(0.0, 1.0),
-                    animation: true,
-                    animationDuration: 800,
-                    curve: AppMotion.emphasized,
-                    circularStrokeCap: CircularStrokeCap.round,
-                    backgroundColor: palette.surfaceMuted,
-                    progressColor: Theme.of(context).colorScheme.primary,
-                    center: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedFlipCounter(
-                          duration: const Duration(milliseconds: 800),
-                          curve: AppMotion.emphasized,
-                          value: displayValue.toInt(),
-                          textStyle: textTheme.displaySmall?.copyWith(
-                            height: 1,
-                          ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SourcesScreen()),
+                  ),
+                  child: Icon(
+                    Icons.info_outline_rounded,
+                    color: palette.textMuted,
+                    size: 22,
+                  ),
+                ),
+                const Spacer(),
+                _MiniStat(
+                  icon: Icons.local_fire_department_rounded,
+                  value: '${displayBurned.toInt()}',
+                  label: S.of(context).burnedLabel,
+                  color: palette.carbsColor,
+                  trailing: true,
+                ),
+              ],
+            ),
+            const SizedBox(height: Dimens.spacing16),
+            // Tap the ring to jump straight to the Diary — the ring only
+            // ever shows today's kcal-left at a glance; anyone who wants the
+            // detail behind that number taps through to it instead of the
+            // ring itself trying to carry multiple meanings.
+            GestureDetector(
+              onTap: () => locator<MainTabController>().showDiary(),
+              child: Semantics(
+                identifier: 'dashboard-ring-open-diary',
+                label:
+                    '${displayValue.toInt()} $kcalLabelText. Tap to open your diary.',
+                excludeSemantics: true,
+                child: CircularPercentIndicator(
+                  radius: 80,
+                  lineWidth: 14,
+                  percent: gaugeValue.clamp(0.0, 1.0),
+                  animation: true,
+                  animationDuration: 800,
+                  curve: AppMotion.emphasized,
+                  circularStrokeCap: CircularStrokeCap.round,
+                  backgroundColor: palette.surfaceMuted,
+                  progressColor: palette.accent,
+                  center: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedFlipCounter(
+                        duration: const Duration(milliseconds: 800),
+                        curve: AppMotion.emphasized,
+                        value: displayValue.toInt(),
+                        textStyle: textTheme.displayMedium?.copyWith(height: 1),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        kcalLabelText,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: palette.textMuted,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          kcalLabelText,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: palette.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: Dimens.spacing16),
+            Row(
+              children: [
+                Expanded(
+                  child: _MacroRingTile(
+                    label: S.of(context).carbsLabel,
+                    intake: widget.totalCarbsIntake,
+                    goal: widget.totalCarbsGoal,
+                    color: palette.carbsColor,
+                    palette: palette,
+                  ),
+                ),
+                Expanded(
+                  child: _MacroRingTile(
+                    label: S.of(context).fatLabel,
+                    intake: widget.totalFatsIntake,
+                    goal: widget.totalFatsGoal,
+                    color: palette.fatColor,
+                    palette: palette,
+                  ),
+                ),
+                Expanded(
+                  child: _MacroRingTile(
+                    label: S.of(context).proteinLabel,
+                    intake: widget.totalProteinsIntake,
+                    goal: widget.totalProteinsGoal,
+                    color: palette.proteinColor,
+                    palette: palette,
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: Dimens.spacing12),
-          Row(
-            children: [
-              Expanded(
-                child: _MacroTile(
-                  label: S.of(context).carbsLabel,
-                  intake: widget.totalCarbsIntake,
-                  goal: widget.totalCarbsGoal,
-                  color: palette.carbs,
-                  palette: palette,
-                ),
-              ),
-              const SizedBox(width: Dimens.spacing12),
-              Expanded(
-                child: _MacroTile(
-                  label: S.of(context).fatLabel,
-                  intake: widget.totalFatsIntake,
-                  goal: widget.totalFatsGoal,
-                  color: palette.fat,
-                  palette: palette,
-                ),
-              ),
-              const SizedBox(width: Dimens.spacing12),
-              Expanded(
-                child: _MacroTile(
-                  label: S.of(context).proteinLabel,
-                  intake: widget.totalProteinsIntake,
-                  goal: widget.totalProteinsGoal,
-                  color: palette.protein,
-                  palette: palette,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -246,14 +247,17 @@ class _MiniStat extends StatelessWidget {
   }
 }
 
-class _MacroTile extends StatelessWidget {
+/// A macro's progress as its own small ring instead of a flat bar — reads
+/// at a glance next to the two others, and echoes the big ring above it
+/// instead of switching visual language halfway down the card.
+class _MacroRingTile extends StatelessWidget {
   final String label;
   final double intake;
   final double goal;
   final Color color;
   final AppPalette palette;
 
-  const _MacroTile({
+  const _MacroRingTile({
     required this.label,
     required this.intake,
     required this.goal,
@@ -264,45 +268,38 @@ class _MacroTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = (goal <= 0) ? 0.0 : (intake / goal).clamp(0.0, 1.0);
-    return AppCard(
-      borderRadius: Dimens.radiusM,
-      padding: const EdgeInsets.fromLTRB(
-        Dimens.spacing16,
-        Dimens.spacing16,
-        Dimens.spacing16,
-        Dimens.spacing16,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Dimens.spacing12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: pct,
-              minHeight: 8,
-              backgroundColor: palette.surfaceMuted,
-              valueColor: AlwaysStoppedAnimation(color),
+    final left = (goal - intake).clamp(0, goal).round();
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      children: [
+        CircularPercentIndicator(
+          radius: 36,
+          lineWidth: 7,
+          percent: pct,
+          animation: true,
+          animationDuration: 700,
+          curve: AppMotion.emphasized,
+          circularStrokeCap: CircularStrokeCap.round,
+          backgroundColor: palette.surfaceMuted,
+          progressColor: color,
+          // Grams left, not a percentage — the number itself is the useful
+          // fact, so the ring can carry it directly instead of needing a
+          // separate "Xg / Yg" line underneath. The ring fill still shows
+          // progress toward the goal (intake/goal).
+          center: Text(
+            '${left}g',
+            style: textTheme.labelMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w800,
             ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: Dimens.spacing8),
+        // "left" spelled out here, at full size and contrast, rather than
+        // crammed into the ring itself — a 9px caption squeezed next to the
+        // bold number inside a 58px ring wasn't actually legible.
+        Text('$label left', style: textTheme.labelMedium),
+      ],
     );
   }
 }
