@@ -69,3 +69,6 @@ ios/vendor/
 key.properties
 *.jks
 *.keystore
+
+# Distributed via GitHub Releases, not committed
+*.apk
