@@ -20,7 +20,6 @@ Your diary is stored locally on-device. API keys are kept in encrypted platform 
 - Food search, custom meals, barcode lookup, and photo meal logging
 - CalT Coach: concise, profile-aware daily meal review, an editable prompt, and a persistent local chat
 - Weight and water tracking, fasting timer, trends, data export/import, and offline-friendly local storage
-- Optional **Load 7-day CalT test diary** action from the Add (`+`) menu for repeatable sample data; **Remove CalT test meals** removes only those generated samples
 
 ## Run on Android
 
@@ -67,10 +66,6 @@ CalT works without an AI provider. To enable the photo estimate and CalT Coach:
 4. Use **Test connection** before trying photo analysis or coaching.
 
 The provider account must have access to the chosen model and any required billing or quota. AI responses are suggestions, not medical advice; review food estimates before saving them.
-
-## Sample data
-
-Open the Add (`+`) menu and choose **Load 7-day CalT test diary**. It creates one week of clearly marked example meals so you can try the dashboard, diary, calendar, and coach without logging real data first. It never loads automatically. Choose **Remove CalT test meals** to clean it up.
 
 ## Validation
 
