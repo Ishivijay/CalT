@@ -21,40 +21,15 @@ Your diary is stored locally on-device. API keys are kept in encrypted platform 
 - CalT Coach: concise, profile-aware daily meal review, an editable prompt, and a persistent local chat
 - Weight and water tracking, fasting timer, trends, data export/import, and offline-friendly local storage
 
-## Run on Android
+## Install on Android
 
-### Requirements
+1. Download the latest `CalT.apk` from [Releases](https://github.com/Ishivijay/CalT/releases/latest).
+2. Open the downloaded file on your phone. If Android blocks it, allow installs from your browser or file manager under **Settings → Apps → Install unknown apps**, then open the file again.
+3. Install and open CalT.
 
-- Flutter stable (the project currently uses Flutter 3.44.7)
-- Android SDK and either an Android device with USB debugging enabled or an Android emulator
+No Flutter setup, no build step — just download and install.
 
-### Install dependencies and run
-
-```sh
-flutter pub get
-flutter devices
-flutter run --flavor full
-```
-
-To build a sideloadable debug APK instead:
-
-```sh
-flutter build apk --debug --flavor full
-```
-
-The resulting APK is at:
-
-```text
-build/app/outputs/flutter-apk/app-full-debug.apk
-```
-
-Install it on a connected device with:
-
-```sh
-adb install build/app/outputs/flutter-apk/app-full-debug.apk
-```
-
-If Android reports that the package already exists with a different signature, uninstall that old app from the device first, then install the APK again.
+If Android reports that the package already exists with a different signature (e.g. you previously sideloaded a debug build), uninstall that old app first, then install this APK.
 
 ## Optional AI setup
 
@@ -67,11 +42,14 @@ CalT works without an AI provider. To enable the photo estimate and CalT Coach:
 
 The provider account must have access to the chosen model and any required billing or quota. AI responses are suggestions, not medical advice; review food estimates before saving them.
 
-## Validation
+## Building from source (contributors)
+
+Most people should just [install the APK](#install-on-android) above. If you're contributing code:
 
 ```sh
+flutter pub get
 flutter test test/features/home/presentation/widgets/intake_vertical_list_test.dart
-flutter build apk --debug --flavor full
+flutter run --flavor full
 ```
 
 ## License and attribution
