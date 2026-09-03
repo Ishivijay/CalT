@@ -1,9 +1,7 @@
 class URLConst {
   static const paCompendium2011URL = "https://pacompendium.com/";
   static const privacyPolicyURLEn =
-      "https://www.iubenda.com/privacy-policy/53501884";
-  static const privacyPolicyURLDe =
-      "https://www.iubenda.com/privacy-policy/53922100";
+      "https://github.com/Ishivijay/CalT/blob/main/PRIVACY.md";
 
   // Citations for the in-app medical/health calculations. Surfaced on the
   // Sources & References screen (see `sources_screen.dart`) so that users

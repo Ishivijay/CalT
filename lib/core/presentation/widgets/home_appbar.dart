@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:opennutritracker/core/presentation/widgets/dynamic_ont_logo.dart';
+import 'package:opennutritracker/core/presentation/widgets/calt_logo_mark.dart';
 import 'package:opennutritracker/features/ai_insights/presentation/coach_screen.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
@@ -11,7 +11,7 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Row(
         children: [
-          const SizedBox(width: 40, child: DynamicOntLogo()),
+          const SizedBox(width: 40, child: CaltLogoMark()),
           Expanded(
             child: RichText(
               text: TextSpan(

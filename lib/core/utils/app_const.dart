@@ -5,9 +5,8 @@ class AppConst {
   static const userAgentAppName = "CalT";
   static const platformNameAndroid = "Android";
   static const platformNameIOS = "iOS";
-  static const reportErrorEmail = "opennutritracker-dev@pm.me";
-  static const sourceCodeUrl =
-      "https://github.com/simonoppowa/OpenNutriTracker";
+  static const reportErrorUrl = "https://github.com/Ishivijay/CalT/issues/new";
+  static const sourceCodeUrl = "https://github.com/Ishivijay/CalT";
 
   static Future<String> getVersionNumber() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();

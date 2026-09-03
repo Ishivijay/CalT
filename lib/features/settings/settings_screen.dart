@@ -5,7 +5,7 @@ import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart
 import 'package:opennutritracker/core/presentation/sources_screen.dart';
 import 'package:opennutritracker/core/presentation/widgets/app_banner_version.dart';
 import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
-import 'package:opennutritracker/core/presentation/widgets/dynamic_ont_logo.dart';
+import 'package:opennutritracker/core/presentation/widgets/calt_logo_mark.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/presentation/widgets/disclaimer_dialog.dart';
@@ -1176,17 +1176,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _reportError(BuildContext context) async {
-    final reportUri = Uri.parse(
-      "mailto:${AppConst.reportErrorEmail}?subject=Report_Error",
-    );
+    final reportUri = Uri.parse(AppConst.reportErrorUrl);
 
     if (await canLaunchUrl(reportUri)) {
-      launchUrl(reportUri);
+      launchUrl(reportUri, mode: LaunchMode.externalApplication);
     } else {
-      // Cannot open email app, show error snackbar
+      // Cannot open a browser, show error snackbar
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).errorOpeningEmail)),
+          SnackBar(content: Text(S.of(context).errorOpeningBrowser)),
         );
       }
     }
@@ -1250,7 +1248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         applicationIcon: const SizedBox(
           width: 40,
           height: 40,
-          child: DynamicOntLogo(),
+          child: CaltLogoMark(),
         ),
         applicationVersion: packageInfo.version,
         applicationLegalese: S.of(context).appLicenseLabel,
