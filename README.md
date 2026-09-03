@@ -1,12 +1,8 @@
 # CalT — a frictionless calorie tracker
 
-CalT is an Android-first nutrition tracker built on top of the open-source OpenNutriTracker project. It adapts that foundation into a distinct, compact calorie-tracking experience with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
+CalT is an Android-first, open-source nutrition tracker built on top of the open-source OpenNutriTracker project. It adapts that foundation into a distinct, compact calorie-tracking experience with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
 
 This is a working Flutter application. The Android package ID is `com.calt.tracker`, so it installs separately from OpenNutriTracker.
-
-## Challenge category
-
-**Health & Fitness**
 
 ## How it works
 
@@ -22,9 +18,9 @@ Your diary is stored locally on-device. API keys are kept in encrypted platform 
 - Daily calorie and macro targets with progress rings
 - Meal diary with edit, delete, calendar, recipes, and activities
 - Food search, custom meals, barcode lookup, and photo meal logging
-- CalT Coach: concise, profile-aware daily meal review and persistent local chat history
+- CalT Coach: concise, profile-aware daily meal review, an editable prompt, and a persistent local chat
 - Weight and water tracking, fasting timer, trends, data export/import, and offline-friendly local storage
-- Optional **Load 7-day CalT test diary** action from the Add (`+`) menu for repeatable demo data; **Remove CalT test meals** removes only those generated samples
+- Optional **Load 7-day CalT test diary** action from the Add (`+`) menu for repeatable sample data; **Remove CalT test meals** removes only those generated samples
 
 ## Run on Android
 
@@ -72,22 +68,9 @@ CalT works without an AI provider. To enable the photo estimate and CalT Coach:
 
 The provider account must have access to the chosen model and any required billing or quota. AI responses are suggestions, not medical advice; review food estimates before saving them.
 
-## Sample data for a demo
+## Sample data
 
-Open the Add (`+`) menu and choose **Load 7-day CalT test diary**. It creates one week of clearly marked example meals for demonstrating the dashboard, diary, calendar, and coach. It never loads automatically. Choose **Remove CalT test meals** to clean it up.
-
-## Built with Codex and GPT-5.6
-
-CalT was built iteratively with Codex using GPT-5.6. Codex accelerated the work by turning product feedback into working Flutter changes, including the separate CalT Android identity, compact dashboard, profile-aware coach prompts, local chat history, photo logging flows, test-data seeding, and Android build troubleshooting.
-
-Key implementation decisions were made directly in the project:
-
-- Keep the core diary local and usable without an AI subscription.
-- Make AI opt-in and BYOK, using encrypted local key storage.
-- Keep coach output tied to the person's profile and today's meals rather than generic wellness copy.
-- Focus the challenge submission on the separate CalT Android build, with repeatable in-app sample data for judging.
-
-For the demo video, show the profile, meal logging, dashboard, seven-day test diary, CalT Coach, and the Android APK running on a phone. Explain that Codex and GPT-5.6 were used to iterate from the product requirements to the final Flutter implementation.
+Open the Add (`+`) menu and choose **Load 7-day CalT test diary**. It creates one week of clearly marked example meals so you can try the dashboard, diary, calendar, and coach without logging real data first. It never loads automatically. Choose **Remove CalT test meals** to clean it up.
 
 ## Validation
 
