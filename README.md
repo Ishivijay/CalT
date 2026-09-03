@@ -21,6 +21,16 @@ Your diary is stored locally on-device. API keys are kept in encrypted platform 
 - CalT Coach: concise, profile-aware daily meal review, an editable prompt, and a persistent local chat
 - Weight and water tracking, fasting timer, trends, data export/import, and offline-friendly local storage
 
+## Screenshots
+
+| Home | Add a meal | Log with photo |
+|---|---|---|
+| ![Home dashboard](docs/screenshots/01_home.png) | ![Add menu](docs/screenshots/02_add_menu.png) | ![Log with photo](docs/screenshots/03_photo_log.png) |
+
+| Diary | CalT Coach | Profile |
+|---|---|---|
+| ![Diary](docs/screenshots/04_diary.png) | ![CalT Coach](docs/screenshots/05_coach.png) | ![Profile](docs/screenshots/06_profile.png) |
+
 ## Install on Android
 
 1. Download the latest `CalT.apk` from [Releases](https://github.com/Ishivijay/CalT/releases/latest).
