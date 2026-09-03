@@ -102,6 +102,25 @@ class _ProfilePageState extends State<ProfilePage> {
           nutritionalStatus: userBMIEntity.nutritionalStatus,
         ),
         const SizedBox(height: Dimens.spacing32),
+        _SectionHeader(label: 'AI features', palette: palette),
+        const SizedBox(height: Dimens.spacing12),
+        _ProfileGroup(
+          palette: palette,
+          tiles: [
+            _ProfileTile(
+              identifier: 'profile-ai-provider',
+              palette: palette,
+              icon: Icons.auto_awesome_rounded,
+              title: 'AI Provider (BYOK)',
+              subtitle: 'Configure your private AI connection',
+              showChevron: true,
+              onTap: () => Navigator.of(
+                context,
+              ).pushNamed(NavigationOptions.aiProviderSettingsRoute),
+            ),
+          ],
+        ),
+        const SizedBox(height: Dimens.spacing24),
         _SectionHeader(label: S.of(context).goalLabel, palette: palette),
         const SizedBox(height: Dimens.spacing12),
         _ProfileGroup(
