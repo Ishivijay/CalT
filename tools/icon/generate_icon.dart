@@ -121,9 +121,63 @@ void main() {
     return;
   }
 
-  _write(_render(_master), 'assets/icon/calt_icon_master_1024.png');
+  final master = _render(_master);
+  _write(master, 'assets/icon/calt_icon_master_1024.png');
   _write(_render(_foreground), 'assets/icon/calt_icon_foreground_1024.png');
   _write(_render(_monochrome), 'assets/icon/calt_icon_monochrome_1024.png');
+
+  // A rounded 512px cut for the README header, so the logo shown on
+  // GitHub is the same mark the launcher shows rather than a hard square.
+  Directory('docs').createSync(recursive: true);
+  _write(
+    _roundCorners(
+      img.copyResize(
+        master,
+        width: 512,
+        height: 512,
+        interpolation: img.Interpolation.cubic,
+      ),
+      0.225,
+    ),
+    'docs/logo.png',
+  );
+}
+
+/// Masks [image] to a rounded square, [radiusRatio] of its width, with a
+/// one-pixel feathered edge so the corners don't stair-step.
+img.Image _roundCorners(img.Image image, double radiusRatio) {
+  final w = image.width.toDouble();
+  final half = w / 2;
+  final radius = w * radiusRatio;
+  final inner = half - radius;
+  final out = img.Image(width: image.width, height: image.height, numChannels: 4);
+
+  for (var y = 0; y < image.height; y++) {
+    for (var x = 0; x < image.width; x++) {
+      final px = (x + 0.5 - half).abs() - inner;
+      final py = (y + 0.5 - half).abs() - inner;
+      // Signed distance to the rounded square.
+      final qx = math.max(px, 0.0);
+      final qy = math.max(py, 0.0);
+      final d =
+          math.sqrt(qx * qx + qy * qy) + math.min(math.max(px, py), 0.0) - radius;
+      final coverage = (0.5 - d).clamp(0.0, 1.0);
+      if (coverage <= 0) {
+        out.setPixelRgba(x, y, 0, 0, 0, 0);
+        continue;
+      }
+      final p = image.getPixel(x, y);
+      out.setPixelRgba(
+        x,
+        y,
+        p.r.toInt(),
+        p.g.toInt(),
+        p.b.toInt(),
+        (coverage * 255).round(),
+      );
+    }
+  }
+  return out;
 }
 
 void _write(img.Image image, String path) {

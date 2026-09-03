@@ -1,4 +1,16 @@
-# CalT — a frictionless calorie tracker
+<p align="center">
+  <img src="docs/logo.png" width="128" alt="CalT logo">
+</p>
+
+<h1 align="center">CalT</h1>
+
+<p align="center"><em>A frictionless calorie tracker</em></p>
+
+<p align="center">
+  <a href="https://github.com/Ishivijay/CalT/releases/latest"><img src="https://img.shields.io/github/v/release/Ishivijay/CalT?label=download%20apk&color=C7401F" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/platform-Android-141210" alt="Android">
+  <img src="https://img.shields.io/badge/license-GPL--3.0-141210" alt="GPL-3.0">
+</p>
 
 CalT is an Android-first, open-source nutrition tracker built on top of the open-source OpenNutriTracker project. It adapts that foundation into a distinct, compact calorie-tracking experience with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
 
