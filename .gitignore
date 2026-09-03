@@ -64,3 +64,8 @@ result
 
 # Fastlane / Bundler — local gem install path (bundle config set path vendor/bundle)
 ios/vendor/
+
+# Release signing (never commit real signing material)
+key.properties
+*.jks
+*.keystore
