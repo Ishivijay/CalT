@@ -3,18 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 
-/// Friendly, playful type pairing. Fredoka (rounded, bubbly) carries display
-/// and headline roles — the big hero numbers and screen titles — where its
-/// personality reads clearly at size. Nunito (warm, humanist) carries body
-/// and label roles, where dense text needs to stay calm and legible rather
-/// than bubbly. Both ship as a single regular-weight file (no bold cut), so
-/// heavier weights below render via Flutter's synthetic bold rather than a
-/// true cut — a fast-follow would bundle the full Google Fonts weight
-/// families for crisper bold rendering, but the single-weight files already
-/// read fine at these sizes.
+/// One family, differentiated by weight. Manrope is a geometric sans with
+/// tight, even numerals, which is what the interface leans on hardest — the
+/// hero kcal figure and the macro grams are the first thing read on every
+/// screen. Rounded display faces made those numbers look soft; this reads
+/// calm and precise instead, and using the same family for body and labels
+/// keeps the whole surface coherent rather than pairing a crisp headline
+/// against softer body text.
+///
+/// Ships as true 400/500/600/700 cuts instanced from the Google Fonts
+/// variable original, so every weight below is a real one rather than a
+/// synthesised bold.
 TextTheme appTextTheme(AppPalette p) {
-  const display = 'Fredoka';
-  const body = 'Nunito';
+  const display = 'Manrope';
+  const body = 'Manrope';
   TextStyle s(
     String family,
     double size,

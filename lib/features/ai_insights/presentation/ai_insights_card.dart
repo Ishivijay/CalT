@@ -41,14 +41,8 @@ class _AiInsightsCardState extends State<AiInsightsCard> {
     }
   }
 
-  static String? _firstPointFallback(String reviewText) {
-    final points = reviewText
-        .split(RegExp(r'\r?\n'))
-        .map((line) => line.replaceFirst(RegExp(r'^[-•]\s*'), '').trim())
-        .where((line) => line.isNotEmpty)
-        .toList();
-    return points.isEmpty ? null : points.first;
-  }
+  static String? _firstPointFallback(String reviewText) =>
+      AiInsightsService.bulletPoints(reviewText).firstOrNull;
 
   @override
   Widget build(BuildContext context) {

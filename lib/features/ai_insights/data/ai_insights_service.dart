@@ -118,6 +118,24 @@ Answer exactly three short bullet points, each no more than 28 words: one non-ob
     return result;
   }
 
+  /// Splits a review into its individual points, stripping whatever list
+  /// syntax the model happened to use. Models reach for markdown even when
+  /// the instruction doesn't ask for it — `*` and `-` bullets, sometimes a
+  /// numbered list, sometimes `**bold**` around the lead-in — and the
+  /// review is rendered as plain text beside our own bullet icons, so any
+  /// leftover marker shows up verbatim on screen as "* Pairing tofu...".
+  static List<String> bulletPoints(String raw) {
+    // A single `*` is a bullet; a doubled one opens markdown bold, so it is
+    // left for the emphasis strip below rather than eaten as a marker.
+    final marker = RegExp(r'^\s*(?:[-•–—]+|\*(?!\*)|\d+[.)])\s*');
+    final emphasis = RegExp(r'(\*\*|__)');
+    return raw
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.replaceFirst(marker, '').replaceAll(emphasis, '').trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+  }
+
   /// Pulls the "SUMMARY: ..." line requested by [_summaryLineInstruction]
   /// out of the raw response, leaving the three bullet points on their own
   /// (that's what the Coach screen's "Today's review" section renders —

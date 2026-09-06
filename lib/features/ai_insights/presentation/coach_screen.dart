@@ -348,11 +348,7 @@ class _InsightSection extends StatelessWidget {
         child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
       );
     } else {
-      final points = result!.text
-          .split(RegExp(r'\r?\n'))
-          .map((line) => line.replaceFirst(RegExp(r'^[-•]\s*'), '').trim())
-          .where((line) => line.isNotEmpty)
-          .toList();
+      final points = AiInsightsService.bulletPoints(result!.text);
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
