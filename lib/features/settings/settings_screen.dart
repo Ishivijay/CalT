@@ -1251,7 +1251,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: CaltLogoMark(),
         ),
         applicationVersion: packageInfo.version,
-        applicationLegalese: S.of(context).appLicenseLabel,
+        applicationLegalese:
+            '${S.of(context).appLicenseLabel}\n\n'
+            'CalT is built on ${AppConst.upstreamProjectName}, an open-source '
+            'nutrition tracker, and remains licensed under the GPL-3.0.',
         children: [
           TextButton(
             onPressed: () {
@@ -1262,6 +1265,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Icon(Icons.code_outlined),
                 const SizedBox(width: 8.0),
                 Text(S.of(context).settingsSourceCodeLabel),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () => _launchUrl(
+              context,
+              Uri.parse(AppConst.upstreamProjectUrl),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.favorite_outline),
+                const SizedBox(width: 8.0),
+                Text('Built on ${AppConst.upstreamProjectName}'),
               ],
             ),
           ),

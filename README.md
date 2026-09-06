@@ -12,7 +12,9 @@
   <img src="https://img.shields.io/badge/license-GPL--3.0-141210" alt="GPL-3.0">
 </p>
 
-CalT is an Android-first, open-source nutrition tracker built on top of the open-source OpenNutriTracker project. It adapts that foundation into a distinct, compact calorie-tracking experience with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
+CalT is an Android-first, open-source nutrition tracker with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
+
+> **CalT is built on [OpenNutriTracker](https://github.com/simonoppowa/OpenNutriTracker)** by [@simonoppowa](https://github.com/simonoppowa) and its contributors. That project provides the foundation CalT is built from — the food databases, diary, calorie and macro engine, and local encrypted storage. CalT adds a redesigned interface, photo-based logging, and the AI coach on top of it, and remains licensed under the GPL-3.0. See [Credits](#credits).
 
 This is a working Flutter application. The Android package ID is `com.calt.tracker`, so it installs separately from OpenNutriTracker.
 
@@ -101,9 +103,20 @@ flutter test test/features/home/presentation/widgets/intake_vertical_list_test.d
 flutter run --flavor full
 ```
 
-## License and attribution
+## Credits
 
-CalT is a derivative of OpenNutriTracker and remains licensed under the [GNU General Public License v3.0](LICENSE). It uses Open Food Facts and optional food-data backends; see the in-app **Sources & References** screen for nutrition references. The project has been materially adapted into the CalT Android experience described above.
+**[OpenNutriTracker](https://github.com/simonoppowa/OpenNutriTracker)** — the project CalT is built on, created by [@simonoppowa](https://github.com/simonoppowa) and its contributors. The unglamorous, correctness-critical half of a food tracker was already solved there: barcode scanning, the multi-source food database, TDEE and macro maths, AES-encrypted local storage, data export/import, and eight-language support. CalT would not exist without it, and every one of those subsystems is still doing the heavy lifting underneath.
+
+What CalT adds on top: a rebuilt visual identity, photo-based meal logging, the CalT Coach (daily review, editable instructions, bring-your-own-key AI), and a reorganised dashboard and diary.
+
+Also credited:
+
+- **[Open Food Facts](https://world.openfoodfacts.org/)** — the collaborative food database behind search and barcode lookup.
+- **USDA FoodData Central** and the other nutrition sources — see the in-app **Sources & References** screen for the full citation list.
+
+## License
+
+CalT is a derivative work of OpenNutriTracker and remains licensed under the [GNU General Public License v3.0](LICENSE), the same licence as the upstream project. If you distribute CalT or a modified version, the GPL-3.0 requires that you keep it under the same licence, credit the upstream project, and make your source available.
 
 ## Disclaimer
 

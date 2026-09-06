@@ -8,6 +8,14 @@ class AppConst {
   static const reportErrorUrl = "https://github.com/Ishivijay/CalT/issues/new";
   static const sourceCodeUrl = "https://github.com/Ishivijay/CalT";
 
+  /// CalT is a GPL-3.0 derivative of OpenNutriTracker. The upstream
+  /// project is credited in the About dialog and linked from there —
+  /// separate from [sourceCodeUrl], which points at this fork so bug
+  /// reports reach the people who can act on them.
+  static const upstreamProjectName = "OpenNutriTracker";
+  static const upstreamProjectUrl =
+      "https://github.com/simonoppowa/OpenNutriTracker";
+
   static Future<String> getVersionNumber() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     return packageInfo.version;
