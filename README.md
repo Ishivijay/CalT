@@ -55,14 +55,41 @@ If Android reports that the package already exists with a different signature (e
 
 ## Optional AI setup
 
-CalT works without an AI provider. To enable the photo estimate and CalT Coach:
+CalT works fully without AI — search, barcodes, the diary and the dashboard all run offline. Two features are opt-in and need a key you supply yourself: **Log with photo** and **CalT Coach**. One connection powers both.
 
-1. Open **Settings → AI Provider (BYOK)**.
-2. Select the provider that issued your key.
-3. Enter a model ID supported by that provider and save the key.
-4. Use **Test connection** before trying photo analysis or coaching.
+### Worked example: Gemini
 
-The provider account must have access to the chosen model and any required billing or quota. AI responses are suggestions, not medical advice; review food estimates before saving them.
+1. **Get a key.** Go to [Google AI Studio](https://aistudio.google.com/apikey) and create an API key. Gemini has a free tier that's enough for daily use.
+2. **Open the settings.** In the app, go to the **You** tab → **AI features** → **AI Provider (BYOK)**. (The same screen is reachable from Settings, or from the provider tile inside CalT Coach.)
+3. **Fill in three fields:**
+
+   | Field | Value |
+   |---|---|
+   | Provider | `Gemini` |
+   | Model ID | `gemini-flash-latest` |
+   | API key | paste the key from step 1 |
+
+   Leave **Base URL** alone — it only appears for *Custom OpenAI-compatible* providers.
+4. **Tap "Test connection".** You should get a success message within a couple of seconds. If it fails, the message says why — usually a mistyped key or a model your account can't reach.
+5. **Tap "Save securely".** The key is written to encrypted device storage, never to the diary database, logs, or crash reports.
+
+### What that unlocks
+
+- **Log with photo** — the `+` menu → **Log with photo** → take or pick a photo → **Estimate nutrition**. The photo is sent to Gemini, which returns an estimated meal and macros; you review and edit before anything is saved.
+- **CalT Coach** — the Coach tab shows a three-point review of *today's* food and activity, and a one-line summary on the Home card. You can ask follow-up questions, and edit the instructions the coach is given from the same screen.
+
+### Other providers
+
+| Provider | Example Model ID |
+|---|---|
+| Gemini | `gemini-flash-latest` |
+| OpenAI | `gpt-4o-mini` |
+| Anthropic | `claude-haiku-4-5-20251001` |
+| Custom OpenAI-compatible | your server's model name, plus a **Base URL** like `https://host/v1` |
+
+Requests go directly from your phone to the provider you picked — CalT has no server in between. Your account needs access to the chosen model and any billing or quota it requires. Vision-capable models are needed for photo estimates; text-only models will still work for the coach.
+
+AI responses are suggestions, not medical advice — review food estimates before saving them.
 
 ## Building from source (contributors)
 
