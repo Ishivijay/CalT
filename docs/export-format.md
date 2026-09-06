@@ -11,7 +11,7 @@ symmetric, and that lives alongside the JSON in the same bundle.
 ## Zip layout
 
 The export is a single `.zip` file (default filename
-`opennutritracker-export.zip`). It contains:
+`calt-export.zip`). It contains:
 
 | File                  | Format | Notes                                                              |
 | --------------------- | ------ | ------------------------------------------------------------------ |
