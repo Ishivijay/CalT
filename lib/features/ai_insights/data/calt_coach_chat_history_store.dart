@@ -18,15 +18,21 @@ class CalTCoachChatMessage {
 }
 
 /// Keeps the private CalT conversation on this device, alongside the other
-/// AI-related local data. Scoped to the current calendar day: the coach's
-/// answers only ever reason about *today's* diary (see
-/// AiInsightsService._todayEntries/_todayActivities), so surfacing a
-/// previous day's questions and answers next to today's would misrepresent
-/// stale advice as still current, not just clutter the sheet. A single key
-/// with an embedded `savedAt` timestamp (mirroring AiInsightsCacheStore's
-/// day-check) keeps this self-resetting without growing a new storage
-/// entry per day forever — a stale day's content just reads back empty and
-/// gets overwritten by the next save().
+/// AI-related local data, and resets it each calendar day.
+///
+/// The reset is a deliberate choice rather than a consequence of what the
+/// coach can see. It once was the latter — answers only reasoned about
+/// *today's* diary, so yesterday's advice would have read as still current
+/// — but the chat now also receives 7-, 30- and 180-day context (see
+/// AiInsightsService.answerQuestion), and a question about last month's
+/// patterns would still be valid tomorrow. What keeps the day scope is
+/// that the coach surface is meant to be about the day you are in, and an
+/// ephemeral transcript bounds how much conversation sits in storage.
+///
+/// A single key with an embedded `savedAt` timestamp (mirroring
+/// AiInsightsCacheStore's day-check) keeps this self-resetting without
+/// growing a new storage entry per day forever — a stale day's content
+/// just reads back empty and gets overwritten by the next save().
 class CalTCoachChatHistoryStore {
   CalTCoachChatHistoryStore(this._storage);
 
