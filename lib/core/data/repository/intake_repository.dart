@@ -36,6 +36,27 @@ class IntakeRepository {
     return await _intakeDataSource.getAllIntakes();
   }
 
+  /// Every intake between [from] and [to], inclusive of both days.
+  ///
+  /// Reads the box once and filters in memory rather than issuing one query
+  /// per day and meal type — the coach asks for a month at a time, and the
+  /// per-day path would be 120 round trips for the same rows.
+  Future<List<IntakeEntity>> getIntakeByDateRange(
+    DateTime from,
+    DateTime to,
+  ) async {
+    final start = DateTime(from.year, from.month, from.day);
+    final end = DateTime(to.year, to.month, to.day).add(const Duration(days: 1));
+    final all = await _intakeDataSource.getAllIntakes();
+    return all
+        .where(
+          (dbo) =>
+              !dbo.dateTime.isBefore(start) && dbo.dateTime.isBefore(end),
+        )
+        .map((dbo) => IntakeEntity.fromIntakeDBO(dbo))
+        .toList();
+  }
+
   Future<List<IntakeEntity>> getIntakeByDateAndType(
     IntakeTypeEntity intakeType,
     DateTime date, {

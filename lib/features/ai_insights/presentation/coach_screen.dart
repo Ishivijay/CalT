@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
@@ -12,11 +13,15 @@ import 'package:opennutritracker/features/ai_provider/data/ai_provider_config_st
 import 'package:opennutritracker/features/ai_provider/domain/ai_provider_config.dart';
 import 'package:opennutritracker/features/ai_provider/domain/llm_provider.dart';
 
+/// Deliberately spans the windows the coach can actually reach — today,
+/// the past week, the past month, and the longer record — so the range of
+/// what it can be asked is visible from the chips rather than something
+/// you have to guess at.
 const _exampleQuestions = <String>[
-  'How can I add more protein today?',
-  'Am I on track for my goal this week?',
   'What should I eat for dinner tonight?',
-  'Is my sugar intake too high today?',
+  'How has my week been?',
+  'What changed in my eating this month?',
+  'Am I consistent, or do I log in bursts?',
 ];
 
 /// CalT coach's own screen: today's review, which AI provider/model is
@@ -131,8 +136,15 @@ class _CoachScreenState extends State<CoachScreen> {
       _question.clear();
     });
     await _saveHistory();
+    await _answer(trimmed);
+  }
+
+  /// Sends [question] and appends the reply. Split out from [_ask] because
+  /// regenerating and editing re-run a question that is already in the
+  /// transcript — they must not append a second copy of it.
+  Future<void> _answer(String question) async {
     try {
-      final answer = await locator<AiInsightsService>().answerQuestion(trimmed);
+      final answer = await locator<AiInsightsService>().answerQuestion(question);
       if (mounted) {
         setState(
           () => _messages.add(CalTCoachChatMessage(text: answer, isUser: false)),
@@ -148,6 +160,57 @@ class _CoachScreenState extends State<CoachScreen> {
     }
   }
 
+  Future<void> _copyMessage(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Copied')));
+  }
+
+  /// Throws away the answer at [index] and everything after it, then asks
+  /// the question above it again. Later turns were written in reply to the
+  /// answer being discarded, so keeping them would leave the transcript
+  /// referring to text that is no longer there.
+  Future<void> _regenerate(int index) async {
+    if (_asking) return;
+    final question = _questionBefore(index);
+    if (question == null) return;
+    setState(() {
+      _asking = true;
+      _messages.removeRange(index, _messages.length);
+    });
+    await _saveHistory();
+    await _answer(question);
+  }
+
+  /// Rewrites the question at [index] and re-asks it, dropping the replaced
+  /// exchange and everything that followed for the same reason.
+  Future<void> _editAndResend(int index) async {
+    if (_asking) return;
+    final edited = await showDialog<String>(
+      context: context,
+      builder: (context) =>
+          _EditMessageDialog(initialText: _messages[index].text),
+    );
+    final trimmed = edited?.trim();
+    if (trimmed == null || trimmed.isEmpty) return;
+    setState(() {
+      _asking = true;
+      _messages.removeRange(index, _messages.length);
+      _messages.add(CalTCoachChatMessage(text: trimmed, isUser: true));
+    });
+    await _saveHistory();
+    await _answer(trimmed);
+  }
+
+  String? _questionBefore(int index) {
+    for (var i = index - 1; i >= 0; i--) {
+      if (_messages[i].isUser) return _messages[i].text;
+    }
+    return null;
+  }
+
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
@@ -159,12 +222,10 @@ class _CoachScreenState extends State<CoachScreen> {
   }
 
   Future<void> _editPrompt() async {
-    final controller = TextEditingController(text: _instruction);
     final saved = await showDialog<bool>(
       context: context,
-      builder: (context) => _PromptEditorDialog(controller: controller),
+      builder: (context) => _PromptEditorDialog(initialText: _instruction),
     );
-    controller.dispose();
     if (saved == true) _load();
   }
 
@@ -204,7 +265,8 @@ class _CoachScreenState extends State<CoachScreen> {
                   Text('Ask CalT', key: _askSectionKey, style: textTheme.titleSmall),
                   const SizedBox(height: 4),
                   Text(
-                    'Ask about today\'s meals, your goals, or try one of these:',
+                    'Ask about today, this week, this month, or your habits '
+                    'overall — or try one of these:',
                     style: textTheme.bodyMedium?.copyWith(color: palette.textMuted),
                   ),
                   const SizedBox(height: Dimens.spacing8),
@@ -237,33 +299,52 @@ class _CoachScreenState extends State<CoachScreen> {
                   if (_loadingHistory)
                     const Center(child: CircularProgressIndicator())
                   else
-                    for (final message in _messages)
+                    for (final (index, message) in _messages.indexed)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10),
-                        child: Align(
-                          alignment: message.isUser
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 330),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: message.isUser
-                                    ? palette.accent.withValues(alpha: 0.16)
-                                    : palette.surfaceMuted,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Text(
-                                  message.text,
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: palette.textStrong,
+                        child: Column(
+                          crossAxisAlignment: message.isUser
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 330),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: message.isUser
+                                      ? palette.accent.withValues(alpha: 0.16)
+                                      : palette.surfaceMuted,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: SelectableText(
+                                    message.text,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: palette.textStrong,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
+                            _MessageActions(
+                              palette: palette,
+                              isUser: message.isUser,
+                              enabled: !_asking,
+                              onCopy: () => _copyMessage(message.text),
+                              onEdit: message.isUser
+                                  ? () => _editAndResend(index)
+                                  : null,
+                              // Only offer a retry where there is a question
+                              // above to retry; a stray leading answer from
+                              // an older transcript has nothing to re-ask.
+                              onRegenerate:
+                                  !message.isUser &&
+                                      _questionBefore(index) != null
+                                  ? () => _regenerate(index)
+                                  : null,
+                            ),
+                          ],
                         ),
                       ),
                   if (_asking)
@@ -499,9 +580,138 @@ class _InstructionsTile extends StatelessWidget {
   }
 }
 
-class _PromptEditorDialog extends StatelessWidget {
-  const _PromptEditorDialog({required this.controller});
-  final TextEditingController controller;
+/// The quiet row of actions under a chat bubble: copy either side, edit and
+/// re-send your own question, or ask for another attempt at an answer.
+/// Deliberately understated — these sit under every message, so anything
+/// heavier would compete with the conversation itself.
+class _MessageActions extends StatelessWidget {
+  const _MessageActions({
+    required this.palette,
+    required this.isUser,
+    required this.enabled,
+    required this.onCopy,
+    this.onEdit,
+    this.onRegenerate,
+  });
+
+  final AppPalette palette;
+  final bool isUser;
+  final bool enabled;
+  final VoidCallback onCopy;
+  final VoidCallback? onEdit;
+  final VoidCallback? onRegenerate;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget action(IconData icon, String tooltip, VoidCallback? onPressed) =>
+        IconButton(
+          icon: Icon(icon, size: 16),
+          tooltip: tooltip,
+          onPressed: enabled ? onPressed : null,
+          color: palette.textMuted,
+          visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 34, minHeight: 30),
+        );
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (onEdit != null) action(Icons.edit_outlined, 'Edit', onEdit),
+          if (onRegenerate != null)
+            action(Icons.refresh_rounded, 'Regenerate', onRegenerate),
+          action(Icons.copy_rounded, 'Copy', onCopy),
+        ],
+      ),
+    );
+  }
+}
+
+/// Edits one question before re-sending it. Owns its controller for the same
+/// lifecycle reason as [_PromptEditorDialog] below.
+class _EditMessageDialog extends StatefulWidget {
+  const _EditMessageDialog({required this.initialText});
+  final String initialText;
+
+  @override
+  State<_EditMessageDialog> createState() => _EditMessageDialogState();
+}
+
+class _EditMessageDialogState extends State<_EditMessageDialog> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialText,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Edit question'),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Sending this again replaces the original question and everything '
+          'after it.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _controller,
+          autofocus: true,
+          minLines: 2,
+          maxLines: 6,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        onPressed: () => Navigator.pop(context, _controller.text),
+        child: const Text('Send'),
+      ),
+    ],
+  );
+}
+
+/// Owns its own [TextEditingController].
+///
+/// The caller used to create the controller, `await showDialog(...)`, then
+/// dispose it on the next line. That disposes it while the dialog is still
+/// animating out with the [TextField] mounted and listening, which tears the
+/// element tree down out of order — `InheritedElement.debugDeactivated`
+/// then trips its `_dependents.isEmpty` assertion and the screen goes red.
+/// Tying the controller to this widget's own lifecycle means it outlives the
+/// exit transition and is disposed exactly once, after the field is gone.
+class _PromptEditorDialog extends StatefulWidget {
+  const _PromptEditorDialog({required this.initialText});
+  final String initialText;
+
+  @override
+  State<_PromptEditorDialog> createState() => _PromptEditorDialogState();
+}
+
+class _PromptEditorDialogState extends State<_PromptEditorDialog> {
+  late final TextEditingController controller = TextEditingController(
+    text: widget.initialText,
+  );
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => AlertDialog(
@@ -541,13 +751,17 @@ class _PromptEditorDialog extends StatelessWidget {
       ),
       FilledButton(
         onPressed: () async {
+          // Resolved before the await: reaching for the Navigator through
+          // `context` afterwards is the same use-after-teardown hazard the
+          // controller had.
+          final navigator = Navigator.of(context);
           final text = controller.text.trim();
           if (text.isEmpty || text == AiInsightsService.defaultReviewInstruction) {
             await locator<CoachPromptStore>().clear();
           } else {
             await locator<CoachPromptStore>().save(text);
           }
-          if (context.mounted) Navigator.pop(context, true);
+          navigator.pop(true);
         },
         child: const Text('Save'),
       ),

@@ -97,6 +97,12 @@ class GetIntakeUsecase {
     return _intakeRepository.getRecentIntake();
   }
 
+  /// Every intake between [from] and [to] inclusive, for callers that need a
+  /// stretch of history at once rather than a single day.
+  Future<List<IntakeEntity>> getIntakeByDateRange(DateTime from, DateTime to) {
+    return _intakeRepository.getIntakeByDateRange(from, to);
+  }
+
   Future<IntakeEntity?> getIntakeById(String intakeId) async {
     return _intakeRepository.getIntakeById(intakeId);
   }

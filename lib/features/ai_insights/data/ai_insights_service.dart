@@ -4,8 +4,12 @@ import 'package:opennutritracker/core/domain/usecase/get_intake_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_kcal_goal_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_macro_goal_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_user_activity_usecase.dart';
+import 'package:opennutritracker/core/domain/usecase/get_tracked_day_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_user_usecase.dart';
+import 'package:opennutritracker/core/domain/entity/tracked_day_entity.dart';
+import 'package:opennutritracker/core/domain/entity/intake_type_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_entity.dart';
+import 'package:opennutritracker/features/ai_insights/domain/insights_aggregation.dart';
 import 'package:opennutritracker/core/domain/entity/user_pal_entity.dart';
 import 'package:opennutritracker/core/domain/entity/user_weight_goal_entity.dart';
 import 'package:opennutritracker/features/ai_insights/data/ai_insights_cache_store.dart';
@@ -25,6 +29,8 @@ class AiInsightsService {
     this._cache,
     this._activity,
     this._promptStore,
+    this._aggregator,
+    this._trackedDay,
   );
   final GetIntakeUsecase _intake;
   final GetKcalGoalUsecase _kcalGoal;
@@ -35,6 +41,14 @@ class AiInsightsService {
   final AiInsightsCacheStore _cache;
   final GetUserActivityUsecase _activity;
   final CoachPromptStore _promptStore;
+  final InsightsAggregator _aggregator;
+  final GetTrackedDayUsecase _trackedDay;
+
+  /// How far back the chat looks when someone asks about longer-term
+  /// habits. The 7- and 30-day windows come from the diary itself; this
+  /// wider one reads the per-day totals, which are cheap to scan and
+  /// already carry each day's goal alongside what was actually eaten.
+  static const _longRangeDays = 180;
 
   /// The built-in coaching instruction, shown to the user as the starting
   /// point when they open the prompt editor and used whenever they haven't
@@ -178,12 +192,32 @@ Answer exactly three short bullet points, each no more than 28 words: one non-ob
         (customInstruction != null && customInstruction.trim().isNotEmpty)
         ? customInstruction.trim()
         : 'You are CalT, a practical nutrition coach.';
+    final now = DateTime.now();
+    final history = await _intake.getIntakeByDateRange(
+      now.subtract(const Duration(days: 29)),
+      now,
+    );
+    final trackedDays = await _trackedDay.getTrackedDaysByRange(
+      DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(const Duration(days: _longRangeDays - 1)),
+      now,
+    );
+    final patterns = _aggregator.aggregate(history, now);
+
     final response = await _providerFactory.create(config).sendTextPrompt(
-      '''$persona Answer the user's question using their exact profile, goal, targets, today's logged meals, AND today's exercise/activity below. Be concise, specific, and helpful. Do not diagnose or make medical claims. If the diary does not contain the information needed, say so clearly. Do not use markdown.
+      '''$persona Answer the user's question using the profile, targets and diary history below. Be concise, specific and helpful. Do not diagnose or make medical claims. Do not use markdown.
+
+The question may be about today, about a recent stretch of days, or about their habits over months. Read it and use whichever window it actually asks about — today's meals for "what should I eat tonight", the 7- or 30-day summary for "how has my week been", the longer history for "am I consistent" or "has anything changed". When you cite a pattern, say which period it comes from so they know what you looked at. Days with nothing logged are gaps in the record, not days of eating nothing — never treat a missing day as a zero, and if a period is too sparse to support an answer, say so instead of inferring a trend from a handful of days.
 
 ${_profileContext(user, kcalGoal, macroGoals)}
 ${_todayDiaryContext(await _todayEntries())}
 ${_todayActivityContext(await _todayActivities())}
+${_periodContext('Last 7 days', patterns.last7Days)}
+${_periodContext('Last 30 days', patterns.last30Days)}
+${_longRangeContext(trackedDays)}
 
 User question: $trimmed''',
     );
@@ -193,6 +227,69 @@ User question: $trimmed''',
     }
     return text;
   }
+
+  /// A 7- or 30-day window rendered as averages rather than raw rows.
+  ///
+  /// Averages are over *logged* days, not calendar days — someone who
+  /// tracked four days out of seven eats an average over those four, and
+  /// dividing by seven would invent a deficit that never happened. The
+  /// logged-day count is stated so the model can judge how much the
+  /// numbers are worth.
+  String _periodContext(String label, NutritionPeriodSummary summary) {
+    if (summary.loggedDays == 0) {
+      return '$label: nothing logged.';
+    }
+    final logged = summary.loggedDays;
+    String perDay(double total) => (total / logged).round().toString();
+    final meals = summary.mealCounts.entries
+        .where((entry) => entry.value > 0)
+        .map((entry) => '${_mealTypeLabel(entry.key)} ${entry.value}')
+        .join(', ');
+    final foods = summary.foodNames.isEmpty
+        ? ''
+        : '\nFoods logged in this period: ${summary.foodNames.join(', ')}.';
+    return '$label ($logged of ${summary.days} days logged): '
+        'average per logged day ${perDay(summary.kcal)} kcal, '
+        '${perDay(summary.carbs)}g carbs, ${perDay(summary.protein)}g protein, '
+        '${perDay(summary.fat)}g fat.'
+        '${meals.isEmpty ? '' : '\nMeals recorded: $meals.'}$foods';
+  }
+
+  /// The long tail, read from per-day totals so it stays cheap. Each day
+  /// carries the goal that applied at the time, which is what makes
+  /// "am I consistent" answerable rather than guesswork.
+  String _longRangeContext(List<TrackedDayEntity> days) {
+    final logged = days.where((day) => day.caloriesTracked > 0).toList();
+    if (logged.isEmpty) {
+      return 'Longer history: nothing logged in the last $_longRangeDays days.';
+    }
+    logged.sort((a, b) => a.day.compareTo(b.day));
+    final kcal = logged.fold<double>(0, (sum, day) => sum + day.caloriesTracked);
+    final onTarget = logged
+        .where(
+          (day) =>
+              day.calorieGoal > 0 &&
+              (day.caloriesTracked - day.calorieGoal).abs() /
+                      day.calorieGoal <=
+                  0.1,
+        )
+        .length;
+    final first = logged.first.day;
+    final span = DateTime.now().difference(first).inDays + 1;
+    return 'Longer history: ${logged.length} days logged since '
+        '${first.year}-${first.month.toString().padLeft(2, '0')}-'
+        '${first.day.toString().padLeft(2, '0')} '
+        '(a $span-day span, within the last $_longRangeDays days). '
+        'Average ${(kcal / logged.length).round()} kcal per logged day. '
+        '$onTarget of those days landed within 10% of that day\'s calorie goal.';
+  }
+
+  String _mealTypeLabel(IntakeTypeEntity type) => switch (type) {
+    IntakeTypeEntity.breakfast => 'breakfast',
+    IntakeTypeEntity.lunch => 'lunch',
+    IntakeTypeEntity.dinner => 'dinner',
+    IntakeTypeEntity.snack => 'snacks',
+  };
 
   Future<List<IntakeEntity>> _todayEntries() async {
     final now = DateTime.now();

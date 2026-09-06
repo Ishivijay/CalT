@@ -18,8 +18,12 @@ void main() {
       entry(DateTime(2026, 7, 14, 12), IntakeTypeEntity.lunch, 50),
       entry(DateTime(2026, 6, 20, 12), IntakeTypeEntity.dinner, 100),
     ], now);
-    expect(result.last7Days.kcal, 200);
-    expect(result.last7Days.loggedDays, 1);
+    // The 7-day window runs from `today - 6 days`, so it covers the 14th
+    // through the 20th inclusive — seven calendar days ending today. The
+    // lunch on the 14th sits exactly on that boundary and counts; the
+    // dinner on 6-20 falls a day outside the 30-day window and does not.
+    expect(result.last7Days.kcal, 300);
+    expect(result.last7Days.loggedDays, 2);
     expect(result.last30Days.kcal, 300);
     expect(result.last30Days.mealCounts[IntakeTypeEntity.lunch], 1);
     expect(result.last30Days.mealCounts[IntakeTypeEntity.dinner], 0);
