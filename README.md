@@ -12,38 +12,71 @@
   <img src="https://img.shields.io/badge/license-GPL--3.0-141210" alt="GPL-3.0">
 </p>
 
-CalT is an Android-first, open-source nutrition tracker with a searchable food diary, barcode lookup, photo-based meal estimates, and an optional personal AI coach.
+**Log a meal by photographing it. Get a coach that reads your diary and tells you something the numbers don't.**
 
-> **CalT is built on [OpenNutriTracker](https://github.com/simonoppowa/OpenNutriTracker)** by [@simonoppowa](https://github.com/simonoppowa) and its contributors. That project provides the foundation CalT is built from — the food databases, diary, calorie and macro engine, and local encrypted storage. CalT adds a redesigned interface, photo-based logging, and the AI coach on top of it, and remains licensed under the GPL-3.0. See [Credits](#credits).
+CalT is an Android-first, open-source nutrition tracker. Underneath it is a complete, conventional food diary — search, barcodes, macros, recipes, weight and water. On top of that sit the two features CalT was actually built for, and the rest of this page is mostly about them.
 
-This is a working Flutter application. The Android package ID is `com.calt.tracker`, so it installs separately from OpenNutriTracker.
+> **CalT is built on [OpenNutriTracker](https://github.com/simonoppowa/OpenNutriTracker)** by [@simonoppowa](https://github.com/simonoppowa) and its contributors, and remains licensed under the GPL-3.0. That project provides the entire foundation described below — the food databases, diary, calorie and macro engine, and encrypted local storage. See [Credits](#credits).
 
-## How it works
+The Android package ID is `com.calt.tracker`, so it installs alongside OpenNutriTracker rather than replacing it.
 
-1. Create a profile with your age, height, weight, activity level, and goal.
-2. Log meals by searching, scanning a barcode, quick-adding, building a recipe, or reviewing an AI photo estimate.
-3. Follow calories and macro targets from the compact home dashboard.
-4. Optionally connect your own OpenAI, Gemini, Anthropic, or OpenAI-compatible provider in **Settings → AI Provider**. CalT Coach uses the profile and today's logged meals to give a concise, non-medical review and answer follow-up questions.
+---
 
-Your diary is stored locally on-device. API keys are kept in encrypted platform storage and are only used when you choose an AI feature.
+## The two features CalT adds
 
-## Features
+Both are opt-in, both run on **your own** AI key, and both send data straight from your phone to the provider you picked — CalT operates no server. [Setup takes about a minute.](#turn-the-ai-features-on)
 
-- Daily calorie and macro targets with progress rings
-- Meal diary with edit, delete, calendar, recipes, and activities
-- Food search, custom meals, barcode lookup, and photo meal logging
-- CalT Coach: concise, profile-aware daily meal review, an editable prompt, and a persistent local chat
-- Weight and water tracking, fasting timer, trends, data export/import, and offline-friendly local storage
+### 1. Log with photo
+
+<img src="docs/screenshots/03_photo_log.png" width="230" align="right" alt="The Log with photo screen">
+
+Photograph the plate instead of describing it.
+
+From the `+` menu, choose **Log with photo**, take a picture or pick one from your gallery, and optionally add a hint — *"large portion"*, *"cooked in butter"* — for anything the camera can't see. Tap **Estimate nutrition** and the photo goes to your AI provider, which comes back with an identified dish, an estimated portion weight, and a macro breakdown.
+
+Nothing is saved until you say so. The estimate lands in the normal meal editor, where you can correct the name, adjust the grams, or fix a macro before it goes in the diary — the model proposes, you decide.
+
+The photo itself is kept with the entry, so a week later the diary shows what you actually ate, not just a row of numbers.
+
+Needs a vision-capable model. `gemini-flash-latest` handles it on the free tier.
+
+<br clear="right">
+
+### 2. CalT Coach
+
+<img src="docs/screenshots/05_coach.png" width="230" align="right" alt="The CalT Coach screen">
+
+Most trackers can already tell you that you ate 40g of protein. That's a readout, not coaching — you can see it on the dashboard.
+
+So the coach is explicitly instructed **not** to restate figures you can already read. Every point has to add something you couldn't get from glancing at the numbers: a pattern across meals, a food-choice tradeoff, or a consequence of how you ate that isn't obvious from the totals. It reviews only *today's* logged food and activity, in three short points — one non-obvious thing going well, one gap or risk, one realistic fix naming specific foods.
+
+A one-line summary of that review sits on the Home dashboard, so you get the gist without opening the tab.
+
+Two things worth calling out:
+
+- **The prompt is yours.** The exact instructions the coach is given are visible in the app and editable in place. Don't like its tone, or want it to focus on fibre? Rewrite them.
+- **You can argue with it.** Ask follow-up questions in the same screen; the conversation is kept locally on your device.
+
+<br clear="right">
+
+---
+
+## Everything else it does
+
+The conventional tracker underneath — all of it inherited from OpenNutriTracker and working without any AI key, offline:
+
+- **Food logging** — text search across Open Food Facts and multi-source nutrition databases, barcode scanning, custom meals, and reusable recipes with ingredients
+- **Dashboard** — daily calorie and macro targets as progress rings, derived from your age, height, weight, activity level and goal
+- **Diary** — a month calendar tinted by how close each day landed to its goal, with per-day meal cards, macro breakdown and a micronutrient panel
+- **Activity** — logged workouts with MET-based calorie burn, folded into the day's budget
+- **Wellness** — weight tracking with a trend chart, water logging, and an intermittent-fasting timer
+- **Your data** — AES-encrypted local storage, full export and import as a zip, and eight languages
 
 ## Screenshots
 
-| Home | Add a meal | Log with photo |
-|---|---|---|
-| ![Home dashboard](docs/screenshots/01_home.png) | ![Add menu](docs/screenshots/02_add_menu.png) | ![Log with photo](docs/screenshots/03_photo_log.png) |
-
-| Diary | CalT Coach | Profile |
-|---|---|---|
-| ![Diary](docs/screenshots/04_diary.png) | ![CalT Coach](docs/screenshots/05_coach.png) | ![Profile](docs/screenshots/06_profile.png) |
+| Home | Add a meal | Diary | Profile |
+|---|---|---|---|
+| ![Home dashboard](docs/screenshots/01_home.png) | ![Add menu](docs/screenshots/02_add_menu.png) | ![Diary](docs/screenshots/04_diary.png) | ![Profile](docs/screenshots/06_profile.png) |
 
 ## Install on Android
 
@@ -55,9 +88,9 @@ No Flutter setup, no build step — just download and install.
 
 If Android reports that the package already exists with a different signature (e.g. you previously sideloaded a debug build), uninstall that old app first, then install this APK.
 
-## Optional AI setup
+## Turn the AI features on
 
-CalT works fully without AI — search, barcodes, the diary and the dashboard all run offline. Two features are opt-in and need a key you supply yourself: **Log with photo** and **CalT Coach**. One connection powers both.
+**Log with photo** and **CalT Coach** need an AI key, which you supply yourself — one connection powers both. Everything else in the app works without this. There's no CalT account and no subscription; you're talking to your own provider account, at your own cost, which for Gemini's free tier is nothing.
 
 ### Worked example: Gemini
 
@@ -75,10 +108,7 @@ CalT works fully without AI — search, barcodes, the diary and the dashboard al
 4. **Tap "Test connection".** You should get a success message within a couple of seconds. If it fails, the message says why — usually a mistyped key or a model your account can't reach.
 5. **Tap "Save securely".** The key is written to encrypted device storage, never to the diary database, logs, or crash reports.
 
-### What that unlocks
-
-- **Log with photo** — the `+` menu → **Log with photo** → take or pick a photo → **Estimate nutrition**. The photo is sent to Gemini, which returns an estimated meal and macros; you review and edit before anything is saved.
-- **CalT Coach** — the Coach tab shows a three-point review of *today's* food and activity, and a one-line summary on the Home card. You can ask follow-up questions, and edit the instructions the coach is given from the same screen.
+That's it — [Log with photo](#1-log-with-photo) and [CalT Coach](#2-calt-coach) are both live. The coach writes its first review as soon as you've logged something today.
 
 ### Other providers
 
