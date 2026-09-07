@@ -1251,8 +1251,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: CaltLogoMark(),
         ),
         applicationVersion: packageInfo.version,
+        // The GPL points at a GUI program's about box as the place to
+        // surface the copyright notice. The original work's line comes
+        // first and is not ours to alter; the CalT line below it covers
+        // only the modifications. See the COPYRIGHT file.
         applicationLegalese:
             '${S.of(context).appLicenseLabel}\n\n'
+            'Copyright (C) 2022-2026 Simon Oppowa and the '
+            '${AppConst.upstreamProjectName} contributors\n'
+            'Copyright (C) 2026 Ishivijay (CalT modifications)\n\n'
             'CalT is built on ${AppConst.upstreamProjectName}, an open-source '
             'nutrition tracker, and remains licensed under the GPL-3.0.',
         children: [

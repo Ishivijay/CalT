@@ -1,0 +1,35 @@
+CalT is a derivative work of OpenNutriTracker and is distributed under the
+GNU General Public License, version 3. The full licence text is in LICENSE.
+
+
+ORIGINAL WORK
+-------------
+
+Copyright (C) 2022-2026 Simon Oppowa and the OpenNutriTracker contributors
+https://github.com/simonoppowa/OpenNutriTracker
+
+This notice covers the original OpenNutriTracker program that CalT is built
+on, including the food databases and search, the diary, the calorie and
+macro engine, the encrypted local storage, the data export and import, and
+the localisations. It must be retained in all copies and in every derivative
+work, as the GPL-3.0 requires. It may not be altered or removed.
+
+
+MODIFICATIONS
+-------------
+
+Copyright (C) 2026 Ishivijay
+
+This notice covers the CalT modifications to the original work, including
+the photo-based meal logging, the CalT Coach and its bring-your-own-key AI
+integration, the redesigned interface and visual identity, and the
+associated build and packaging changes.
+
+These modifications are released under the same GNU General Public License,
+version 3, as the original work.
+
+
+Authorship above is recorded from this repository's commit history. Anyone
+distributing CalT, modified or unmodified, must keep both notices intact,
+license their own work under the GPL-3.0, and make the corresponding source
+available.

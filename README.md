@@ -146,7 +146,9 @@ Also credited:
 
 ## License
 
-CalT is a derivative work of OpenNutriTracker and remains licensed under the [GNU General Public License v3.0](LICENSE), the same licence as the upstream project. If you distribute CalT or a modified version, the GPL-3.0 requires that you keep it under the same licence, credit the upstream project, and make your source available.
+CalT is a derivative work of OpenNutriTracker and remains licensed under the [GNU General Public License v3.0](LICENSE), the same licence as the upstream project.
+
+Copyright is recorded in [COPYRIGHT](COPYRIGHT): the original work's notice first, unaltered, and CalT's own notice below it covering the modifications. If you distribute CalT or a modified version, the GPL-3.0 requires that you keep **both** notices intact, license your work under the same licence, and make your source available.
 
 ## Disclaimer
 
